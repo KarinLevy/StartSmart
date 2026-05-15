@@ -1,10 +1,10 @@
 .hero-card {
-  padding: 2rem;
-  border-radius: 1.5rem; /* 24px */
+  padding: var(--spacing-container-padding);
+  border-radius: var(--rounded-xl); /* 24px */
   position: relative;
   overflow: hidden;
   border: none;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl equivalent */
+  box-shadow: var(--shadow-xl);
 }
 
 .hero-card:hover .hero-card-blur {
@@ -28,7 +28,7 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-card-gap);
 }
 
 @media (min-width: 768px) {
@@ -47,15 +47,15 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-base);
 }
 
 .hero-tag-priority {
   background-color: var(--color-secondary-container);
   color: var(--color-on-secondary-container);
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 10px;
+  border-radius: var(--rounded-full);
+  font-size: var(--font-size-label-xs);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -70,10 +70,10 @@
 }
 
 .hero-card-title {
-  font-size: 1.5rem;
+  font-size: var(--font-size-headline-lg-mobile);
   font-weight: 700;
   color: var(--color-on-surface);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-base);
 }
 
 .hero-card-desc {
@@ -84,9 +84,9 @@
 }
 
 .hero-button {
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 1rem;
+  color: var(--color-on-primary);
+  padding: var(--spacing-base) var(--spacing-container-padding);
+  border-radius: var(--rounded-lg);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -107,13 +107,13 @@
 
 /* Workflow Table */
 .workflow-card {
-  border-radius: 1.5rem;
+  border-radius: var(--rounded-xl);
   overflow: hidden;
 }
 
 .workflow-header {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(197, 197, 211, 0.1);
+  border-bottom: 1px solid var(--color-surface-container);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -138,8 +138,8 @@
 }
 
 .workflow-action-btn {
-  padding: 0.5rem;
-  border-radius: 0.5rem;
+  padding: var(--spacing-base);
+  border-radius: var(--rounded-default);
   color: var(--color-on-surface-variant);
   background: transparent;
   border: none;
@@ -177,7 +177,7 @@
 @media (max-width: 640px) {
   .workflow-table th {
     padding: 0.75rem 0.5rem;
-    font-size: 10px;
+    font-size: var(--font-size-label-xs);
   }
 }
 
@@ -188,7 +188,7 @@
 
 .workflow-row {
   transition: background-color 0.2s;
-  border-bottom: 1px solid rgba(197, 197, 211, 0.1);
+  border-bottom: 1px solid var(--color-surface-container);
 }
 
 .workflow-row:hover {
@@ -212,14 +212,14 @@
 }
 
 .task-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
+  width: var(--spacing-base);
+  height: var(--spacing-base);
+  border-radius: var(--rounded-full);
 }
 
 .task-dot.secondary { background-color: var(--color-secondary); }
 .task-dot.outline { background-color: var(--color-outline); }
-.task-dot.green { background-color: #22c55e; }
+.task-dot.green { background-color: var(--color-success); }
 
 .task-name {
   font-weight: 700;
@@ -229,7 +229,7 @@
 
 @media (max-width: 640px) {
   .task-name {
-    font-size: 12px;
+    font-size: var(--font-size-label-sm);
   }
 }
 
@@ -240,7 +240,7 @@
 
 @media (max-width: 640px) {
   .task-time {
-    font-size: 11px;
+    font-size: var(--font-size-label-xxs);
   }
 }
 
@@ -250,7 +250,7 @@
 }
 
 .task-gap.success {
-  color: #16a34a;
+  color: var(--color-success);
   font-weight: 700;
 }
 
@@ -260,8 +260,8 @@
 
 .status-badge {
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 11px;
+  border-radius: var(--rounded-full);
+  font-size: var(--font-size-label-xxs);
   font-weight: 700;
 }
 
@@ -276,8 +276,8 @@
 }
 
 .status-badge.done {
-  background-color: #dcfce7;
-  color: #15803d;
+  background-color: var(--color-success-container);
+  color: var(--color-success-on);
 }
 
 .action-btn {
@@ -295,7 +295,7 @@
 }
 
 .action-icon {
-  color: #22c55e;
+  color: var(--color-success);
   font-size: 20px;
 }
 
@@ -313,7 +313,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--spacing-base);
 }
 
 .workflow-footer-link:hover {
@@ -345,6 +345,6 @@
 /* On extremely small screens, make font even smaller */
 @media (max-width: 360px) {
   .task-name {
-    font-size: 11px;
+    font-size: var(--font-size-label-xxs);
   }
 }

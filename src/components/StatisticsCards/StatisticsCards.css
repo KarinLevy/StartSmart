@@ -1,6 +1,6 @@
 .stats-card {
-  padding: 1.5rem;
-  border-radius: 1.5rem;
+  padding: var(--spacing-card-gap);
+  border-radius: var(--rounded-xl);
   text-align: left;
   border: none;
 }
@@ -9,7 +9,7 @@
   font-size: var(--font-size-label-md);
   font-weight: 700;
   color: var(--color-on-surface-variant);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-card-gap);
   margin-top: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -47,14 +47,15 @@
 }
 
 .progress-percentage {
-  font-size: 1.875rem; /* 3xl */
+  font-size: var(--font-size-headline-lg);
+  /* 32px */
   font-weight: 800;
   color: var(--color-on-surface);
   line-height: 1;
 }
 
 .progress-label {
-  font-size: 10px;
+  font-size: var(--font-size-label-xs);
   color: var(--color-outline);
   font-weight: 700;
   margin-top: 0.25rem;
@@ -85,14 +86,15 @@
 }
 
 .progress-stat-label {
-  font-size: 10px;
+  font-size: var(--font-size-label-xs);
   color: var(--color-outline);
   font-weight: 700;
 }
 
 .progress-stat-divider {
   width: 1px;
-  background-color: rgba(197, 197, 211, 0.3); /* outline-variant */
+  background-color: rgba(197, 197, 211, 0.3);
+  /* outline-variant */
 }
 
 /* Focus Intensity */
@@ -104,7 +106,7 @@
 }
 
 .focus-trend {
-  font-size: 0.75rem;
+  font-size: var(--font-size-label-sm);
   color: var(--color-secondary);
   font-weight: 700;
 }
@@ -120,8 +122,8 @@
 .focus-bar {
   flex: 1;
   background-color: var(--color-surface-container-highest);
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+  border-top-left-radius: var(--rounded-default);
+  border-top-right-radius: var(--rounded-default);
 }
 
 .focus-bar.active {
@@ -131,7 +133,7 @@
 .focus-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: var(--font-size-label-xs);
   font-weight: 700;
   color: var(--color-outline);
 }

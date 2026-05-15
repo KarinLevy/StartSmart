@@ -16,7 +16,7 @@
 }
 
 .footer-left {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-base);
 }
 
 .footer-right a {

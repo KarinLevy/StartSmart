@@ -12,17 +12,17 @@
 }
 
 .dashboard-content {
-  padding: 1rem;
+  padding: var(--spacing-base) 1rem;
 }
 
 @media (min-width: 768px) {
   .dashboard-content {
-    padding: 2rem;
+    padding: var(--spacing-container-padding);
   }
 }
 
 .dashboard-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: var(--spacing-lg);
 }
 
 .dashboard-greeting {
@@ -36,7 +36,7 @@
 .dashboard-date {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-base);
   color: var(--color-on-surface-variant);
   font-size: var(--font-size-label-md);
   font-weight: 500;
@@ -45,14 +45,14 @@
 .dashboard-grid {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-container-padding);
 }
 
 .dashboard-left-col {
   grid-column: span 12;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-container-padding);
   min-width: 0;
 }
 
@@ -76,17 +76,17 @@
 
 .fab-button {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: var(--spacing-container-padding);
+  right: var(--spacing-container-padding);
   width: 4rem;
   height: 4rem;
-  border-radius: 50%;
+  border-radius: var(--rounded-full);
   border: none;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-2xl);
   cursor: pointer;
   transition: all 0.2s;
   z-index: 50;

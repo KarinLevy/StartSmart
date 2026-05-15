@@ -1,5 +1,5 @@
 .sidebar-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-container-padding);
 }

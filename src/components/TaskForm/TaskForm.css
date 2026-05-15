@@ -1,27 +1,27 @@
 .task-form-card {
   background-color: var(--color-surface-container-lowest);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  border: 1px solid rgba(197, 197, 211, 0.1);
-  box-shadow: 0px 12px 40px rgba(30, 58, 138, 0.08);
+  border-radius: var(--rounded-xl);
+  padding: var(--spacing-card-gap);
+  border: 1px solid var(--color-surface-container);
+  box-shadow: var(--shadow-xl);
 }
 
 @media (min-width: 768px) {
   .task-form-card {
-    padding: 2rem;
+    padding: var(--spacing-container-padding);
   }
 }
 
 .task-form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-container-padding);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-base);
 }
 
 .form-label {
@@ -37,11 +37,11 @@
 
 .form-input {
   width: 100%;
-  padding: 1rem 1.5rem;
+  padding: var(--spacing-base) var(--spacing-card-gap);
   background-color: var(--color-surface-container-low);
   border: 1px solid var(--color-outline-variant);
-  border-radius: 0.75rem; /* xl */
-  color: var(--color-on-surface);
+  border-radius: var(--rounded-md);
+  /* xl */  color: var(--color-on-surface);
   font-size: var(--font-size-body-lg);
   font-family: inherit;
   transition: all 0.2s;
@@ -67,7 +67,7 @@
 .form-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: var(--spacing-container-padding);
 }
 
 @media (min-width: 768px) {
@@ -82,7 +82,7 @@
 
 .input-icon-left {
   position: absolute;
-  left: 1rem;
+  left: var(--spacing-base);
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-primary);
@@ -90,13 +90,13 @@
 }
 
 .form-input-with-icon-left {
-  padding-left: 3rem;
+  padding-left: var(--spacing-section-margin);
   font-size: var(--font-size-body-md);
 }
 
 .duration-inputs {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-base);
 }
 
 .duration-input-wrapper {
@@ -111,7 +111,7 @@
 
 .duration-unit {
   position: absolute;
-  right: 0.75rem;
+  right: var(--spacing-base);
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--font-size-label-sm);
@@ -120,20 +120,20 @@
 }
 
 .form-options {
-  padding-top: 1rem;
+  padding-top: var(--spacing-base);
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--spacing-base);
 }
 
 .option-btn {
-  padding: 0.5rem 1.5rem;
-  border-radius: 9999px;
+  padding: var(--spacing-base) var(--spacing-card-gap);
+  border-radius: var(--rounded-full);
   font-size: var(--font-size-label-md);
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-base);
   cursor: pointer;
   background: transparent;
   transition: all 0.2s;
@@ -158,25 +158,25 @@
 }
 
 .option-icon {
-  font-size: 20px !important;
+  font-size: var(--font-size-title-md) !important;
 }
 
 .form-actions {
-  padding-top: 2.5rem;
+  padding-top: var(--spacing-lg);
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: var(--spacing-base);
   border-top: 1px solid rgba(197, 197, 211, 0.1);
 }
 
 .action-btn-cancel {
-  padding: 1rem 2.5rem;
+  padding: var(--spacing-base) 2.5rem;
   color: var(--color-on-surface-variant);
   font-weight: 700;
   background: transparent;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: var(--rounded-md);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -186,13 +186,14 @@
 }
 
 .action-btn-save {
-  padding: 1rem 3rem;
+  padding: var(--spacing-base) var(--spacing-section-margin);
   background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
-  color: white;
+  color: var(--color-on-primary);
   font-weight: 700;
   border: none;
-  border-radius: 0.75rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 35, 111, 0.2); /* shadow-lg shadow-primary/20 */
+  border-radius: var(--rounded-md);
+  box-shadow: var(--shadow-lg);
+  /* shadow-lg shadow-primary/20 */
   cursor: pointer;
   transition: all 0.2s;
 }
