@@ -1,15 +1,16 @@
 import React from 'react';
+import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 
-const Login = () => {
+const LandingPage = () => {
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <h1>Login — Coming Soon</h1>
+        <div className="LandingPage-container">
+            <Navbar />
+            <div className="LandingPage-card">
+                <h1>Landing Page — Coming Soon</h1>
             </div>
             <Footer />
         </div>
     );
 };
-
-export default Login; 
+export default LandingPage;
