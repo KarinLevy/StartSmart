@@ -1,0 +1,55 @@
+.smart-tip-card {
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.smart-tip-content {
+  position: relative;
+  z-index: 10;
+}
+
+.smart-tip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.smart-tip-icon {
+  font-size: 24px;
+}
+
+.smart-tip-title {
+  font-size: var(--font-size-label-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.smart-tip-text {
+  font-size: var(--font-size-body-md);
+  font-weight: 500;
+  line-height: 1.625;
+  font-style: italic;
+  margin: 0;
+}
+
+.smart-tip-glow {
+  position: absolute;
+  right: -2rem;
+  bottom: -2rem;
+  width: 8rem;
+  height: 8rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(24px); /* blur-2xl */
+  transition: transform 0.3s;
+}
+
+.smart-tip-card:hover .smart-tip-glow {
+  transform: scale(1.5);
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StartSmart - Focus Mode</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #faf8ff;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .timer-glow {
+            filter: drop-shadow(0 0 40px rgba(0, 35, 111, 0.05));
+        }
+
+        .bento-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .gradient-button {
+            background: linear-gradient(135deg, #6338d3 0%, #001142 100%);
+            transition: all 0.3s ease;
+        }
+
+        .gradient-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -5px rgba(99, 56, 211, 0.3);
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-surface-variant": "#444651", "on-primary-fixed": "#00164e", background: "#faf8ff", "tertiary-fixed-dim": "#ffb691", "surface-container-high": "#e9e7ee", "secondary-fixed": "#e9ddff", "on-tertiary-fixed": "#341100", "on-error": "#ffffff", "surface-container-lowest": "#ffffff", "surface-container-low": "#f4f3fa", "surface-tint": "#425aa6", "surface-container": "#efedf4", "on-surface": "#1a1b20", "secondary-fixed-dim": "#d0bcff", tertiary: "#2b0d00", "surface-bright": "#faf8ff", "on-primary-container": "#778ede", "secondary-container": "#8555ee", "on-secondary-fixed-variant": "#5517bd", "inverse-on-surface": "#f1f0f7", "on-error-container": "#93000a", "inverse-primary": "#b5c4ff", outline: "#757682", secondary: "#6b38d3", "tertiary-container": "#4b1c00", "tertiary-fixed": "#ffdbcb", "on-tertiary-fixed-variant": "#6f3817", "on-primary": "#ffffff", "outline-variant": "#c5c5d3", "on-secondary-fixed": "#23005b", "inverse-surface": "#2f3035", "primary-fixed-dim": "#b5c4ff", "on-background": "#1a1b20", "primary-container": "#00236f", error: "#ba1a1a", surface: "#faf8ff", "on-secondary": "#ffffff", "surface-variant": "#e3e1e9", "primary-fixed": "#dce1ff", "on-secondary-container": "#fffbff", "surface-dim": "#dad9e0", "surface-container-highest": "#e3e1e9", primary: "#001142", "on-primary-fixed-variant": "#29428c", "on-tertiary": "#ffffff", "error-container": "#ffdad6", "on-tertiary-container": "#c88059", "brand-purple": "#6338d3"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {base: "8px", "container-padding": "32px", "section-margin": "48px", "card-gap": "24px", gutter: "24px"}, fontFamily: {"label-md": ["Geist"], "headline-lg-mobile": ["Geist"], "headline-lg": ["Geist"], "label-sm": ["Geist"], "body-lg": ["Geist"], "title-md": ["Geist"], "body-md": ["Geist"], "display-lg": ["Geist"], headline: ["Geist"], display: ["Geist"], body: ["Geist"], label: ["Geist"]}, fontSize: {"label-md": ["14px", {lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "500"}], "headline-lg-mobile": ["24px", {lineHeight: "32px", fontWeight: "600"}], "headline-lg": ["32px", {lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600"}], "label-sm": ["12px", {lineHeight: "16px", fontWeight: "600"}], "body-lg": ["18px", {lineHeight: "28px", fontWeight: "400"}], "title-md": ["20px", {lineHeight: "28px", fontWeight: "600"}], "body-md": ["16px", {lineHeight: "24px", fontWeight: "400"}], "display-lg": ["48px", {lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700"}]}}}};</script>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Top Navigation (Matched to Dashboard SCREEN_101) -->
+<header class="bg-white border-b border-[#e5e7eb] sticky top-0 z-50 h-[64px] flex items-center">
+<div class="flex justify-between items-center px-6 w-full mx-auto max-w-full">
+<!-- Left Section: Logo and Nav -->
+<div class="flex items-center gap-6">
+<!-- Logo -->
+<div class="flex items-center gap-2">
+<div class="bg-[#001142] p-[6px] rounded-md">
+<span class="material-symbols-outlined text-white text-[18px]" style="font-variation-settings: 'FILL' 1">rocket_launch</span>
+</div>
+<span class="font-bold text-[18px] text-[#001142] tracking-tight">StartSmart</span>
+</div>
+<!-- Nav Links -->
+<nav class="flex items-center gap-1">
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">grid_view</span>
+<span class="text-[12px] font-medium text-gray-600">Dashboard</span>
+</a>
+<a class="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] bg-[#7b61ff] text-white shadow-sm hover:opacity-90 transition-opacity mx-1" href="#">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'wght' 500">check_circle</span>
+<span class="text-[12px] font-bold">Create Task</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">assignment</span>
+<span class="text-[12px] font-medium text-gray-600">Task Details</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">timer</span>
+<span class="text-[12px] font-medium text-gray-600">Focus Mode</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">calendar_month</span>
+<span class="text-[12px] font-medium text-gray-600">Schedule</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">history</span>
+<span class="text-[12px] font-medium text-gray-600">Task History</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">insights</span>
+<span class="text-[12px] font-medium text-gray-600">Statistics</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">person</span>
+<span class="text-[12px] font-medium text-gray-600">Profile</span>
+</a>
+<a class="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[18px] text-gray-500">settings</span>
+<span class="text-[12px] font-medium text-gray-600">Settings/Upgrade</span>
+</a>
+</nav>
+</div>
+<!-- Right Section -->
+<div class="flex items-center gap-4">
+<button class="relative p-1">
+<span class="material-symbols-outlined text-[24px] text-gray-700">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#ba1a1a] rounded-full border border-white"></span>
+</button>
+<div class="flex items-center gap-4 border-l border-gray-200 h-8 pl-6">
+<span class="font-bold text-[#001142] text-[14px] whitespace-nowrap">Maya Cohen</span>
+<img alt="Maya Cohen" class="w-9 h-9 rounded-full object-cover border border-gray-200" src="https://lh3.googleusercontent.com/aida/ADBb0uiLHzEuU50yOxsrmiFdBTATgYzTFrMUF54S2igDXQlYDn7a7imcG-Dcj30uF5QiRc9KePmqOY6SA8l8gKmQg3p8GU7AVUOHXCrZ-nontzks1NMlnJQ0FQX2TKpUWznIVsSQ8G_BLopj9vMD6UM1mmYM8Fv1xR0gR5O3q8Vaew-M63f_eUbpbsyZI-9TzlTWq9ludRnduSs0IvZKiMgvQvHBgLY7x18YJ_IpXBBGyOiGXJbcM9BWmM6Xsk-vLZSXpIEQBKyordR3yQ"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-container-padding py-10 flex flex-col items-center">
+<!-- Current Task Card (Refined Style) -->
+<div class="w-full max-w-4xl bento-card p-8 mb-card-gap">
+<div class="flex items-center justify-between mb-6">
+<div>
+<span class="text-[10px] font-bold text-brand-purple uppercase tracking-[0.15em] mb-1.5 block">Current Task</span>
+<h2 class="text-2xl font-bold text-primary tracking-tight">Refactor UI Component Architecture</h2>
+</div>
+<div class="bg-primary text-white px-5 py-1.5 rounded-full text-[11px] font-bold tracking-wider shadow-lg shadow-primary/10">
+                RUNNING
+            </div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+<span>Progress vs Estimated</span>
+<span>75%</span>
+</div>
+<div class="h-2.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-brand-purple w-3/4 rounded-full transition-all duration-1000 ease-out"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold text-outline uppercase tracking-[0.1em]">
+<span>Started at 09:00 AM</span>
+<span>Est. 45 mins</span>
+</div>
+</div>
+</div>
+<!-- Timer Section (Futuristic Circular Design) -->
+<div class="relative flex flex-col items-center justify-center py-4">
+<div class="relative w-[480px] h-[480px] flex items-center justify-center">
+<!-- Circular Progress SVG -->
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle class="text-surface-container-high" cx="240" cy="240" fill="transparent" r="210" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="240" cy="240" fill="transparent" r="210" stroke="currentColor" stroke-dasharray="1319.5" stroke-dashoffset="330" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<!-- Inner Timer Card -->
+<div class="z-10 bg-white w-[380px] h-[380px] rounded-full flex flex-col items-center justify-center shadow-2xl shadow-primary/5 border border-outline-variant/5 timer-glow">
+<span class="font-display-lg text-[84px] text-primary tracking-tight leading-none mb-1">00:23:14</span>
+<p class="text-xs font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-8">Focusing...</p>
+<div class="flex items-center gap-2 px-5 py-2 rounded-full bg-surface-container text-brand-purple border border-outline-variant/10">
+<span class="material-symbols-outlined text-base">timer</span>
+<span class="text-[10px] font-bold uppercase tracking-[0.1em]">Pomodoro 1/4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Controls (IMAGE_12 Gradient Style) -->
+<div class="flex items-center gap-6 mt-12 w-full max-w-md">
+<button class="flex-1 gradient-button py-3.5 px-6 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-3">
+<div class="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings: 'FILL' 1">pause</span>
+</div>
+<span>Stop</span>
+</button>
+<button class="flex-1 gradient-button py-3.5 px-6 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-3">
+<div class="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[16px]" style="font-variation-settings: 'FILL' 1">check</span>
+</div>
+<span>Finish</span>
+</button>
+</div>
+<!-- Ambient Info Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full max-w-6xl mt-16">
+<div class="bento-card p-8">
+<div class="bg-surface-container w-10 h-10 rounded-xl flex items-center justify-center text-brand-purple mb-6">
+<span class="material-symbols-outlined text-xl">music_note</span>
+</div>
+<h3 class="text-lg font-bold text-primary mb-2">Lo-fi Chill</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">Ambient workspace audio is currently active.</p>
+</div>
+<div class="bento-card p-8">
+<div class="bg-surface-container w-10 h-10 rounded-xl flex items-center justify-center text-brand-purple mb-6">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1">notifications_off</span>
+</div>
+<h3 class="text-lg font-bold text-primary mb-2">DND Active</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">All notifications silenced for this session.</p>
+</div>
+<div class="bento-card p-8">
+<div class="bg-surface-container w-10 h-10 rounded-xl flex items-center justify-center text-brand-purple mb-6">
+<span class="material-symbols-outlined text-xl">analytics</span>
+</div>
+<h3 class="text-lg font-bold text-primary mb-2">Efficiency</h3>
+<p class="text-sm text-on-surface-variant leading-relaxed">You are +12% more focused than yesterday.</p>
+</div>
+</div>
+</main>
+</body></html>

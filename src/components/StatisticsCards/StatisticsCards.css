@@ -1,0 +1,137 @@
+.stats-card {
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  text-align: left;
+  border: none;
+}
+
+.stats-card-title {
+  font-size: var(--font-size-label-md);
+  font-weight: 700;
+  color: var(--color-on-surface-variant);
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stats-card-title-left {
+  text-align: left;
+  margin-bottom: 0;
+}
+
+.progress-circle-container {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+  margin: 0 auto 1.5rem;
+}
+
+.progress-circle-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-circle-bg {
+  color: var(--color-surface-container-highest);
+}
+
+.progress-circle-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-percentage {
+  font-size: 1.875rem; /* 3xl */
+  font-weight: 800;
+  color: var(--color-on-surface);
+  line-height: 1;
+}
+
+.progress-label {
+  font-size: 10px;
+  color: var(--color-outline);
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.progress-desc {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.progress-stats-row {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.progress-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.progress-stat-value {
+  font-size: var(--font-size-title-md);
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+
+.progress-stat-label {
+  font-size: 10px;
+  color: var(--color-outline);
+  font-weight: 700;
+}
+
+.progress-stat-divider {
+  width: 1px;
+  background-color: rgba(197, 197, 211, 0.3); /* outline-variant */
+}
+
+/* Focus Intensity */
+.focus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.focus-trend {
+  font-size: 0.75rem;
+  color: var(--color-secondary);
+  font-weight: 700;
+}
+
+.focus-bars-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  height: 6rem;
+  margin-bottom: 1rem;
+}
+
+.focus-bar {
+  flex: 1;
+  background-color: var(--color-surface-container-highest);
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.focus-bar.active {
+  background: linear-gradient(135deg, var(--color-primary-container) 0%, var(--color-secondary) 100%);
+}
+
+.focus-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-outline);
+}

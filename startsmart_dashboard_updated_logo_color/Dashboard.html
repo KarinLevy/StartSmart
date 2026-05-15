@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>StartSmart - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-tertiary-fixed": "#341100", "tertiary-container": "#4b1c00", "outline-variant": "#c5c5d3", "on-primary": "#ffffff", "on-background": "#1a1b20", outline: "#757682", "tertiary-fixed-dim": "#ffb691", "on-secondary-fixed-variant": "#5517bd", "primary-container": "#00236f", "on-tertiary-container": "#c88059", "on-secondary-container": "#fffbff", "on-tertiary": "#ffffff", "surface-container-lowest": "#ffffff", "tertiary-fixed": "#ffdbcb", "surface-container": "#efedf4", "on-primary-fixed": "#00164e", "inverse-primary": "#b5c4ff", "surface-dim": "#dad9e0", "surface-tint": "#425aa6", primary: "#001142", "surface-variant": "#e3e1e9", "on-surface": "#1a1b20", "on-error-container": "#93000a", "error-container": "#ffdad6", "on-secondary": "#ffffff", "inverse-surface": "#2f3035", "surface-container-highest": "#e3e1e9", "on-primary-container": "#778ede", "secondary-container": "#8555ee", "surface-container-high": "#e9e7ee", error: "#ba1a1a", "on-tertiary-fixed-variant": "#6f3817", surface: "#faf8ff", "primary-fixed-dim": "#b5c4ff", "surface-container-low": "#f4f3fa", "on-primary-fixed-variant": "#29428c", tertiary: "#2b0d00", "surface-bright": "#faf8ff", background: "#faf8ff", "on-secondary-fixed": "#23005b", "inverse-on-surface": "#f1f0f7", "secondary-fixed": "#e9ddff", "on-error": "#ffffff", secondary: "#6b38d3", "secondary-fixed-dim": "#d0bcff", "primary-fixed": "#dce1ff", "on-surface-variant": "#444651"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Geist"], display: ["Geist"], body: ["Geist"], label: ["Geist"]}, fontSize: {}}}};</script>
+<style>
+        body { font-family: 'Geist', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #00236f 0%, #6b38d4 100%);
+        }
+        .motivational-glow {
+            box-shadow: 0 0 15px rgba(132, 85, 239, 0.4);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="w-full sticky top-0 z-40 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/10">
+<div class="px-4 h-16 flex items-center justify-between gap-2 max-w-[1920px] mx-auto">
+<!-- Logo -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-primary">
+<span class="material-symbols-outlined" data-icon="rocket_launch">rocket_launch</span>
+</div>
+<div>
+<h1 class="text-title-md font-extrabold text-primary leading-tight">StartSmart</h1>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 flex items-center gap-0.5 px-2 overflow-visible justify-center">
+<a class="flex items-center gap-2 bg-secondary-container text-on-secondary-container font-bold py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">dashboard</span>
+<span class="">Dashboard</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">add_task</span>
+<span class="">Create Task</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">assignment</span>
+<span class="">Task Details</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">timer</span>
+<span class="">Focus Mode</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">calendar_today</span>
+<span class="">Schedule</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">history</span>
+<span class="">Task History</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">insights</span>
+<span class="">Statistics</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">person</span>
+<span class="">Profile</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant hover:bg-surface-container transition-all py-2 rounded-lg shrink-0 px-1.5 py-2 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-size: 18px;">settings</span>
+<span class="">Settings/Upgrade</span>
+</a>
+</nav>
+<!-- Right: Notifications & Profile -->
+<div class="flex items-center gap-4 shrink-0">
+<button class="p-2 hover:bg-surface-container-high/50 rounded-full transition-all text-on-surface-variant relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
+<div class="text-right flex flex-col items-end hidden sm:flex">
+<span class="text-label-md font-bold text-on-surface">Maya Cohen</span>
+</div>
+<div class="w-9 h-9 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="Maya's avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8GuD2wPPDTlH7P0VxUJXoUCMroXZ0feEIyxxQbesa8F9FVMkARnJqI_E48IKMpYPnVJz47Yvo8Wrt2-drYftGKXDi6FZge3Of65zB3ugt1dX-yyKN28MjiGPKVSw72dPbI2LNkaMpoqAFscvc-4CLyoLPo0luZbYAbfqDjhtTXNAgAFtGq7XZuX6PrMmS31sX21Pk1P4tayMZG0cJKAB3zszct7hr5UpOFaFsJLju2OuLgllb60g0iyl-1bgGCK8luQZURHSbdf4"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="min-h-screen max-w-[1440px] mx-auto">
+<!-- Dashboard Content -->
+<div class="p-8">
+<!-- Welcome Header -->
+<div class="mb-10">
+<h2 class="text-headline-lg font-bold text-primary mb-1">Good morning, Maya 👋</h2>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span>
+<span class="text-label-md font-medium">Monday, October 23rd, 2023</span>
+</div>
+</div>
+<!-- Dashboard Grid -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Main Content (Left) -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Recommended Next Task (Hero) -->
+<div class="glass-card p-8 rounded-3xl relative overflow-hidden group border-none shadow-xl">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-primary/10 transition-colors"></div>
+<div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-4">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">High Priority</span>
+<span class="flex items-center gap-1 text-on-surface-variant text-label-sm">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                                    45 min session
+                                </span>
+</div>
+<h3 class="text-2xl font-bold text-on-surface mb-2">Refine Product Architecture</h3>
+<p class="text-on-surface-variant max-w-md">Finalize the technical documentation for the SmartScale module before the stakeholder sync.</p>
+</div>
+<button class="primary-gradient text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 motivational-glow hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="play_circle">play_circle</span>
+                            Start Now
+                        </button>
+</div>
+</div>
+<!-- Priority Workflow Table -->
+<div class="glass-card rounded-3xl overflow-hidden">
+<div class="p-6 border-b border-outline-variant/10 flex justify-between items-center">
+<h4 class="text-title-md font-bold text-on-surface">Priority Workflow</h4>
+<div class="flex gap-2">
+<button class="p-2 rounded-lg hover:bg-surface-container transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+<button class="p-2 rounded-lg hover:bg-surface-container transition-all text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low/50">
+<tr>
+<th class="px-6 py-4 text-label-sm font-bold text-outline uppercase tracking-wider">Task Name</th>
+<th class="px-6 py-4 text-label-sm font-bold text-outline uppercase tracking-wider text-center">Est. Time</th>
+<th class="px-6 py-4 text-label-sm font-bold text-outline uppercase tracking-wider text-center">Actual</th>
+<th class="px-6 py-4 text-label-sm font-bold text-outline uppercase tracking-wider text-center">Gap</th>
+<th class="px-6 py-4 text-label-sm font-bold text-outline uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-label-sm font-bold text-outline uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-bold text-on-surface text-body-md">UI Audit: Dashboard Shell</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center text-on-surface-variant font-medium">1h 20m</td>
+<td class="px-6 py-5 text-center text-on-surface-variant font-medium">1h 25m</td>
+<td class="px-6 py-5 text-center">
+<span class="text-error font-bold">+5m</span>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[11px] font-bold">In Progress</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary hover:text-secondary transition-colors font-bold text-label-sm">Edit</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-outline"></div>
+<span class="font-bold text-on-surface text-body-md">Client Feedback Loop</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center text-on-surface-variant font-medium">45m</td>
+<td class="px-6 py-5 text-center text-on-surface-variant font-medium">--</td>
+<td class="px-6 py-5 text-center text-outline">--</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full bg-surface-container-low text-outline text-[11px] font-bold">Pending</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary hover:text-secondary transition-colors font-bold text-label-sm">Start</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container/30 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-green-500"></div>
+<span class="font-bold text-on-surface text-body-md opacity-60">Database Migration Check</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center text-on-surface-variant font-medium opacity-60">30m</td>
+<td class="px-6 py-5 text-center text-on-surface-variant font-medium opacity-60">28m</td>
+<td class="px-6 py-5 text-center">
+<span class="text-green-600 font-bold opacity-60">-2m</span>
+</td>
+<td class="px-6 py-5">
+<span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[11px] font-bold">Done</span>
+</td>
+<td class="px-6 py-5 text-right">
+<span class="material-symbols-outlined text-green-500 text-sm" data-icon="check_circle">check_circle</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-surface-container-low/30 text-center">
+<a class="text-label-md font-bold text-primary hover:underline flex items-center justify-center gap-2" href="#">
+                            View All Task History
+                            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Stats Sidebar (Right) -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<!-- Daily Progress Circular -->
+<div class="glass-card p-6 rounded-3xl text-center">
+<h4 class="text-label-md font-bold text-on-surface-variant mb-6 uppercase tracking-wider">Daily Progress</h4>
+<div class="relative w-40 h-40 mx-auto mb-6">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-highest" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="12"></circle>
+<circle cx="80" cy="80" fill="transparent" r="70" stroke="url(#gradient)" stroke-dasharray="440" stroke-dashoffset="132" stroke-linecap="round" stroke-width="12"></circle>
+<defs>
+<lineargradient id="gradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#00236f"></stop>
+<stop offset="100%" stop-color="#6b38d4"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-extrabold text-on-surface">70%</span>
+<span class="text-[10px] text-outline font-bold">COMPLETED</span>
+</div>
+</div>
+<p class="text-body-md text-on-surface-variant">5 of 7 tasks finished today.</p>
+<div class="mt-4 flex justify-center gap-4">
+<div class="flex flex-col">
+<span class="text-title-md font-bold text-on-surface">4.2h</span>
+<span class="text-[10px] text-outline font-bold">FOCUS TIME</span>
+</div>
+<div class="w-[1px] bg-outline-variant/30"></div>
+<div class="flex flex-col">
+<span class="text-title-md font-bold text-on-surface">92</span>
+<span class="text-[10px] text-outline font-bold">PROD. SCORE</span>
+</div>
+</div>
+</div>
+<!-- Focus Hour Widget -->
+<div class="glass-card p-6 rounded-3xl">
+<div class="flex justify-between items-center mb-4">
+<h4 class="text-label-md font-bold text-on-surface-variant uppercase tracking-wider">Focus Intensity</h4>
+<span class="text-xs text-secondary font-bold">+12% vs yest.</span>
+</div>
+<div class="flex items-end gap-1 h-24 mb-4">
+<div class="flex-1 bg-surface-container-highest rounded-t-lg h-[40%]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg h-[60%]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg h-[30%]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg h-[80%]"></div>
+<div class="flex-1 primary-gradient rounded-t-lg h-[100%]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg h-[50%]"></div>
+<div class="flex-1 bg-surface-container-highest rounded-t-lg h-[70%]"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold text-outline">
+<span class="">08:00</span>
+<span class="">12:00</span>
+<span class="">16:00</span>
+</div>
+</div>
+<!-- Productivity Tip -->
+<div class="p-6 rounded-3xl primary-gradient text-white relative overflow-hidden group">
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined" data-icon="tips_and_updates">tips_and_updates</span>
+<span class="text-label-sm font-bold tracking-widest uppercase opacity-80">Smart Tip</span>
+</div>
+<p class="text-body-md font-medium leading-relaxed italic">"Your concentration peaks around 10 AM. Use this for your 'High Priority' architecture tasks."</p>
+</div>
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB -->
+<button class="fixed bottom-8 right-8 w-16 h-16 primary-gradient text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 motivational-glow">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+</body></html>

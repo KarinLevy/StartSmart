@@ -1,0 +1,350 @@
+.hero-card {
+  padding: 2rem;
+  border-radius: 1.5rem; /* 24px */
+  position: relative;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl equivalent */
+}
+
+.hero-card:hover .hero-card-blur {
+  background-color: rgba(0, 17, 66, 0.1); /* primary/10 */
+}
+
+.hero-card-blur {
+  position: absolute;
+  top: -5rem;
+  right: -5rem;
+  width: 16rem;
+  height: 16rem;
+  background-color: rgba(0, 17, 66, 0.05); /* primary/5 */
+  border-radius: 50%;
+  filter: blur(48px); /* blur-3xl */
+  transition: background-color 0.3s;
+}
+
+.hero-card-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .hero-card-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.hero-card-text {
+  flex: 1;
+}
+
+.hero-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.hero-tag-priority {
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-tag-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-label-sm);
+}
+
+.hero-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin-bottom: 0.5rem;
+}
+
+.hero-card-desc {
+  color: var(--color-on-surface-variant);
+  max-width: 28rem;
+  margin: 0;
+  font-size: var(--font-size-body-md);
+}
+
+.hero-button {
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  font-size: var(--font-size-body-md);
+}
+
+.hero-button:hover {
+  transform: scale(1.05);
+}
+
+.hero-button:active {
+  transform: scale(0.95);
+}
+
+/* Workflow Table */
+.workflow-card {
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.workflow-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(197, 197, 211, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .workflow-header {
+    padding: 1rem;
+  }
+}
+
+.workflow-title {
+  font-size: var(--font-size-title-md);
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+.workflow-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.workflow-action-btn {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--color-on-surface-variant);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workflow-action-btn:hover {
+  background-color: var(--color-surface-container);
+}
+
+.workflow-table-wrapper {
+  overflow-x: auto;
+}
+
+.workflow-table {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.workflow-table th {
+  background-color: rgba(244, 243, 250, 0.5); /* surface-container-low/50 */
+  padding: 1rem 1.5rem;
+  font-size: var(--font-size-label-sm);
+  font-weight: 700;
+  color: var(--color-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+  .workflow-table th {
+    padding: 0.75rem 0.5rem;
+    font-size: 10px;
+  }
+}
+
+.workflow-table th.center { text-align: center; }
+.workflow-table th.right { text-align: right; }
+.workflow-table td.center { text-align: center; }
+.workflow-table td.right { text-align: right; }
+
+.workflow-row {
+  transition: background-color 0.2s;
+  border-bottom: 1px solid rgba(197, 197, 211, 0.1);
+}
+
+.workflow-row:hover {
+  background-color: rgba(239, 237, 244, 0.3); /* surface-container/30 */
+}
+
+.workflow-table td {
+  padding: 1.25rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .workflow-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+.task-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.task-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.task-dot.secondary { background-color: var(--color-secondary); }
+.task-dot.outline { background-color: var(--color-outline); }
+.task-dot.green { background-color: #22c55e; }
+
+.task-name {
+  font-weight: 700;
+  color: var(--color-on-surface);
+  font-size: var(--font-size-body-md);
+}
+
+@media (max-width: 640px) {
+  .task-name {
+    font-size: 12px;
+  }
+}
+
+.task-time {
+  color: var(--color-on-surface-variant);
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .task-time {
+    font-size: 11px;
+  }
+}
+
+.task-gap.error {
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+.task-gap.success {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.task-gap.neutral {
+  color: var(--color-outline);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-badge.in-progress {
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-on-surface-variant);
+}
+
+.status-badge.pending {
+  background-color: var(--color-surface-container-low);
+  color: var(--color-outline);
+}
+
+.status-badge.done {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.action-btn {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: var(--font-size-label-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.action-btn:hover {
+  color: var(--color-secondary);
+}
+
+.action-icon {
+  color: #22c55e;
+  font-size: 20px;
+}
+
+.workflow-footer {
+  padding: 1rem;
+  background-color: rgba(244, 243, 250, 0.3); /* surface-container-low/30 */
+  text-align: center;
+}
+
+.workflow-footer-link {
+  font-size: var(--font-size-label-md);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.workflow-footer-link:hover {
+  text-decoration: underline;
+}
+
+.opacity-60 {
+  opacity: 0.6;
+}
+
+.icon-sm {
+  font-size: 14px !important;
+}
+
+/* Compact Table on Mobile: Leave only Task Name and Status on mobile screens */
+@media (max-width: 640px) {
+  .workflow-table th:nth-child(2),
+  .workflow-table td:nth-child(2),
+  .workflow-table th:nth-child(3),
+  .workflow-table td:nth-child(3),
+  .workflow-table th:nth-child(4),
+  .workflow-table td:nth-child(4),
+  .workflow-table th:nth-child(6),
+  .workflow-table td:nth-child(6) {
+    display: none;
+  }
+}
+
+/* On extremely small screens, make font even smaller */
+@media (max-width: 360px) {
+  .task-name {
+    font-size: 11px;
+  }
+}

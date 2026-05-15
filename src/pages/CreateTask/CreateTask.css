@@ -1,0 +1,49 @@
+.create-task-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.create-task-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.create-task-content {
+  padding: 1rem;
+  max-width: 56rem; /* 4xl */
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .create-task-content {
+    padding: 2rem;
+  }
+}
+
+.create-task-header {
+  margin-bottom: 2rem;
+}
+
+.create-task-title {
+  font-size: var(--font-size-headline-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.create-task-subtitle {
+  font-size: var(--font-size-body-lg);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.footer-spacer {
+  height: 4rem;
+  pointer-events: none;
+}
