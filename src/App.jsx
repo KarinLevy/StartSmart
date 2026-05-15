@@ -4,13 +4,13 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import CreateTask from './pages/CreateTask/CreateTask';
 import FocusMode from './pages/FocusMode/FocusMode';
 import Statistics from './pages/Statistics/Statistics';
-import Login from './pages/Login/login';
+import LandingPage from './pages/LandingPage/landing';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create-task" element={<CreateTask />} />
         <Route path="/focus-mode" element={<FocusMode />} />
