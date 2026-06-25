@@ -1,0 +1,153 @@
+.set-section {
+  margin-bottom: var(--spacing-card-gap);
+}
+
+.set-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-title-md);
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0 0 var(--spacing-card-gap) 0;
+}
+
+.set-section-title .material-symbols-outlined {
+  color: var(--color-secondary);
+}
+
+.set-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-surface-container);
+}
+
+.set-rows .set-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.set-rows .set-row:first-child {
+  padding-top: 0;
+}
+
+.set-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.set-row-label {
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+
+.set-row-desc {
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface-variant);
+}
+
+/* Toggle switch */
+.set-toggle {
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: var(--rounded-full);
+  border: none;
+  background-color: var(--color-outline-variant);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.set-toggle.on {
+  background: linear-gradient(to right, var(--color-primary), var(--color-secondary));
+}
+
+.set-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--rounded-full);
+  background-color: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+
+.set-toggle.on .set-toggle-knob {
+  transform: translateX(1.25rem);
+}
+
+/* Select */
+.set-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-md);
+  background-color: var(--color-surface-container-low);
+  font-family: inherit;
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface);
+  cursor: pointer;
+}
+
+.set-select:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(107, 56, 211, 0.18);
+}
+
+/* Upgrade banner */
+.set-upgrade {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  border-radius: var(--rounded-xl);
+  padding: var(--spacing-container-padding);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-lg);
+}
+
+.set-upgrade-chip {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.set-upgrade-title {
+  font-size: var(--font-size-title-md);
+  font-weight: 700;
+  margin: 0 0 0.375rem 0;
+}
+
+.set-upgrade-desc {
+  font-size: var(--font-size-body-md);
+  margin: 0;
+  opacity: 0.92;
+  max-width: 32rem;
+}
+
+.set-upgrade-btn {
+  background-color: #fff;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.set-upgrade-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}

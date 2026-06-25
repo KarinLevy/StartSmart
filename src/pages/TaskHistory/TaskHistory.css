@@ -1,0 +1,119 @@
+.th-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: var(--spacing-card-gap);
+}
+
+@media (max-width: 640px) {
+  .th-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+.th-summary-card {
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-surface-container);
+  border-radius: var(--rounded-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-card-gap);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.th-summary-value {
+  font-size: var(--font-size-headline-lg-mobile);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.th-summary-label {
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface-variant);
+}
+
+.th-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.th-table-scroll {
+  overflow-x: auto;
+}
+
+.th-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body-md);
+}
+
+.th-table thead th {
+  text-align: left;
+  padding: 1rem var(--spacing-card-gap);
+  font-size: var(--font-size-label-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-outline);
+  background-color: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-surface-container);
+  white-space: nowrap;
+}
+
+.th-table tbody td {
+  padding: 1rem var(--spacing-card-gap);
+  border-bottom: 1px solid var(--color-surface-container);
+  color: var(--color-on-surface-variant);
+  white-space: nowrap;
+}
+
+.th-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.th-table tbody tr:hover {
+  background-color: var(--color-surface-container-low);
+}
+
+.th-name {
+  font-weight: 600;
+  color: var(--color-on-surface) !important;
+}
+
+/* Responsive: turn rows into stacked cards on small screens */
+@media (max-width: 720px) {
+  .th-table thead {
+    display: none;
+  }
+  .th-table,
+  .th-table tbody,
+  .th-table tr,
+  .th-table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .th-table tr {
+    padding: 0.5rem var(--spacing-card-gap);
+    border-bottom: 1px solid var(--color-surface-container);
+  }
+  .th-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.375rem 0;
+    border: none;
+    white-space: normal;
+  }
+  .th-table td::before {
+    content: attr(data-label);
+    font-size: var(--font-size-label-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-outline);
+    font-weight: 600;
+  }
+  .th-name {
+    font-size: var(--font-size-title-md);
+  }
+}

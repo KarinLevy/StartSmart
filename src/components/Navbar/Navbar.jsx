@@ -43,34 +43,34 @@ const Navbar = () => {
             <span className="material-symbols-outlined navbar-link-icon">add_task</span>
             <span>Create Task</span>
           </NavLink>
-          <a className="navbar-link" href="#" onClick={closeMenu}>
+          <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/task-details" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">assignment</span>
             <span>Task Details</span>
-          </a>
+          </NavLink>
           <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/focus-mode" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">timer</span>
             <span>Focus Mode</span>
           </NavLink>
-          <a className="navbar-link" href="#" onClick={closeMenu}>
+          <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/schedule" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">calendar_today</span>
             <span>Schedule</span>
-          </a>
-          <a className="navbar-link" href="#" onClick={closeMenu}>
+          </NavLink>
+          <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/task-history" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">history</span>
             <span>Task History</span>
-          </a>
+          </NavLink>
           <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/statistics" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">insights</span>
             <span>Statistics</span>
           </NavLink>
-          <a className="navbar-link" href="#" onClick={closeMenu}>
+          <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/profile" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">person</span>
             <span>Profile</span>
-          </a>
-          <a className="navbar-link" href="#" onClick={closeMenu}>
+          </NavLink>
+          <NavLink className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} to="/settings" onClick={closeMenu}>
             <span className="material-symbols-outlined navbar-link-icon">settings</span>
             <span>Settings/Upgrade</span>
-          </a>
+          </NavLink>
         </nav>
 
         {/* Right: Notifications & Profile */}
