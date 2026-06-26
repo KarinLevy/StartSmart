@@ -1,27 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
-import EnvironmentCard from '../../components/FocusMode/EnvironmentCard';
 import { useTasks } from '../../context/TasksContext';
 import '../../components/FocusMode/FocusMode.css';
 import Footer from '../../components/Footer/Footer';
-import './FocusModeOverride.css';
+import './FocusMode.css';
 
 const pad = (n) => String(n).padStart(2, '0');
 const fmtSecs = (s) => `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+const fmtMin  = (m) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}` : `${m}m`);
 
 const FocusMode = () => {
-  const { id } = useParams();
+  const { id }       = useParams();
   const { tasks, finishFocus, updateTask } = useTasks();
-  const navigate = useNavigate();
+  const navigate     = useNavigate();
 
   const task = tasks.find((t) => t.id === id);
 
-  const [running, setRunning] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const [running,  setRunning]  = useState(false);
+  const [elapsed,  setElapsed]  = useState(0);
   const [finished, setFinished] = useState(false);
   const [actualMin, setActualMin] = useState(0);
   const intervalRef = useRef(null);
+
+  // Start task in_progress on mount
+  useEffect(() => {
+    if (task && task.status === 'pending') {
+      updateTask(id, { status: 'in_progress' });
+    }
+    return () => clearInterval(intervalRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   useEffect(() => {
     if (running) {
@@ -32,28 +41,47 @@ const FocusMode = () => {
     return () => clearInterval(intervalRef.current);
   }, [running]);
 
-  useEffect(() => {
-    if (task && task.status === 'pending') {
-      updateTask(id, { status: 'in_progress' });
+  // Spacebar shortcut to start/pause
+  const handleKeyDown = useCallback((e) => {
+    if (e.code === 'Space' && e.target === document.body) {
+      e.preventDefault();
+      if (!finished) setRunning((r) => !r);
     }
-  }, [id]);
+  }, [finished]);
 
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Not found
   if (!task) {
     return (
       <div className="focus-mode-layout">
         <Navbar />
-        <main className="focus-mode-main">
-          <p style={{ color: 'var(--color-on-surface-variant)' }}>Task not found.</p>
-          <Link to="/dashboard" className="btn btn-secondary">&#8592; Dashboard</Link>
+        <main className="focus-mode-main fm-center">
+          <div className="fm-error-card">
+            <span className="material-symbols-outlined fm-error-icon" aria-hidden="true">search_off</span>
+            <h2>Task not found</h2>
+            <p>This task may have been deleted.</p>
+            <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+          </div>
         </main>
+        <Footer />
       </div>
     );
   }
 
-  const estimatedSecs = task.estimatedMinutes * 60;
-  const progress = Math.min(elapsed / estimatedSecs, 1);
-  const circumference = 2 * Math.PI * 42;
-  const strokeDashoffset = circumference * (1 - progress);
+  const estimatedSecs = (task.estimatedMinutes || 1) * 60;
+  const progress      = Math.min(elapsed / estimatedSecs, 1);
+  const remaining     = Math.max(estimatedSecs - elapsed, 0);
+  const isOver        = elapsed > estimatedSecs;
+  const overSecs      = elapsed - estimatedSecs;
+
+  // SVG circle
+  const R    = 90;
+  const circ = 2 * Math.PI * R;
+  const dashOffset = circ * (1 - progress);
 
   const handleFinish = () => {
     clearInterval(intervalRef.current);
@@ -64,43 +92,56 @@ const FocusMode = () => {
     setFinished(true);
   };
 
+  // ── Summary screen ─────────────────────────────────────────────────────────
   if (finished) {
     const gap = actualMin - task.estimatedMinutes;
+    const insight =
+      gap === 0 ? 'Perfect estimate — you nailed it!' :
+      gap > 0   ? `You went over by ${gap} minute${gap !== 1 ? 's' : ''}. Consider adding a buffer next time.` :
+                  `You finished ${Math.abs(gap)} minute${Math.abs(gap) !== 1 ? 's' : ''} early — great pacing!`;
+
     return (
       <div className="focus-mode-layout">
         <Navbar />
-        <main className="focus-mode-main">
-          <div className="focus-bento-card focus-summary-card">
-            <span className="material-symbols-outlined focus-summary-icon">task_alt</span>
-            <h2 className="focus-summary-title">Session Complete!</h2>
-            <p className="focus-summary-task">{task.title}</p>
-            <div className="focus-summary-stats">
-              <div className="focus-stat">
-                <span className="focus-stat-label">Estimated</span>
-                <span className="focus-stat-value">{task.estimatedMinutes}m</span>
+        <main className="focus-mode-main fm-center">
+          <div className="fm-summary">
+            <div className={`fm-summary-icon-wrap ${gap > 0 ? 'over' : 'done'}`} aria-hidden="true">
+              <span className="material-symbols-outlined">{gap > 0 ? 'timer_off' : 'task_alt'}</span>
+            </div>
+            <h2 className="fm-summary-title">Session complete!</h2>
+            <p className="fm-summary-task">{task.title}</p>
+
+            <div className="fm-summary-stats">
+              <div className="fm-stat">
+                <span className="fm-stat-val">{fmtMin(task.estimatedMinutes)}</span>
+                <span className="fm-stat-key">Planned</span>
               </div>
-              <div className="focus-stat">
-                <span className="focus-stat-label">Actual</span>
-                <span className="focus-stat-value">{actualMin}m</span>
+              <div className="fm-stat-divider" aria-hidden="true" />
+              <div className="fm-stat">
+                <span className="fm-stat-val">{fmtMin(actualMin)}</span>
+                <span className="fm-stat-key">Actual</span>
               </div>
-              <div className="focus-stat">
-                <span className="focus-stat-label">Gap</span>
-                <span className={`focus-stat-value ${gap > 0 ? 'gap-over' : 'gap-under'}`}>
+              <div className="fm-stat-divider" aria-hidden="true" />
+              <div className="fm-stat">
+                <span className={`fm-stat-val ${gap > 0 ? 'over' : 'under'}`}>
                   {gap > 0 ? `+${gap}m` : `${gap}m`}
                 </span>
+                <span className="fm-stat-key">Gap</span>
               </div>
             </div>
-            <p className="focus-summary-insight">
-              {gap === 0
-                ? 'Perfect estimate — you nailed it!'
-                : gap > 0
-                ? `You went over by ${gap} minute${gap !== 1 ? 's' : ''}. Try adding a buffer next time.`
-                : `You finished ${Math.abs(gap)} minute${Math.abs(gap) !== 1 ? 's' : ''} early — great pacing!`}
-            </p>
-            <Link to="/dashboard" className="btn btn-primary focus-summary-btn">
-              <span className="material-symbols-outlined">dashboard</span>
-              Back to Dashboard
-            </Link>
+
+            <p className="fm-summary-insight">{insight}</p>
+
+            <div className="fm-summary-actions">
+              <Link to="/dashboard" className="btn btn-secondary">
+                <span className="material-symbols-outlined" aria-hidden="true">dashboard</span>
+                Dashboard
+              </Link>
+              <Link to="/insights" className="btn btn-primary">
+                <span className="material-symbols-outlined" aria-hidden="true">insights</span>
+                View insights
+              </Link>
+            </div>
           </div>
         </main>
         <Footer />
@@ -108,82 +149,124 @@ const FocusMode = () => {
     );
   }
 
+  // ── Active session ──────────────────────────────────────────────────────────
   return (
     <div className="focus-mode-layout">
       <Navbar />
       <main className="focus-mode-main">
 
-        <div className="focus-bento-card focus-task-card">
-          <div className="focus-task-header">
-            <div>
-              <span className="focus-task-subtitle">Now Focusing</span>
-              <h2 className="focus-task-title">{task.title}</h2>
-            </div>
+        {/* Task info banner */}
+        <div className="focus-bento-card fm-task-banner">
+          <div className="fm-task-banner-left">
+            <span className="fm-now-label">Now focusing</span>
+            <h2 className="fm-task-title">{task.title}</h2>
+            {task.description && <p className="fm-task-desc">{task.description}</p>}
+          </div>
+          <div className="fm-task-banner-right">
             {task.priorityHigh && (
-              <span className="chip chip-priority" style={{ alignSelf: 'flex-start' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>flag</span>
-                High Priority
+              <span className="chip chip-priority">
+                <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">flag</span>
+                High priority
               </span>
             )}
+            <div className="fm-est-badge">
+              <span className="material-symbols-outlined" aria-hidden="true">hourglass_top</span>
+              {fmtMin(task.estimatedMinutes)} goal
+            </div>
           </div>
-          {task.description && <p className="focus-task-desc">{task.description}</p>}
-          <div className="focus-task-meta">
-            <span className="focus-task-meta-item">
-              <span className="material-symbols-outlined">hourglass_top</span>
-              Estimated: {task.estimatedMinutes}m
+        </div>
+
+        {/* Timer */}
+        <div className="fm-timer-wrap">
+          <svg
+            className="fm-timer-svg"
+            viewBox="0 0 200 200"
+            aria-label={`Focus timer: ${fmtSecs(elapsed)} elapsed`}
+            role="img"
+          >
+            {/* Track */}
+            <circle cx="100" cy="100" r={R} fill="none" stroke="var(--color-surface-container)" strokeWidth="10" />
+            {/* Progress */}
+            <circle
+              cx="100" cy="100" r={R}
+              fill="none"
+              stroke={isOver ? 'var(--color-error)' : 'url(#timerGrad)'}
+              strokeWidth="10"
+              strokeDasharray={circ}
+              strokeDashoffset={dashOffset}
+              strokeLinecap="round"
+              style={{ transform: 'rotate(-90deg)', transformOrigin: '100px 100px', transition: 'stroke-dashoffset 0.5s linear' }}
+            />
+            <defs>
+              <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--color-primary)" />
+                <stop offset="100%" stopColor="var(--color-secondary)" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <div className="fm-timer-inner">
+            <span className={`fm-elapsed${isOver ? ' over' : ''}`}>{fmtSecs(elapsed)}</span>
+            <span className="fm-timer-status">
+              {running ? 'Focusing…' : elapsed === 0 ? 'Ready' : 'Paused'}
+            </span>
+            <span className="fm-remaining">
+              {isOver
+                ? `+${fmtSecs(overSecs)} over`
+                : `${fmtSecs(remaining)} left`}
             </span>
           </div>
         </div>
 
-        <div className="focus-timer-container">
-          <div className="focus-timer-wrapper">
-            <svg className="focus-timer-svg" viewBox="0 0 100 100">
-              <circle className="timer-track" cx="50" cy="50" r="42" fill="transparent" strokeWidth="6" />
-              <circle
-                className="timer-progress"
-                cx="50" cy="50" r="42"
-                fill="transparent"
-                strokeWidth="8"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', transition: 'stroke-dashoffset 0.5s linear' }}
+        {/* Live gap bar (visible once running) */}
+        {elapsed > 0 && (
+          <div className="fm-gap-bar-wrap">
+            <span className="fm-gap-bar-label">Progress toward estimate</span>
+            <div className="fm-gap-bar-track" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
+              <div
+                className={`fm-gap-bar-fill${isOver ? ' over' : ''}`}
+                style={{ width: `${Math.min(progress * 100, 100)}%` }}
               />
-            </svg>
-            <div className="focus-timer-inner">
-              <span className="focus-timer-time">{fmtSecs(elapsed)}</span>
-              <p className="focus-timer-status">{running ? 'Focusing…' : elapsed === 0 ? 'Ready' : 'Paused'}</p>
-              <div className="focus-timer-pomodoro">
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>timer</span>
-                <span className="focus-timer-pomodoro-text">{task.estimatedMinutes}m goal</span>
-              </div>
             </div>
+            <span className="fm-gap-bar-pct">{Math.min(Math.round(progress * 100), 100)}%</span>
           </div>
-        </div>
+        )}
 
-        <div className="focus-controls-container">
+        {/* Controls */}
+        <div className="fm-controls">
           {!running ? (
-            <button className="primary-gradient motivational-glow focus-ctrl-btn" onClick={() => setRunning(true)}>
-              <span className="material-symbols-outlined">play_arrow</span>
+            <button
+              className="fm-btn fm-btn-start"
+              onClick={() => setRunning(true)}
+              aria-label={elapsed === 0 ? 'Start timer' : 'Resume timer'}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
               {elapsed === 0 ? 'Start' : 'Resume'}
             </button>
           ) : (
-            <button className="focus-ctrl-btn focus-ctrl-stop" onClick={() => setRunning(false)}>
-              <span className="material-symbols-outlined">pause</span>
+            <button
+              className="fm-btn fm-btn-pause"
+              onClick={() => setRunning(false)}
+              aria-label="Pause timer"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">pause</span>
               Pause
             </button>
           )}
-          <button className="focus-ctrl-btn focus-ctrl-finish" onClick={handleFinish} disabled={elapsed === 0}>
-            <span className="material-symbols-outlined">check</span>
+          <button
+            className="fm-btn fm-btn-finish"
+            onClick={handleFinish}
+            disabled={elapsed === 0}
+            aria-label="Finish session"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">check</span>
             Finish
           </button>
         </div>
 
-        <div className="focus-env-grid">
-          <EnvironmentCard icon="music_note" title="Lo-fi Chill" description="Ambient workspace audio is currently active." />
-          <EnvironmentCard icon="notifications_off" title="DND Active" description="All notifications silenced for this session." active={true} />
-          <EnvironmentCard icon="analytics" title="Efficiency" description="You are on track with your daily focus goal." />
-        </div>
+        <p className="fm-kbd-hint" aria-hidden="true">
+          <kbd>Space</kbd> to start / pause
+        </p>
 
       </main>
       <Footer />

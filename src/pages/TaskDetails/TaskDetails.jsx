@@ -6,13 +6,17 @@ import './TaskDetails.css';
 
 const fmtMin = (m) => {
   if (!m) return '--';
-  if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60 > 0 ? m % 60 + 'm' : ''}`.trim();
+  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}`;
   return `${m}m`;
 };
 
-const STATUS_LABELS = { pending: 'Pending', in_progress: 'In Progress', done: 'Done' };
-const STATUS_CHIPS = { pending: 'chip-pending', in_progress: 'chip-progress', done: 'chip-done' };
-const STATUS_ICONS = { pending: 'schedule', in_progress: 'autorenew', done: 'check_circle' };
+const STATUS_META = {
+  pending:     { label: 'Pending',     cls: 'chip-pending',  icon: 'schedule' },
+  in_progress: { label: 'In Progress', cls: 'chip-progress', icon: 'autorenew' },
+  done:        { label: 'Done',        cls: 'chip-done',     icon: 'check_circle' },
+};
+
+const STATUSES = ['pending', 'in_progress', 'done'];
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -21,16 +25,24 @@ const TaskDetails = () => {
 
   const task = tasks.find((t) => t.id === id);
 
-  const [editing, setEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDesc, setEditDesc] = useState('');
-  const [editEst, setEditEst] = useState('');
+  const [editing, setEditing]       = useState(false);
+  const [editTitle, setEditTitle]   = useState('');
+  const [editDesc, setEditDesc]     = useState('');
+  const [editEst, setEditEst]       = useState('');
+  const [editDate, setEditDate]     = useState('');
+  const [editStatus, setEditStatus] = useState('');
+  const [editPrio, setEditPrio]     = useState(false);
+  const [showDel, setShowDel]       = useState(false);
 
   if (!task) {
     return (
       <PageShell narrow title="Task not found">
-        <p style={{ color: 'var(--color-on-surface-variant)' }}>This task does not exist.</p>
-        <Link to="/dashboard" className="btn btn-secondary">Back to dashboard</Link>
+        <div className="td-not-found">
+          <span className="material-symbols-outlined td-not-found-icon" aria-hidden="true">search_off</span>
+          <h3>This task doesn&apos;t exist.</h3>
+          <p>It may have been deleted, or the link might be wrong.</p>
+          <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+        </div>
       </PageShell>
     );
   }
@@ -39,138 +51,255 @@ const TaskDetails = () => {
     setEditTitle(task.title);
     setEditDesc(task.description || '');
     setEditEst(String(task.estimatedMinutes));
+    setEditDate(task.scheduledDate || '');
+    setEditStatus(task.status);
+    setEditPrio(task.priorityHigh);
     setEditing(true);
   };
 
+  const cancelEdit = () => setEditing(false);
+
   const saveEdit = () => {
     updateTask(id, {
-      title: editTitle.trim() || task.title,
-      description: editDesc,
+      title:            editTitle.trim() || task.title,
+      description:      editDesc,
       estimatedMinutes: parseInt(editEst) || task.estimatedMinutes,
+      scheduledDate:    editDate,
+      status:           editStatus,
+      priorityHigh:     editPrio,
     });
     setEditing(false);
   };
 
-  const handleDelete = () => {
+  const confirmDelete = () => {
     deleteTask(id);
     navigate('/dashboard');
   };
 
   const scheduledFormatted = task.scheduledDate
-    ? new Date(task.scheduledDate).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? new Date(task.scheduledDate).toLocaleString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
     : '—';
+
+  const sm = STATUS_META[task.status] || STATUS_META.pending;
+  const gap = task.gap;
 
   return (
     <PageShell
       narrow
       title="Task Details"
-      subtitle="Review everything about this task before you start."
+      subtitle="Review, edit, or start a focus session on this task."
       actions={
-        <>
+        <div className="td-header-actions">
           {!editing ? (
-            <button className="btn btn-secondary" onClick={startEdit}>
-              <span className="material-symbols-outlined">edit</span>
-              Edit
-            </button>
+            <>
+              <button className="btn btn-secondary" onClick={startEdit}>
+                <span className="material-symbols-outlined" aria-hidden="true">edit</span>
+                Edit
+              </button>
+              <button className="btn btn-danger" onClick={() => setShowDel(true)}>
+                <span className="material-symbols-outlined" aria-hidden="true">delete</span>
+                Delete
+              </button>
+            </>
           ) : (
-            <button className="btn btn-primary" onClick={saveEdit}>
-              <span className="material-symbols-outlined">save</span>
-              Save
-            </button>
+            <>
+              <button className="btn btn-secondary" onClick={cancelEdit}>Cancel</button>
+              <button className="btn btn-primary" onClick={saveEdit}>
+                <span className="material-symbols-outlined" aria-hidden="true">save</span>
+                Save
+              </button>
+            </>
           )}
-          <button className="btn btn-danger" onClick={handleDelete}>
-            <span className="material-symbols-outlined">delete</span>
-            Delete
-          </button>
-        </>
+        </div>
       }
     >
+
+      {/* Delete confirmation */}
+      {showDel && (
+        <div className="td-confirm-overlay" role="dialog" aria-modal="true" aria-label="Delete task confirmation">
+          <div className="td-confirm-box">
+            <span className="material-symbols-outlined td-confirm-icon" aria-hidden="true">warning</span>
+            <h3 className="td-confirm-title">Delete this task?</h3>
+            <p className="td-confirm-text">This action cannot be undone.</p>
+            <div className="td-confirm-actions">
+              <button className="btn btn-secondary" onClick={() => setShowDel(false)}>Cancel</button>
+              <button className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="surface-card td-card">
+
+        {/* Top: status + title */}
         <div className="td-top">
           <div className="td-status-row">
-            <span className={`chip ${STATUS_CHIPS[task.status]}`}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{STATUS_ICONS[task.status]}</span>
-              {STATUS_LABELS[task.status]}
-            </span>
-            {task.priorityHigh && (
-              <span className="chip chip-priority">
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>flag</span>
-                High priority
-              </span>
+            {editing ? (
+              <div className="td-status-select-group">
+                {STATUSES.map((s) => {
+                  const m = STATUS_META[s];
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      className={`td-status-opt ${s === editStatus ? 'active' : ''}`}
+                      onClick={() => setEditStatus(s)}
+                      aria-pressed={s === editStatus}
+                    >
+                      <span className="material-symbols-outlined" aria-hidden="true">{m.icon}</span>
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <>
+                <span className={`chip ${sm.cls}`}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">{sm.icon}</span>
+                  {sm.label}
+                </span>
+                {task.priorityHigh && (
+                  <span className="chip chip-priority">
+                    <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">flag</span>
+                    High priority
+                  </span>
+                )}
+              </>
             )}
           </div>
 
           {editing ? (
-            <input className="td-title-input" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+            <input
+              className="td-title-input"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              aria-label="Task title"
+            />
           ) : (
-            <h3 className="td-title">{task.title}</h3>
+            <h2 className="td-title">{task.title}</h2>
           )}
         </div>
 
+        {/* Description */}
         <div className="td-field">
           <span className="td-field-label">Description</span>
           {editing ? (
-            <textarea className="td-textarea" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows="4" />
+            <textarea
+              className="td-textarea"
+              value={editDesc}
+              onChange={(e) => setEditDesc(e.target.value)}
+              rows={4}
+              aria-label="Task description"
+            />
           ) : (
-            <p className="td-field-value">{task.description || <em style={{ color: 'var(--color-outline)' }}>No description</em>}</p>
+            <p className="td-field-value">
+              {task.description || <em style={{ color: 'var(--color-outline)' }}>No description</em>}
+            </p>
           )}
         </div>
 
+        {/* Meta grid */}
         <div className="td-meta-grid">
+          {/* Scheduled */}
           <div className="td-meta">
-            <span className="material-symbols-outlined td-meta-icon">calendar_month</span>
+            <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">calendar_month</span>
             <div>
               <span className="td-meta-label">Scheduled</span>
-              <span className="td-meta-value">{scheduledFormatted}</span>
-            </div>
-          </div>
-          <div className="td-meta">
-            <span className="material-symbols-outlined td-meta-icon">hourglass_top</span>
-            <div>
-              <span className="td-meta-label">Estimated time</span>
               {editing ? (
                 <input
-                  className="td-title-input"
-                  type="number"
-                  min="1"
-                  value={editEst}
-                  onChange={(e) => setEditEst(e.target.value)}
-                  style={{ width: '80px', fontSize: 'var(--font-size-body-md)' }}
-                  aria-label="Estimated minutes"
+                  type="datetime-local"
+                  className="td-inline-input"
+                  value={editDate}
+                  onChange={(e) => setEditDate(e.target.value)}
+                  aria-label="Scheduled date and time"
                 />
+              ) : (
+                <span className="td-meta-value">{scheduledFormatted}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Estimated */}
+          <div className="td-meta">
+            <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">hourglass_top</span>
+            <div>
+              <span className="td-meta-label">Estimated</span>
+              {editing ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <input
+                    className="td-inline-input"
+                    type="number"
+                    min="1"
+                    value={editEst}
+                    onChange={(e) => setEditEst(e.target.value)}
+                    style={{ width: '72px' }}
+                    aria-label="Estimated minutes"
+                  />
+                  <span style={{ fontSize: 'var(--font-size-label-sm)', color: 'var(--color-outline)' }}>min</span>
+                </div>
               ) : (
                 <span className="td-meta-value">{fmtMin(task.estimatedMinutes)}</span>
               )}
             </div>
           </div>
+
+          {/* Actual (read-only) */}
           {task.actualMinutes != null && (
             <div className="td-meta">
-              <span className="material-symbols-outlined td-meta-icon">timer</span>
+              <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">timer</span>
               <div>
                 <span className="td-meta-label">Actual time</span>
                 <span className="td-meta-value">{fmtMin(task.actualMinutes)}</span>
               </div>
             </div>
           )}
-          {task.gap != null && (
+
+          {/* Gap */}
+          {gap != null && (
             <div className="td-meta">
-              <span className="material-symbols-outlined td-meta-icon">query_stats</span>
+              <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">query_stats</span>
               <div>
                 <span className="td-meta-label">Gap</span>
-                <span className={`td-meta-value ${task.gap > 0 ? 'gap-over' : 'gap-under'}`}>
-                  {task.gap > 0 ? `+${task.gap}m` : `${task.gap}m`}
+                <span className={`td-meta-value ${gap > 0 ? 'gap-over' : 'gap-under'}`}>
+                  {gap > 0 ? `+${gap}m` : `${gap}m`}
+                  <span className="td-gap-badge">
+                    {gap === 0 ? 'On target' : gap > 0 ? 'Over' : 'Early'}
+                  </span>
                 </span>
               </div>
             </div>
           )}
         </div>
 
-        {task.tags.length > 0 && (
+        {/* Priority toggle in edit mode */}
+        {editing && (
+          <div className="td-field">
+            <button
+              type="button"
+              className={`td-prio-toggle${editPrio ? ' active' : ''}`}
+              onClick={() => setEditPrio((v) => !v)}
+              aria-pressed={editPrio}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">flag</span>
+              {editPrio ? 'High priority — click to remove' : 'Mark as high priority'}
+            </button>
+          </div>
+        )}
+
+        {/* Tags */}
+        {!editing && task.tags?.length > 0 && (
           <div className="td-field">
             <span className="td-field-label">Tags</span>
             <div className="td-tags">
               {task.tags.map((tag) => (
-                <span key={tag.name} className="td-tag" style={{ backgroundColor: `${tag.color}1a`, color: tag.color }}>
+                <span
+                  key={tag.name}
+                  className="td-tag"
+                  style={{ background: `${tag.color}1a`, color: tag.color }}
+                >
                   {tag.name}
                 </span>
               ))}
@@ -178,15 +307,16 @@ const TaskDetails = () => {
           </div>
         )}
 
+        {/* Bottom actions */}
         <div className="td-actions">
           <Link to="/dashboard" className="btn btn-secondary">
-            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             Dashboard
           </Link>
           {task.status !== 'done' && (
             <Link to={`/focus-mode/${task.id}`} className="btn btn-primary">
-              <span className="material-symbols-outlined">play_arrow</span>
-              Start task
+              <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+              Start focus
             </Link>
           )}
         </div>
