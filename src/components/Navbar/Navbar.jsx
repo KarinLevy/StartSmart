@@ -4,6 +4,8 @@ import Logo from '../Logo/Logo';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
 import { useNotifications } from '../../context/NotificationsContext';
+import { useProfile } from '../../context/ProfileContext';
+import Avatar from '../Avatar/Avatar';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -21,6 +23,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const { unreadCount } = useNotifications();
+  const { profile } = useProfile();
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -89,15 +92,9 @@ const Navbar = () => {
           {/* Profile */}
           <div className="navbar-profile">
             <div className="navbar-profile-info">
-              <span className="navbar-profile-name">Maya Cohen</span>
+              <span className="navbar-profile-name">{profile.firstName} {profile.lastName}</span>
             </div>
-            <div
-              className="navbar-profile-avatar"
-              style={{ background: 'linear-gradient(135deg, #1e3a8a, #6b38d4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              aria-label="Maya Cohen's avatar"
-            >
-              <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem' }}>MC</span>
-            </div>
+            <Avatar size="md" className="navbar-profile-avatar" />
           </div>
         </div>
       </div>

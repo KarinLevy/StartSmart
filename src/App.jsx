@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { TasksProvider } from './context/TasksContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationsProvider } from './context/NotificationsContext';
+import { ProfileProvider } from './context/ProfileContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -39,6 +40,7 @@ function App() {
     <AuthProvider>
     <NotificationsProvider>
     <TasksProvider>
+    <ProfileProvider>
     <Router>
       <Routes>
         {/* Public */}
@@ -70,6 +72,7 @@ function App() {
         <Route path="/insights"           element={<ProtectedRoute><Insights /></ProtectedRoute>} />
       </Routes>
     </Router>
+    </ProfileProvider>
     </TasksProvider>
     </NotificationsProvider>
     </AuthProvider>
