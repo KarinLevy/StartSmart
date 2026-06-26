@@ -111,8 +111,10 @@ function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, 
         {TAG_PRESETS.map((p) => (
           <li key={p.color} className="tcp-legend-item">
             <span className="tcp-legend-dot" style={{ background: p.color }} aria-hidden="true" />
-            <span className="tcp-legend-label">{p.label}</span>
-            <span className="tcp-legend-hint">{p.hint}</span>
+            <span className="tcp-legend-text">
+              <span className="tcp-legend-hint">{p.hint}</span>
+              <span className="tcp-legend-examples">{p.examples}</span>
+            </span>
           </li>
         ))}
       </ul>

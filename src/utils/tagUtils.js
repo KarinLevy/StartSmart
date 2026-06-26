@@ -14,14 +14,14 @@ export const MAX_TAGS      = 8;
 export const TAG_MAX_LEN   = 24;
 
 export const TAG_PRESETS = [
-  { color: '#6b38d4', label: 'Purple', hint: 'Default / General'  },
-  { color: '#2563eb', label: 'Blue',   hint: 'Work'               },
-  { color: '#16a34a', label: 'Green',  hint: 'Personal'           },
-  { color: '#c2610c', label: 'Orange', hint: 'Study / University' },
-  { color: '#b91c1c', label: 'Red',    hint: 'Urgent'             },
-  { color: '#a16207', label: 'Yellow', hint: 'Reminder'           },
-  { color: '#be185d', label: 'Pink',   hint: 'Creative'           },
-  { color: '#0e7490', label: 'Cyan',   hint: 'Technical'          },
+  { color: '#6b38d4', label: 'Purple', hint: 'Default / General',       examples: 'Misc, General, Other'                   },
+  { color: '#2563eb', label: 'Blue',   hint: 'Work',                    examples: 'Client, Office, Business'               },
+  { color: '#16a34a', label: 'Green',  hint: 'Personal & Health',       examples: 'Family, Birthday, Gym, Health'          },
+  { color: '#c2610c', label: 'Orange', hint: 'Study & Learning',        examples: 'University, Exam, Course, Reading'      },
+  { color: '#b91c1c', label: 'Red',    hint: 'Urgent / High Priority',  examples: 'ASAP, Critical, Deadline'               },
+  { color: '#a16207', label: 'Yellow', hint: 'Planning & Reminders',    examples: 'Meeting, Schedule, Shopping, Reminder'  },
+  { color: '#be185d', label: 'Pink',   hint: 'Creative',                examples: 'Design, Writing, Ideas'                 },
+  { color: '#0e7490', label: 'Cyan',   hint: 'Technology',              examples: 'Backend, Frontend, AI, Programming'     },
 ];
 
 // ── Keyword → color map ───────────────────────────────────────────────────────
@@ -80,43 +80,45 @@ const KEYWORD_MAP = [
     ],
   },
 
-  // ── Study / University / Orange ───────────────────────────────────────────
+  // ── Study & Learning / Orange ─────────────────────────────────────────────
   {
     color: '#c2610c',
     keywords: [
       // English
       'study', 'exam', 'homework', 'university', 'school', 'course', 'lecture',
       'assignment', 'thesis', 'quiz', 'class', 'college', 'semester', 'grade',
-      'academic', 'research', 'tutorial', 'lesson',
+      'academic', 'research', 'tutorial', 'lesson', 'reading', 'book',
       // Hebrew
       'לימודים', 'מבחן', 'שיעורי בית', 'אוניברסיטה', 'בית ספר', 'קורס',
       'הרצאה', 'עבודה אקדמית', 'תזה', 'בגרות', 'מכללה', 'סמסטר',
-      'מטלה', 'שיעור',
+      'מטלה', 'שיעור', 'קריאה', 'ספר',
     ],
   },
 
-  // ── Personal / Green ──────────────────────────────────────────────────────
+  // ── Personal & Health / Green ─────────────────────────────────────────────
   {
     color: '#16a34a',
     keywords: [
       // English
       'personal', 'family', 'home', 'health', 'fitness', 'gym', 'sport',
       'life', 'self', 'wellness', 'hobby', 'leisure', 'birthday', 'vacation',
-      'travel', 'relax', 'friend', 'social',
+      'travel', 'relax', 'friend', 'social', 'meditation', 'sleep', 'diet',
       // Hebrew
       'אישי', 'משפחה', 'בית', 'בריאות', 'כושר', 'ספורט', 'יום הולדת',
-      'חופשה', 'טיול', 'חבר', 'חברה', 'נופש', 'תחביב',
+      'חופשה', 'טיול', 'חבר', 'חברה', 'נופש', 'תחביב', 'מדיטציה',
     ],
   },
 
-  // ── Reminder / Yellow ─────────────────────────────────────────────────────
+  // ── Planning & Reminders / Yellow ─────────────────────────────────────────
   {
     color: '#a16207',
     keywords: [
       // English
-      'reminder', 'shopping', 'grocery', 'buy', 'shop', 'purchase', 'todo',
-      'errand', 'remember', 'note to self',
+      'meeting', 'calendar', 'planning', 'plan', 'schedule', 'event',
+      'standup', 'sync', 'agenda', 'appointment', 'reminder', 'shopping',
+      'grocery', 'buy', 'shop', 'purchase', 'todo', 'errand', 'remember',
       // Hebrew
+      'פגישה', 'לוח זמנים', 'תכנון', 'יומן', 'אירוע', 'סדר יום', 'תיאום',
       'תזכורת', 'קניות', 'לקנות', 'לזכור', 'מכולת', 'סופר', 'רשימת קניות',
     ],
   },
