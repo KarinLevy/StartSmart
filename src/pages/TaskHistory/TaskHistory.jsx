@@ -31,18 +31,23 @@ const fmtDateShort = (d) => {
 };
 
 const SORT_OPTIONS = [
-  { value: 'newest',      label: 'Newest first' },
-  { value: 'oldest',      label: 'Oldest first' },
-  { value: 'longest',     label: 'Longest duration' },
-  { value: 'biggest_gap', label: 'Biggest gap' },
-  { value: 'alpha',       label: 'A → Z' },
+  { value: 'newest',      label: 'Newest First' },
+  { value: 'oldest',      label: 'Oldest First' },
+  { value: 'az',          label: 'A → Z' },
+  { value: 'za',          label: 'Z → A' },
+  { value: 'est_high',    label: 'Highest Estimated' },
+  { value: 'est_low',     label: 'Lowest Estimated' },
+  { value: 'actual_high', label: 'Highest Actual' },
+  { value: 'actual_low',  label: 'Lowest Actual' },
+  { value: 'gap_high',    label: 'Largest Gap' },
+  { value: 'gap_low',     label: 'Smallest Gap' },
 ];
 
 const DATE_FILTERS = [
-  { value: 'all',    label: 'All time' },
-  { value: 'week',   label: 'This week' },
-  { value: 'month',  label: 'This month' },
-  { value: 'last30', label: 'Last 30 days' },
+  { value: 'all',    label: 'All Time' },
+  { value: 'week',   label: 'This Week' },
+  { value: 'last30', label: 'Last 30 Days' },
+  { value: 'custom', label: 'Custom Range' },
 ];
 
 // ── Reflections stored in localStorage, separate from task data ───────────────
@@ -289,12 +294,14 @@ const TaskHistory = () => {
 
   const done = useMemo(() => tasks.filter((t) => t.status === 'done'), [tasks]);
 
-  const [search,      setSearch]      = useState('');
-  const [filterDate,  setFilterDate]  = useState('all');
-  const [filterPrio,  setFilterPrio]  = useState(false);
-  const [filterTag,   setFilterTag]   = useState('');
-  const [sortBy,      setSortBy]      = useState('newest');
-  const [activeTask,  setActiveTask]  = useState(null);
+  const [search,       setSearch]       = useState('');
+  const [filterDate,   setFilterDate]   = useState('all');
+  const [customStart,  setCustomStart]  = useState('');
+  const [customEnd,    setCustomEnd]    = useState('');
+  const [filterPrio,   setFilterPrio]   = useState(false);
+  const [filterTag,    setFilterTag]    = useState('');
+  const [sortBy,       setSortBy]       = useState('newest');
+  const [activeTask,   setActiveTask]   = useState(null);
 
   // All unique tags across done tasks
   const allTags = useMemo(() => {
@@ -308,10 +315,10 @@ const TaskHistory = () => {
     const now = Date.now();
     const q   = search.toLowerCase().trim();
 
-    const startOf = (unit) => {
+    const startOfWeek = () => {
       const d = new Date();
-      if (unit === 'week')  { d.setDate(d.getDate() - d.getDay()); d.setHours(0, 0, 0, 0); }
-      if (unit === 'month') { d.setDate(1); d.setHours(0, 0, 0, 0); }
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // Monday
+      d.setHours(0, 0, 0, 0);
       return d.getTime();
     };
 
@@ -324,9 +331,13 @@ const TaskHistory = () => {
       }
       if (filterDate !== 'all' && t.scheduledDate) {
         const ts = new Date(t.scheduledDate).getTime();
-        if (filterDate === 'week'   && ts < startOf('week'))      return false;
-        if (filterDate === 'month'  && ts < startOf('month'))     return false;
-        if (filterDate === 'last30' && ts < now - 30 * 86400000)  return false;
+        if (filterDate === 'week'   && ts < startOfWeek())           return false;
+        if (filterDate === 'last30' && ts < now - 30 * 86400000)     return false;
+        if (filterDate === 'custom' && customStart && customEnd) {
+          const start = new Date(customStart); start.setHours(0, 0, 0, 0);
+          const end   = new Date(customEnd);   end.setHours(23, 59, 59, 999);
+          if (ts < start.getTime() || ts > end.getTime()) return false;
+        }
       }
       if (filterPrio && !t.priorityHigh) return false;
       if (filterTag && !t.tags?.some((tag) => tag.name === filterTag)) return false;
@@ -337,13 +348,18 @@ const TaskHistory = () => {
     switch (sortBy) {
       case 'newest':      list.sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate)); break;
       case 'oldest':      list.sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate)); break;
-      case 'longest':     list.sort((a, b) => (b.actualMinutes || 0) - (a.actualMinutes || 0)); break;
-      case 'biggest_gap': list.sort((a, b) => (b.gap || 0) - (a.gap || 0)); break;
-      case 'alpha':       list.sort((a, b) => a.title.localeCompare(b.title)); break;
+      case 'az':          list.sort((a, b) => a.title.localeCompare(b.title)); break;
+      case 'za':          list.sort((a, b) => b.title.localeCompare(a.title)); break;
+      case 'est_high':    list.sort((a, b) => (b.estimatedMinutes || 0) - (a.estimatedMinutes || 0)); break;
+      case 'est_low':     list.sort((a, b) => (a.estimatedMinutes || 0) - (b.estimatedMinutes || 0)); break;
+      case 'actual_high': list.sort((a, b) => (b.actualMinutes || 0) - (a.actualMinutes || 0)); break;
+      case 'actual_low':  list.sort((a, b) => (a.actualMinutes || 0) - (b.actualMinutes || 0)); break;
+      case 'gap_high':    list.sort((a, b) => (b.gap || 0) - (a.gap || 0)); break;
+      case 'gap_low':     list.sort((a, b) => (a.gap || 0) - (b.gap || 0)); break;
       default: break;
     }
     return list;
-  }, [done, search, filterDate, filterPrio, filterTag, sortBy]);
+  }, [done, search, filterDate, customStart, customEnd, filterPrio, filterTag, sortBy]);
 
   // Summary stats across ALL done tasks (not filtered)
   const totalMin = done.reduce((s, t) => s + (t.actualMinutes || 0), 0);
@@ -352,8 +368,14 @@ const TaskHistory = () => {
     : 0;
   const avgGapRounded = Math.round(avgGap);
 
+  const handleDateFilter = (val) => {
+    setFilterDate(val);
+    if (val !== 'custom') { setCustomStart(''); setCustomEnd(''); }
+  };
+
   const clearFilters = useCallback(() => {
-    setSearch(''); setFilterDate('all'); setFilterPrio(false); setFilterTag('');
+    setSearch(''); setFilterDate('all'); setCustomStart(''); setCustomEnd('');
+    setFilterPrio(false); setFilterTag('');
   }, []);
 
   const hasFilters = search || filterDate !== 'all' || filterPrio || filterTag;
@@ -415,13 +437,39 @@ const TaskHistory = () => {
               <button
                 key={f.value}
                 className={`th-filter-btn${filterDate === f.value ? ' active' : ''}`}
-                onClick={() => setFilterDate(f.value)}
+                onClick={() => handleDateFilter(f.value)}
                 aria-pressed={filterDate === f.value}
               >
                 {f.label}
               </button>
             ))}
           </div>
+
+          {filterDate === 'custom' && (
+            <div className="th-custom-range" role="group" aria-label="Custom date range">
+              <label className="th-date-label" htmlFor="th-start">From</label>
+              <input
+                id="th-start"
+                type="date"
+                className="th-date-input"
+                value={customStart}
+                max={customEnd || undefined}
+                onChange={(e) => setCustomStart(e.target.value)}
+                aria-label="Start date"
+              />
+              <span className="th-date-sep" aria-hidden="true">—</span>
+              <label className="th-date-label" htmlFor="th-end">To</label>
+              <input
+                id="th-end"
+                type="date"
+                className="th-date-input"
+                value={customEnd}
+                min={customStart || undefined}
+                onChange={(e) => setCustomEnd(e.target.value)}
+                aria-label="End date"
+              />
+            </div>
+          )}
 
           <span className="th-filter-sep" aria-hidden="true" />
 
