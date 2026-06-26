@@ -693,6 +693,28 @@
   border-color: var(--color-primary);
 }
 
+/* Compact range summary banner */
+.stat-range-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface-variant);
+  margin-bottom: var(--spacing-card-gap);
+  flex-wrap: wrap;
+}
+
+.stat-range-icon {
+  font-size: 1rem;
+  color: var(--color-secondary);
+  flex-shrink: 0;
+}
+
+.stat-range-summary strong {
+  color: var(--color-on-surface);
+  font-weight: 600;
+}
+
 /* Custom date range picker */
 .stat-custom-range {
   display: flex;
@@ -736,6 +758,23 @@
 .stat-date-sep {
   color: var(--color-outline);
   font-size: 0.8rem;
+}
+
+.stat-custom-clear {
+  padding: 0.3rem 0.7rem;
+  border: none;
+  background: transparent;
+  color: var(--color-error, #ba1a1a);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--rounded-full);
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.stat-custom-clear:hover {
+  background: rgba(186, 26, 26, 0.08);
 }
 
 /* Stat insights link */

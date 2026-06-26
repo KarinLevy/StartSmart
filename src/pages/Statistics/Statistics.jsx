@@ -98,16 +98,20 @@ const getRangeLabel = (period, customStart, customEnd) => {
   if (period === 'This Week') {
     const mon = startOfWeek();
     const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-    return `${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    return `This Week (${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
   }
   if (period === 'Last 30 Days') {
     const cutoff = new Date(Date.now() - 30 * 86400000);
-    return `${cutoff.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – Today`;
+    return `Last 30 Days (${cutoff.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – Today)`;
   }
-  if (period === 'Custom Range' && customStart && customEnd) {
-    return `${new Date(customStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} – ${new Date(customEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  if (period === 'Custom Range') {
+    if (customStart && customEnd) {
+      return `${new Date(customStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} – ${new Date(customEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+    }
+    if (customStart) return `From ${new Date(customStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+    return 'Select a start and end date';
   }
-  return 'All time';
+  return 'All Time';
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -116,6 +120,7 @@ const Statistics = () => {
   const { tasks } = useTasks();
 
   const [period,      setPeriod]      = useState('All Time');
+  const [prevPeriod,  setPrevPeriod]  = useState('All Time');
   const [customStart, setCustomStart] = useState('');
   const [customEnd,   setCustomEnd]   = useState('');
   const [sortBy,      setSortBy]      = useState('newest');
@@ -138,9 +143,15 @@ const Statistics = () => {
   const rangeLabel = getRangeLabel(period, customStart, customEnd);
 
   const handlePeriodChange = (p) => {
+    if (p !== 'Custom Range') setPrevPeriod(p);
     setPeriod(p);
-    // Reset custom range when switching away
     if (p !== 'Custom Range') { setCustomStart(''); setCustomEnd(''); }
+  };
+
+  const handleClearCustomRange = () => {
+    setCustomStart('');
+    setCustomEnd('');
+    setPeriod(prevPeriod);
   };
 
   return (
@@ -188,13 +199,15 @@ const Statistics = () => {
                   onChange={(e) => setCustomEnd(e.target.value)}
                   aria-label="End date"
                 />
+                <button
+                  className="stat-custom-clear"
+                  onClick={handleClearCustomRange}
+                  aria-label="Clear custom date range"
+                >
+                  Clear
+                </button>
               </div>
             )}
-
-            <div className="statistics-date">
-              <span className="material-symbols-outlined statistics-date-icon" aria-hidden="true">calendar_today</span>
-              <h2>{rangeLabel}</h2>
-            </div>
           </div>
 
           <Link to="/insights" className="btn-secondary stat-insights-link">
@@ -202,6 +215,12 @@ const Statistics = () => {
             View All Insights
           </Link>
         </section>
+
+        {/* Range summary banner */}
+        <div className="stat-range-summary" aria-live="polite">
+          <span className="material-symbols-outlined stat-range-icon" aria-hidden="true">calendar_today</span>
+          <span>Showing data for: <strong>{rangeLabel}</strong></span>
+        </div>
 
         {/* Summary cards */}
         <section className="summary-cards-grid" aria-label="Summary metrics">
