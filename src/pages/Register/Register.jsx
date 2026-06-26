@@ -13,8 +13,11 @@ function colorFromStr(str) {
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
 }
 function getInitials(first, last) {
-  return ((first[0] || '') + (last[0] || '')).toUpperCase() || '?';
+  return ((first[0] || '') + (last[0] || '')).toUpperCase();
 }
+
+const PHONE_RE = /^[\d\s\-+().]{7,15}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -22,35 +25,58 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName]   = useState('');
-  const [avatarSrc, setAvatarSrc] = useState(null); // data-URL or null
-  const [uploadState, setUploadState] = useState('idle'); // idle | uploading | error
+  const [lastName,  setLastName]  = useState('');
+  const [username,  setUsername]  = useState('');
+  const [email,     setEmail]     = useState('');
+  const [phone,     setPhone]     = useState('');
+  const [password,  setPassword]  = useState('');
+  const [avatarSrc, setAvatarSrc] = useState(null);
+  const [uploadState, setUploadState] = useState('idle');
 
-  /* Derived initials avatar */
+  const [errors,  setErrors]  = useState({});
+  const [touched, setTouched] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  /* Derived initials / avatar */
   const initials = getInitials(firstName, lastName);
   const [bg, text] = colorFromStr(firstName + lastName || 'user');
+  const hasName = firstName.trim() || lastName.trim();
+
+  /* ── Validation ── */
+  function validate(fields = {}) {
+    const f = {
+      firstName, lastName, username, email, phone, password,
+      ...fields,
+    };
+    const e = {};
+    if (!f.firstName.trim())  e.firstName = 'First name is required.';
+    if (!f.lastName.trim())   e.lastName  = 'Last name is required.';
+    if (!f.username.trim())   e.username  = 'Username is required.';
+    if (!f.email.trim())      e.email     = 'Email is required.';
+    else if (!EMAIL_RE.test(f.email)) e.email = 'Enter a valid email address.';
+    if (!f.password)          e.password  = 'Password is required.';
+    else if (f.password.length < 8) e.password = 'Password must be at least 8 characters.';
+    if (f.phone && !PHONE_RE.test(f.phone)) e.phone = 'Enter a valid phone number.';
+    return e;
+  }
+
+  function handleBlur(field, value) {
+    setTouched((t) => ({ ...t, [field]: true }));
+    setErrors((prev) => ({ ...prev, ...validate({ [field]: value }) }));
+    if (!validate({ [field]: value })[field]) {
+      setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
+    }
+  }
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validate type + size
-    if (!file.type.startsWith('image/')) {
-      setUploadState('error');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadState('error');
-      return;
-    }
-
+    if (!file.type.startsWith('image/')) { setUploadState('error'); return; }
+    if (file.size > 5 * 1024 * 1024)    { setUploadState('error'); return; }
     setUploadState('uploading');
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      setAvatarSrc(ev.target.result);
-      setUploadState('idle');
-    };
-    reader.onerror = () => setUploadState('error');
+    reader.onload  = (ev) => { setAvatarSrc(ev.target.result); setUploadState('idle'); };
+    reader.onerror = ()  => setUploadState('error');
     reader.readAsDataURL(file);
   };
 
@@ -60,8 +86,30 @@ const Register = () => {
     if (fileRef.current) fileRef.current.value = '';
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const allTouched = { firstName: true, lastName: true, username: true, email: true, phone: true, password: true };
+    setTouched(allTouched);
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setSubmitting(true);
+    // In-memory app — navigate to dashboard on success
+    setTimeout(() => { navigate('/dashboard'); }, 400);
+  };
+
+  const FieldError = ({ field }) =>
+    touched[field] && errors[field]
+      ? <p className="auth-field-error" role="alert"><span className="material-symbols-outlined" style={{ fontSize: '15px' }}>error</span>{errors[field]}</p>
+      : null;
+
   return (
     <div className="auth-layout">
+      <Link to="/" className="auth-back-home" aria-label="Back to home page">
+        <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+        Back to home
+      </Link>
       <div className="auth-card">
         <Link to="/" className="auth-brand" aria-label="StartSmart home">
           <div className="auth-brand-icon" aria-hidden="true">
@@ -75,11 +123,8 @@ const Register = () => {
           <p className="auth-subtitle">Start building better time habits today.</p>
         </div>
 
-        <form
-          className="auth-form"
-          onSubmit={(e) => { e.preventDefault(); navigate('/dashboard'); }}
-          noValidate
-        >
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+
           {/* Name row */}
           <div className="auth-grid-2">
             <div className="auth-field">
@@ -87,7 +132,7 @@ const Register = () => {
                 First name <span className="auth-label-required" aria-hidden="true">*</span>
               </label>
               <input
-                className="auth-input"
+                className={`auth-input${touched.firstName && errors.firstName ? ' input-error' : ''}`}
                 id="first-name"
                 type="text"
                 placeholder="Dana"
@@ -95,14 +140,18 @@ const Register = () => {
                 autoComplete="given-name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                onBlur={(e) => handleBlur('firstName', e.target.value)}
+                aria-describedby={errors.firstName ? 'err-firstName' : undefined}
+                aria-invalid={!!(touched.firstName && errors.firstName)}
               />
+              <FieldError field="firstName" />
             </div>
             <div className="auth-field">
               <label className="auth-label" htmlFor="last-name">
                 Last name <span className="auth-label-required" aria-hidden="true">*</span>
               </label>
               <input
-                className="auth-input"
+                className={`auth-input${touched.lastName && errors.lastName ? ' input-error' : ''}`}
                 id="last-name"
                 type="text"
                 placeholder="Friedman"
@@ -110,7 +159,10 @@ const Register = () => {
                 autoComplete="family-name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                onBlur={(e) => handleBlur('lastName', e.target.value)}
+                aria-invalid={!!(touched.lastName && errors.lastName)}
               />
+              <FieldError field="lastName" />
             </div>
           </div>
 
@@ -119,7 +171,19 @@ const Register = () => {
             <label className="auth-label" htmlFor="username">
               Username <span className="auth-label-required" aria-hidden="true">*</span>
             </label>
-            <input className="auth-input" id="username" type="text" placeholder="dana_f" required autoComplete="username" />
+            <input
+              className={`auth-input${touched.username && errors.username ? ' input-error' : ''}`}
+              id="username"
+              type="text"
+              placeholder="dana_f"
+              required
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onBlur={(e) => handleBlur('username', e.target.value)}
+              aria-invalid={!!(touched.username && errors.username)}
+            />
+            <FieldError field="username" />
           </div>
 
           {/* Email */}
@@ -129,8 +193,20 @@ const Register = () => {
             </label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
-              <input className="auth-input" id="reg-email" type="email" placeholder="dana@example.com" required autoComplete="email" />
+              <input
+                className={`auth-input${touched.email && errors.email ? ' input-error' : ''}`}
+                id="reg-email"
+                type="email"
+                placeholder="dana@example.com"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={(e) => handleBlur('email', e.target.value)}
+                aria-invalid={!!(touched.email && errors.email)}
+              />
             </div>
+            <FieldError field="email" />
           </div>
 
           {/* Phone + Password */}
@@ -139,8 +215,19 @@ const Register = () => {
               <label className="auth-label" htmlFor="phone">Phone</label>
               <div className="auth-input-icon-wrap">
                 <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">call</span>
-                <input className="auth-input" id="phone" type="tel" placeholder="050-000-0000" autoComplete="tel" />
+                <input
+                  className={`auth-input${touched.phone && errors.phone ? ' input-error' : ''}`}
+                  id="phone"
+                  type="tel"
+                  placeholder="050-000-0000"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  onBlur={(e) => handleBlur('phone', e.target.value)}
+                  aria-invalid={!!(touched.phone && errors.phone)}
+                />
               </div>
+              <FieldError field="phone" />
             </div>
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-password">
@@ -149,13 +236,18 @@ const Register = () => {
               <div className="auth-input-icon-wrap">
                 <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">lock</span>
                 <input
-                  className="auth-input"
+                  className={`auth-input${touched.password && errors.password ? ' input-error' : ''}`}
                   id="reg-password"
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
                   minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onBlur={(e) => handleBlur('password', e.target.value)}
+                  aria-invalid={!!(touched.password && errors.password)}
+                  aria-describedby="password-hint"
                 />
                 <button
                   type="button"
@@ -168,6 +260,8 @@ const Register = () => {
                   </span>
                 </button>
               </div>
+              {!errors.password && <p id="password-hint" className="auth-avatar-hint">At least 8 characters.</p>}
+              <FieldError field="password" />
             </div>
           </div>
 
@@ -175,21 +269,22 @@ const Register = () => {
           <div className="auth-field">
             <label className="auth-label" id="avatar-label">Profile picture (optional)</label>
             <div className="auth-avatar-row" aria-labelledby="avatar-label">
-              {/* Preview — uploaded image or initials */}
+              {/* Preview */}
               <div
                 className="auth-avatar-preview"
-                style={avatarSrc ? {} : { background: `linear-gradient(135deg, ${bg}, ${text})` }}
-                aria-label={avatarSrc ? 'Uploaded avatar preview' : `Initials avatar: ${initials}`}
+                style={avatarSrc ? {} : hasName ? { background: `linear-gradient(135deg, ${bg}, ${text})` } : {}}
+                aria-label={avatarSrc ? 'Uploaded avatar preview' : hasName ? `Initials avatar: ${initials}` : 'No avatar selected'}
               >
                 {avatarSrc ? (
                   <img src={avatarSrc} alt="Avatar preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                ) : (
+                ) : hasName ? (
                   <span style={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem', userSelect: 'none' }}>{initials}</span>
+                ) : (
+                  <span className="material-symbols-outlined" style={{ fontSize: '1.75rem', color: 'var(--color-outline)' }} aria-hidden="true">person</span>
                 )}
               </div>
 
               <div className="auth-avatar-actions">
-                {/* Hidden file input */}
                 <input
                   ref={fileRef}
                   type="file"
@@ -221,15 +316,13 @@ const Register = () => {
                 Please upload a valid image file under 5 MB.
               </p>
             )}
-            {!avatarSrc && (firstName || lastName) && (
-              <p className="auth-avatar-hint">
-                No photo? We'll use your initials automatically.
-              </p>
+            {!avatarSrc && hasName && (
+              <p className="auth-avatar-hint">No photo? We'll use your initials automatically.</p>
             )}
           </div>
 
-          <button type="submit" className="auth-submit">
-            Create account
+          <button type="submit" className="auth-submit" disabled={submitting} aria-busy={submitting}>
+            {submitting ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import Footer from '../../components/Footer/Footer';
 import './landing.css';
 
 /* ── Scroll-fade hook ── */
@@ -27,7 +28,6 @@ function FadeSection({ children, className = '' }) {
 function MarketingNav() {
   const [open, setOpen] = useState(false);
 
-  // Close menu on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
@@ -56,22 +56,26 @@ function MarketingNav() {
 
         {/* Desktop actions */}
         <div className="lp-nav-actions">
-          <Link to="/login" className="lp-btn-ghost">Log in</Link>
+          <ThemeToggle />
+          <Link to="/login" className="lp-btn-login">Log in</Link>
           <Link to="/register" className="lp-btn-primary">Sign up free</Link>
         </div>
 
         {/* Mobile hamburger */}
-        <button
-          className="lp-nav-hamburger"
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-          aria-controls="lp-mobile-menu"
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {open ? 'close' : 'menu'}
-          </span>
-        </button>
+        <div className="lp-nav-mobile-right">
+          <ThemeToggle />
+          <button
+            className="lp-nav-hamburger"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            aria-controls="lp-mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">
+              {open ? 'close' : 'menu'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown */}
@@ -84,8 +88,8 @@ function MarketingNav() {
         <a href="#how" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>How it works</a>
         <div className="lp-nav-mobile-divider" />
         <div className="lp-nav-mobile-actions">
-          <Link to="/login" className="lp-btn-ghost" style={{ flex: 1, textAlign: 'center' }} onClick={() => setOpen(false)}>Log in</Link>
-          <Link to="/register" className="lp-btn-primary" style={{ flex: 1, textAlign: 'center' }} onClick={() => setOpen(false)}>Sign up</Link>
+          <Link to="/login" className="lp-btn-login" style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>Log in</Link>
+          <Link to="/register" className="lp-btn-primary" style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>Sign up</Link>
         </div>
       </div>
     </header>
@@ -141,11 +145,6 @@ function GapCard() {
 const LandingPage = () => (
   <div className="lp-wrapper">
     <MarketingNav />
-
-    {/* ── Floating theme toggle ── */}
-    <div className="lp-theme-float" aria-label="Toggle color theme">
-      <ThemeToggle />
-    </div>
 
     {/* ── Hero ── */}
     <section className="lp-hero" aria-labelledby="hero-headline">
@@ -279,23 +278,7 @@ const LandingPage = () => (
       </div>
     </section>
 
-    {/* ── Footer ── */}
-    <footer className="lp-footer">
-      <div className="lp-footer-inner">
-        <Link to="/" className="lp-footer-brand" aria-label="StartSmart home">
-          <span className="material-symbols-outlined" aria-hidden="true">rocket_launch</span>
-          StartSmart
-        </Link>
-        <nav className="lp-footer-links" aria-label="Footer links">
-          <a href="#features" className="lp-footer-link">Features</a>
-          <a href="#how" className="lp-footer-link">How it works</a>
-          <Link to="/about" className="lp-footer-link">About</Link>
-          <Link to="/privacy-policy" className="lp-footer-link">Privacy</Link>
-          <Link to="/contact" className="lp-footer-link">Contact</Link>
-        </nav>
-        <span className="lp-footer-copy">© {new Date().getFullYear()} StartSmart</span>
-      </div>
-    </footer>
+    <Footer />
   </div>
 );
 
