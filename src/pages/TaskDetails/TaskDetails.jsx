@@ -294,15 +294,18 @@ const TaskDetails = () => {
           <div className="td-field">
             <span className="td-field-label">Tags</span>
             <div className="td-tags">
-              {task.tags.map((tag) => (
-                <span
-                  key={tag.name}
-                  className="td-tag"
-                  style={{ background: `${tag.color}1a`, color: tag.color }}
-                >
-                  {tag.name}
-                </span>
-              ))}
+              {task.tags.map((tag) => {
+                const c = tag.color || '#6b38d4';
+                return (
+                  <span
+                    key={tag.name}
+                    className="td-tag"
+                    style={{ background: c + '1e', color: c, borderColor: c + '40' }}
+                  >
+                    {tag.name}
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}
