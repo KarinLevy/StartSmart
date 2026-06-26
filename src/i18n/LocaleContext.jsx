@@ -94,8 +94,20 @@ export function LocaleProvider({ children }) {
 
   const isRTL = RTL_LOCALES.has(locale);
 
+  const formatDate = useCallback((dateStr, options = {}) => {
+    if (!dateStr) return '';
+    try {
+      return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', ...options }).format(new Date(dateStr));
+    } catch { return dateStr; }
+  }, [locale]);
+
+  const formatNumber = useCallback((num, options = {}) => {
+    if (num == null) return '';
+    try { return new Intl.NumberFormat(locale, options).format(num); } catch { return String(num); }
+  }, [locale]);
+
   return (
-    <LocaleContext.Provider value={{ locale, setLocale, t, isRTL, LANGUAGES }}>
+    <LocaleContext.Provider value={{ locale, setLocale, t, isRTL, LANGUAGES, formatDate, formatNumber }}>
       {children}
     </LocaleContext.Provider>
   );

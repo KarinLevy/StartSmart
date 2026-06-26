@@ -416,7 +416,7 @@ const Profile = () => {
     : null;
   const avgGapLabel = avgGap !== null ? (avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`) : '—';
 
-  const { achievements, streakDays } = computeAchievements(tasks);
+  const { achievements, streakDays } = computeAchievements(tasks, t);
 
   const closePwModal  = useCallback(() => setShowPwModal(false), []);
   const closeDelModal = useCallback(() => setShowDelModal(false), []);
@@ -505,7 +505,7 @@ const Profile = () => {
         </div>
         <div className="pr-streak-badge" aria-label={`${streakDays} day streak`}>
           <span className="pr-streak-badge-num">{streakDays}</span>
-          <span className="pr-streak-badge-label">days</span>
+          <span className="pr-streak-badge-label">{t('profile.streakBadgeDays')}</span>
         </div>
       </div>
 

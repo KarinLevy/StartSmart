@@ -112,18 +112,18 @@ const Insights = () => {
   const done = tasks.filter((tk) => tk.status === 'done' && tk.estimatedMinutes && tk.actualMinutes);
 
   // ── Derived metrics ──
-  const totalEst  = done.reduce((s, t) => s + t.estimatedMinutes, 0);
-  const totalAct  = done.reduce((s, t) => s + t.actualMinutes, 0);
+  const totalEst  = done.reduce((s, tk) => s + tk.estimatedMinutes, 0);
+  const totalAct  = done.reduce((s, tk) => s + tk.actualMinutes, 0);
   const accuracy  = done.length > 0 ? Math.min(Math.round((totalEst / totalAct) * 100), 100) : null;
-  const avgGap    = done.length > 0 ? Math.round(done.reduce((s, t) => s + (t.gap || 0), 0) / done.length) : null;
+  const avgGap    = done.length > 0 ? Math.round(done.reduce((s, tk) => s + (tk.gap || 0), 0) / done.length) : null;
 
   const sorted    = [...done].sort((a, b) => (a.gap || 0) - (b.gap || 0));
   const bestTask  = sorted[0] || null;
   const worstTask = sorted[sorted.length - 1] || null;
-  const maxAbsGap = done.length > 0 ? Math.max(...done.map((t) => Math.abs(t.gap || 0)), 1) : 1;
+  const maxAbsGap = done.length > 0 ? Math.max(...done.map((tk) => Math.abs(tk.gap || 0)), 1) : 1;
 
-  const overCount  = done.filter((t) => (t.gap || 0) > 0).length;
-  const underCount = done.filter((t) => (t.gap || 0) < 0).length;
+  const overCount  = done.filter((tk) => (tk.gap || 0) > 0).length;
+  const underCount = done.filter((tk) => (tk.gap || 0) < 0).length;
   const onTarget   = done.length - overCount - underCount;
 
   const onTimeRatio = done.length > 0 ? (onTarget + underCount) / done.length : 0;
@@ -134,33 +134,33 @@ const Insights = () => {
   // ── Productivity trends ──
   const TRENDS = [];
   if (accuracy !== null) {
-    if (accuracy >= 85) TRENDS.push({ icon: 'trending_up', text: `Your estimation accuracy is ${accuracy}% — excellent consistency.`, badge: `${accuracy}%`, positive: true });
-    else if (accuracy >= 70) TRENDS.push({ icon: 'show_chart', text: `Estimation accuracy is ${accuracy}%. Close, but there's room to improve.`, badge: `${accuracy}%`, positive: null });
-    else TRENDS.push({ icon: 'trending_down', text: `Estimation accuracy is ${accuracy}%. Tasks are consistently taking longer than planned.`, badge: `${accuracy}%`, positive: false });
+    if (accuracy >= 85) TRENDS.push({ icon: 'trending_up', text: t('insights.trendAccHigh', { pct: accuracy }), badge: `${accuracy}%`, positive: true });
+    else if (accuracy >= 70) TRENDS.push({ icon: 'show_chart', text: t('insights.trendAccMid', { pct: accuracy }), badge: `${accuracy}%`, positive: null });
+    else TRENDS.push({ icon: 'trending_down', text: t('insights.trendAccLow', { pct: accuracy }), badge: `${accuracy}%`, positive: false });
   }
   if (done.length > 0) {
     const pctOverdue = Math.round((overCount / done.length) * 100);
-    if (pctOverdue <= 20) TRENDS.push({ icon: 'task_alt', text: `${100 - pctOverdue}% of tasks were completed on time or early. Great pacing!`, badge: `${100 - pctOverdue}% on time`, positive: true });
-    else TRENDS.push({ icon: 'warning', text: `${pctOverdue}% of tasks ran over estimate. Consider adding buffer time.`, badge: `${pctOverdue}% over`, positive: false });
+    if (pctOverdue <= 20) TRENDS.push({ icon: 'task_alt', text: t('insights.trendOnTime', { pct: 100 - pctOverdue }), badge: `${100 - pctOverdue}% on time`, positive: true });
+    else TRENDS.push({ icon: 'warning', text: t('insights.trendOver', { pct: pctOverdue }), badge: `${pctOverdue}% over`, positive: false });
   }
   if (avgGap !== null) {
-    if (avgGap > 10)  TRENDS.push({ icon: 'more_time', text: `Average task overrun is +${avgGap} min. Adding a buffer could help.`, badge: `+${avgGap}m avg`, positive: false });
-    if (avgGap < -10) TRENDS.push({ icon: 'fast_forward', text: `You finish ${Math.abs(avgGap)} min early on average — you may be over-estimating.`, badge: `${avgGap}m avg`, positive: null });
-    if (Math.abs(avgGap) <= 10) TRENDS.push({ icon: 'adjust', text: `Average gap is just ${avgGap}m — your time estimates are very accurate.`, badge: `${avgGap}m avg`, positive: true });
+    if (avgGap > 10)  TRENDS.push({ icon: 'more_time', text: t('insights.trendAvgOver', { avg: avgGap }), badge: `+${avgGap}m avg`, positive: false });
+    if (avgGap < -10) TRENDS.push({ icon: 'fast_forward', text: t('insights.trendAvgFast', { avg: Math.abs(avgGap) }), badge: `${avgGap}m avg`, positive: null });
+    if (Math.abs(avgGap) <= 10) TRENDS.push({ icon: 'adjust', text: t('insights.trendAvgAccurate', { avg: avgGap }), badge: `${avgGap}m avg`, positive: true });
   }
-  if (done.length < 3) TRENDS.push({ icon: 'hourglass_empty', text: 'Complete more tasks with Focus Mode to unlock richer productivity trends.', badge: null, positive: null });
+  if (done.length < 3) TRENDS.push({ icon: 'hourglass_empty', text: t('insights.trendMoreData'), badge: null, positive: null });
 
   // ── Recommendations ──
   const RECS = [];
-  if (avgGap !== null && avgGap > 10)  RECS.push({ icon: 'add_circle', title: 'Add a buffer to your estimates', explanation: `Your tasks average +${avgGap} min over estimate. Add a 10–15 min buffer to complex tasks to reduce overruns.` });
-  if (avgGap !== null && avgGap < -10) RECS.push({ icon: 'tune', title: 'Tighten your estimates', explanation: `You consistently finish ${Math.abs(avgGap)} min early. Try setting tighter estimates to better reflect your actual speed.` });
-  if (overCount > underCount)          RECS.push({ icon: 'call_split', title: 'Break large tasks into smaller pieces', explanation: 'Most of your tasks run over estimate. Splitting complex tasks into sub-tasks improves both accuracy and focus.' });
-  if (done.length >= 3 && accuracy !== null && accuracy < 70) RECS.push({ icon: 'history', title: 'Review your past gaps', explanation: 'Your estimation gap is consistently large. Review completed tasks to spot patterns and adjust your planning baseline.' });
-  if (done.length < 3)                 RECS.push({ icon: 'timer', title: 'Complete more Focus Sessions', explanation: 'You need at least 3 completed tasks to get personalised recommendations. Start a Focus Session to track your time.' });
-  if (RECS.length === 0)               RECS.push({ icon: 'star', title: 'Great work — keep it up!', explanation: 'Your estimations are accurate and consistent. Continue scheduling focused sessions to maintain this performance.' });
+  if (avgGap !== null && avgGap > 10)  RECS.push({ icon: 'add_circle', title: t('insights.recBufferTitle'), explanation: t('insights.recBufferDesc', { avg: avgGap }) });
+  if (avgGap !== null && avgGap < -10) RECS.push({ icon: 'tune', title: t('insights.recTightenTitle'), explanation: t('insights.recTightenDesc', { avg: Math.abs(avgGap) }) });
+  if (overCount > underCount)          RECS.push({ icon: 'call_split', title: t('insights.recSplitTitle'), explanation: t('insights.recSplitDesc') });
+  if (done.length >= 3 && accuracy !== null && accuracy < 70) RECS.push({ icon: 'history', title: t('insights.recReviewTitle'), explanation: t('insights.recReviewDesc') });
+  if (done.length < 3)                 RECS.push({ icon: 'timer', title: t('insights.recMoreTitle'), explanation: t('insights.recMoreDesc') });
+  if (RECS.length === 0)               RECS.push({ icon: 'star', title: t('insights.recGreatTitle'), explanation: t('insights.recGreatDesc') });
 
   // ── Achievements — computed from real task data ──
-  const { achievements: ACHIEVEMENTS, streakDays } = computeAchievements(tasks);
+  const { achievements: ACHIEVEMENTS } = computeAchievements(tasks, t);
 
   if (loading) return (
     <div className="insights-layout">
@@ -211,22 +211,22 @@ const Insights = () => {
             <div className="ins-card ins-card-score">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">emoji_events</span>
-                Productivity Score
+                {t('insights.scoreLabel')}
               </div>
               <div className="ins-score-row">
                 <ScoreMeter score={score} />
                 <div className="ins-score-breakdown">
                   <div className="ins-score-stat">
                     <span className="ins-score-val">{accuracy}%</span>
-                    <span className="ins-score-key">Estimation accuracy</span>
+                    <span className="ins-score-key">{t('insights.accuracyLabel')}</span>
                   </div>
                   <div className="ins-score-stat">
                     <span className="ins-score-val">{Math.round(onTimeRatio * 100)}%</span>
-                    <span className="ins-score-key">On time or early</span>
+                    <span className="ins-score-key">{t('insights.onTimeLabel')}</span>
                   </div>
                   <div className="ins-score-stat">
                     <span className="ins-score-val">{done.length}</span>
-                    <span className="ins-score-key">Tasks analysed</span>
+                    <span className="ins-score-key">{t('insights.analysedLabel')}</span>
                   </div>
                 </div>
               </div>
@@ -236,20 +236,20 @@ const Insights = () => {
             <div className="ins-card ins-card-dist">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">bar_chart</span>
-                Gap Distribution
+                {t('insights.distLabel')}
               </div>
               <div className="ins-dist-row" role="list" aria-label="Gap distribution">
                 <div className="ins-dist-item over" role="listitem">
                   <span className="ins-dist-count">{overCount}</span>
-                  <span className="ins-dist-label">Over</span>
+                  <span className="ins-dist-label">{t('insights.overLabel')}</span>
                 </div>
                 <div className="ins-dist-item on" role="listitem">
                   <span className="ins-dist-count">{onTarget}</span>
-                  <span className="ins-dist-label">On target</span>
+                  <span className="ins-dist-label">{t('insights.onTargetLabel')}</span>
                 </div>
                 <div className="ins-dist-item under" role="listitem">
                   <span className="ins-dist-count">{underCount}</span>
-                  <span className="ins-dist-label">Under</span>
+                  <span className="ins-dist-label">{t('insights.underLabel')}</span>
                 </div>
               </div>
               <div className="ins-dist-bar-track" role="img" aria-label={`${overCount} over, ${onTarget} on target, ${underCount} under`}>
@@ -263,10 +263,10 @@ const Insights = () => {
               </div>
               <p className="ins-dist-note">
                 {overCount > underCount
-                  ? 'Most tasks ran over estimate. Consider adding buffer time.'
+                  ? t('insights.distNoteOver')
                   : underCount > overCount
-                  ? 'You tend to over-estimate. Try tighter time allocations.'
-                  : 'Great balance! Your estimates are right on target.'}
+                  ? t('insights.distNoteUnder')
+                  : t('insights.distNoteBalance')}
               </p>
             </div>
 
@@ -274,11 +274,11 @@ const Insights = () => {
             <div className="ins-card ins-card-trends">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">trending_up</span>
-                Productivity Trends
+                {t('insights.trendsLabel')}
               </div>
               <div className="ins-trends-list">
-                {TRENDS.map((t, i) => (
-                  <TrendItem key={i} {...t} />
+                {TRENDS.map((trend, i) => (
+                  <TrendItem key={i} {...trend} />
                 ))}
               </div>
             </div>
@@ -288,7 +288,7 @@ const Insights = () => {
               <div className="ins-card ins-card-best">
                 <div className="ins-card-label">
                   <span className="material-symbols-outlined" aria-hidden="true">thumb_up</span>
-                  Best Estimation
+                  {t('insights.bestLabel')}
                 </div>
                 <Link to={`/task-details/${bestTask.id}`} className="ins-task-link">
                   <span className="ins-task-title">{bestTask.title}</span>
@@ -297,7 +297,7 @@ const Insights = () => {
                   </span>
                 </Link>
                 <p className="ins-task-sub">
-                  Est {fmtMin(bestTask.estimatedMinutes)} · Actual {fmtMin(bestTask.actualMinutes)}
+                  {t('insights.taskEst', { est: fmtMin(bestTask.estimatedMinutes), act: fmtMin(bestTask.actualMinutes) })}
                 </p>
                 <p className="ins-task-date">{fmtDate(bestTask.scheduledDate)}</p>
               </div>
@@ -306,14 +306,14 @@ const Insights = () => {
               <div className="ins-card ins-card-worst">
                 <div className="ins-card-label">
                   <span className="material-symbols-outlined" aria-hidden="true">thumb_down</span>
-                  Biggest Overrun
+                  {t('insights.worstLabel')}
                 </div>
                 <Link to={`/task-details/${worstTask.id}`} className="ins-task-link">
                   <span className="ins-task-title">{worstTask.title}</span>
                   <span className="ins-task-gap over">+{worstTask.gap}m</span>
                 </Link>
                 <p className="ins-task-sub">
-                  Est {fmtMin(worstTask.estimatedMinutes)} · Actual {fmtMin(worstTask.actualMinutes)}
+                  {t('insights.taskEst', { est: fmtMin(worstTask.estimatedMinutes), act: fmtMin(worstTask.actualMinutes) })}
                 </p>
                 <p className="ins-task-date">{fmtDate(worstTask.scheduledDate)}</p>
               </div>
@@ -323,20 +323,15 @@ const Insights = () => {
             <div className="ins-card ins-card-bars">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">align_horizontal_left</span>
-                Gap per Task
+                {t('insights.gapLabel')}
               </div>
               <div className="ins-bar-list" role="list" aria-label="Gap per task">
-                {done.map((t) => (
-                  <div key={t.id} className="ins-bar-row" role="listitem">
-                    <span
-                      className="ins-bar-name"
-                      title={t.title}
-                    >
-                      {t.title}
-                    </span>
-                    <GapBar gap={t.gap || 0} max={maxAbsGap} />
-                    <span className={`ins-bar-val${(t.gap || 0) > 0 ? ' over' : ' under'}`}>
-                      {(t.gap || 0) > 0 ? `+${t.gap}m` : `${t.gap}m`}
+                {done.map((tk) => (
+                  <div key={tk.id} className="ins-bar-row" role="listitem">
+                    <span className="ins-bar-name" title={tk.title}>{tk.title}</span>
+                    <GapBar gap={tk.gap || 0} max={maxAbsGap} />
+                    <span className={`ins-bar-val${(tk.gap || 0) > 0 ? ' over' : ' under'}`}>
+                      {(tk.gap || 0) > 0 ? `+${tk.gap}m` : `${tk.gap}m`}
                     </span>
                   </div>
                 ))}
@@ -347,7 +342,7 @@ const Insights = () => {
             <div className="ins-card ins-card-recs">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">tips_and_updates</span>
-                Recommendations
+                {t('insights.recsLabel')}
               </div>
               <div className="ins-rec-cards">
                 {RECS.map((r, i) => <RecCard key={i} {...r} />)}
@@ -358,7 +353,7 @@ const Insights = () => {
             <div className="ins-card ins-card-achievements">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">military_tech</span>
-                Achievements
+                {t('insights.achievementsLabel')}
               </div>
               <div className="ins-achievements-grid">
                 {ACHIEVEMENTS.map((a) => <AchievementCard key={a.key} icon={a.iconMat} title={a.title} description={a.description} unlocked={a.unlocked} value={a.value} />)}
@@ -369,23 +364,18 @@ const Insights = () => {
             <div className="ins-card ins-card-ai">
               <div className="ins-card-label">
                 <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
-                AI-Powered Insights
-                <span className="ins-coming-soon-badge">Coming Soon</span>
+                {t('insights.aiLabel')}
+                <span className="ins-coming-soon-badge">{t('insights.comingSoonBadge')}</span>
               </div>
               <div className="ins-ai-placeholder">
                 <div className="ins-ai-icon" aria-hidden="true">
                   <span className="material-symbols-outlined">psychology</span>
                 </div>
                 <div className="ins-ai-body">
-                  <p className="ins-ai-title">Smarter insights are on the way</p>
-                  <p className="ins-ai-desc">
-                    Once connected, AI will analyse your task patterns, identify your most productive hours,
-                    flag estimation blind spots, and generate personalised coaching recommendations.
-                  </p>
+                  <p className="ins-ai-title">{t('insights.aiTitleText')}</p>
+                  <p className="ins-ai-desc">{t('insights.aiDescText')}</p>
                 </div>
               </div>
-              {/* Backend integration point: replace placeholder with AI-generated insight cards */}
-              {/* {aiInsights.map((insight) => <InsightItem key={insight.id} {...insight} />)} */}
             </div>
 
           </div>

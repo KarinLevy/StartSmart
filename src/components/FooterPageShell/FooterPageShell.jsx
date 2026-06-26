@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../Logo/Logo';
 import Footer from '../Footer/Footer';
+import { useLocale } from '../../i18n/LocaleContext';
 import './FooterPageShell.css';
 
 /*
@@ -9,24 +10,27 @@ import './FooterPageShell.css';
  * Renders the logo header and Back link so each page only needs to supply
  * its own main content — no logo markup is duplicated.
  */
-const FooterPageShell = ({ children }) => (
-  <div className="fp-shell">
-    <header className="fp-shell-header">
-      <div className="fp-shell-header-inner">
-        <Logo to="/" size="sm" />
-        <Link to="/" className="fp-shell-back" aria-label="Back to StartSmart home">
-          <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-          Back to StartSmart
-        </Link>
-      </div>
-    </header>
+const FooterPageShell = ({ children }) => {
+  const { t } = useLocale();
+  return (
+    <div className="fp-shell">
+      <header className="fp-shell-header">
+        <div className="fp-shell-header-inner">
+          <Logo to="/" size="sm" />
+          <Link to="/" className="fp-shell-back" aria-label="Back to StartSmart home">
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            {t('footerShell.back')}
+          </Link>
+        </div>
+      </header>
 
-    <main className="fp-shell-content">
-      {children}
-    </main>
+      <main className="fp-shell-content">
+        {children}
+      </main>
 
-    <Footer />
-  </div>
-);
+      <Footer />
+    </div>
+  );
+};
 
 export default FooterPageShell;

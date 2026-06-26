@@ -1,31 +1,38 @@
 import React, { useState } from 'react';
 import FooterPageShell from '../../components/FooterPageShell/FooterPageShell';
+import { useLocale } from '../../i18n/LocaleContext';
 import './FooterPage.css';
 
-const TOPICS = ['General enquiry', 'Bug report', 'Feature request', 'Billing & plans', 'Privacy & data', 'Other'];
-
-const CHANNELS = [
-  { icon: 'support_agent', label: 'Support',        text: 'support@startsmart-app.com', href: 'mailto:support@startsmart-app.com' },
-  { icon: 'mail',          label: 'General',         text: 'hello@startsmart-app.com',   href: 'mailto:hello@startsmart-app.com' },
-  { icon: 'schedule',      label: 'Response time',   text: 'Within 24 hours on business days', href: null },
-];
-
 const Contact = () => {
+  const { t } = useLocale();
   const [form, setForm] = useState({ name: '', email: '', topic: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const set = (k) => (e) => setForm((prev) => ({ ...prev, [k]: e.target.value }));
+
+  const TOPICS = [
+    t('contact.topic1'),
+    t('contact.topic2'),
+    t('contact.topic3'),
+    t('contact.topic4'),
+    t('contact.topic5'),
+    t('contact.topic6'),
+  ];
+
+  const CHANNELS = [
+    { icon: 'support_agent', label: t('contact.ch1Label'), text: t('contact.ch1Text'), href: 'mailto:support@startsmart-app.com' },
+    { icon: 'mail',          label: t('contact.ch2Label'), text: t('contact.ch2Text'), href: 'mailto:hello@startsmart-app.com' },
+    { icon: 'schedule',      label: t('contact.ch3Label'), text: t('contact.ch3Text'), href: null },
+  ];
 
   return (
     <FooterPageShell>
       <div className="fp-hero">
         <div className="fp-badge">
           <span className="material-symbols-outlined">chat</span>
-          Contact
+          {t('contact.badge')}
         </div>
-        <h1 className="fp-title">Get in touch.</h1>
-        <p className="fp-subtitle">
-          Have a question, a bug to report, or a feature idea? Send a message and we will get back to you promptly.
-        </p>
+        <h1 className="fp-title">{t('contact.title')}</h1>
+        <p className="fp-subtitle">{t('contact.subtitle')}</p>
       </div>
 
       <div className="fp-body">
@@ -53,42 +60,42 @@ const Contact = () => {
               <div className="fp-submit-success-icon">
                 <span className="material-symbols-outlined">check_circle</span>
               </div>
-              <h3>Message sent!</h3>
-              <p>Thanks for reaching out. We will reply to {form.email || 'your email'} within 24 hours.</p>
+              <h3>{t('contact.successTitle')}</h3>
+              <p>{t('contact.successMsg', { email: form.email || t('contact.emailPh') })}</p>
               <button
                 className="btn-secondary"
                 style={{ marginTop: '0.5rem' }}
                 onClick={() => { setSubmitted(false); setForm({ name: '', email: '', topic: '', message: '' }); }}
               >
-                Send another message
+                {t('contact.sendAnother')}
               </button>
             </div>
           ) : (
             <form className="fp-form" onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} noValidate>
               <div className="fp-form-row">
                 <div className="fp-field">
-                  <label htmlFor="contact-name">Name</label>
-                  <input id="contact-name" type="text" placeholder="Your name" value={form.name} onChange={set('name')} required autoComplete="name" />
+                  <label htmlFor="contact-name">{t('contact.nameLbl')}</label>
+                  <input id="contact-name" type="text" placeholder={t('contact.namePh')} value={form.name} onChange={set('name')} required autoComplete="name" />
                 </div>
                 <div className="fp-field">
-                  <label htmlFor="contact-email">Email</label>
-                  <input id="contact-email" type="email" placeholder="your@email.com" value={form.email} onChange={set('email')} required autoComplete="email" />
+                  <label htmlFor="contact-email">{t('contact.emailLbl')}</label>
+                  <input id="contact-email" type="email" placeholder={t('contact.emailPh')} value={form.email} onChange={set('email')} required autoComplete="email" />
                 </div>
               </div>
               <div className="fp-field">
-                <label htmlFor="contact-topic">Topic</label>
+                <label htmlFor="contact-topic">{t('contact.topicLbl')}</label>
                 <select id="contact-topic" value={form.topic} onChange={set('topic')} required>
-                  <option value="">Select a topic…</option>
-                  {TOPICS.map((t) => <option key={t} value={t}>{t}</option>)}
+                  <option value="">{t('contact.topicPh')}</option>
+                  {TOPICS.map((topic) => <option key={topic} value={topic}>{topic}</option>)}
                 </select>
               </div>
               <div className="fp-field">
-                <label htmlFor="contact-message">Message</label>
-                <textarea id="contact-message" placeholder="Describe your question or issue…" value={form.message} onChange={set('message')} required />
+                <label htmlFor="contact-message">{t('contact.messageLbl')}</label>
+                <textarea id="contact-message" placeholder={t('contact.messagePh')} value={form.message} onChange={set('message')} required />
               </div>
               <button type="submit" className="btn-primary" style={{ alignSelf: 'flex-start' }}>
                 <span className="material-symbols-outlined" aria-hidden="true">send</span>
-                Send message
+                {t('contact.send')}
               </button>
             </form>
           )}

@@ -72,15 +72,19 @@ export function calcStreak(tasks) {
  * Compute all achievement unlock states from real task data.
  *
  * @param {Array} tasks — full tasks array from TasksContext
+ * @param {Function} t — translation function from useLocale()
  * @returns {{ achievements: Array, streakDays: number, accuracy: number|null }}
  */
-export function computeAchievements(tasks) {
-  const done = tasks.filter((t) => t.status === 'done');
+export function computeAchievements(tasks, t) {
+  // Fallback if t is not provided (backwards compatibility)
+  const tr = t || ((key) => key);
+
+  const done = tasks.filter((task) => task.status === 'done');
 
   // Estimation accuracy (same formula as Insights)
-  const withLogs = done.filter((t) => t.estimatedMinutes && t.actualMinutes);
-  const totalEst = withLogs.reduce((s, t) => s + t.estimatedMinutes, 0);
-  const totalAct = withLogs.reduce((s, t) => s + t.actualMinutes, 0);
+  const withLogs = done.filter((task) => task.estimatedMinutes && task.actualMinutes);
+  const totalEst = withLogs.reduce((s, task) => s + task.estimatedMinutes, 0);
+  const totalAct = withLogs.reduce((s, task) => s + task.actualMinutes, 0);
   const accuracy = withLogs.length > 0
     ? Math.min(Math.round((totalEst / totalAct) * 100), 100)
     : null;
@@ -91,8 +95,8 @@ export function computeAchievements(tasks) {
   // Tag-based focus time (minutes of actual time on tasks with a given tag)
   const focusMinsByTag = (tagName) =>
     done
-      .filter((t) => t.tags?.some((tag) => tag.name.toLowerCase() === tagName.toLowerCase()))
-      .reduce((s, t) => s + (t.actualMinutes || t.estimatedMinutes || 0), 0);
+      .filter((task) => task.tags?.some((tag) => tag.name.toLowerCase() === tagName.toLowerCase()))
+      .reduce((s, task) => s + (task.actualMinutes || task.estimatedMinutes || 0), 0);
 
   const studyMins = focusMinsByTag('Study');
   const workMins  = focusMinsByTag('Work');
@@ -102,55 +106,63 @@ export function computeAchievements(tasks) {
       key:         'first_task',
       icon:        '🏆',
       iconMat:     'emoji_events',
-      title:       'First Task',
-      description: 'Complete your first task.',
+      title:       tr('achievement.firstTask.title'),
+      description: tr('achievement.firstTask.desc'),
       unlocked:    done.length >= 1,
-      value:       done.length >= 1 ? `${done.length} task${done.length !== 1 ? 's' : ''} completed` : null,
+      value:       done.length >= 1
+        ? tr('achievement.firstTask.value', { n: done.length, s: done.length !== 1 ? 's' : '' })
+        : null,
     },
     {
       key:         'streak_7',
       icon:        '🔥',
       iconMat:     'local_fire_department',
-      title:       '7-Day Streak',
-      description: '7 consecutive productive days.',
+      title:       tr('achievement.streak7.title'),
+      description: tr('achievement.streak7.desc'),
       unlocked:    streakDays >= 7,
-      value:       streakDays >= 7 ? `${streakDays}-day streak` : null,
+      value:       streakDays >= 7 ? tr('achievement.streak7.value', { n: streakDays }) : null,
     },
     {
       key:         'accuracy_90',
       icon:        '🎯',
       iconMat:     'adjust',
-      title:       '90% Accuracy',
-      description: 'Estimation accuracy above 90%.',
+      title:       tr('achievement.accuracy90.title'),
+      description: tr('achievement.accuracy90.desc'),
       unlocked:    accuracy !== null && accuracy >= 90,
-      value:       accuracy !== null ? `${accuracy}% accuracy` : null,
+      value:       accuracy !== null ? tr('achievement.accuracy90.value', { pct: accuracy }) : null,
     },
     {
       key:         'tasks_100',
       icon:        '⭐',
       iconMat:     'star',
-      title:       '100 Tasks',
-      description: 'Complete 100 tasks total.',
+      title:       tr('achievement.tasks100.title'),
+      description: tr('achievement.tasks100.desc'),
       unlocked:    done.length >= 100,
-      value:       done.length >= 100 ? `${done.length} tasks` : `${done.length} / 100`,
+      value:       done.length >= 100
+        ? tr('achievement.tasks100.value', { n: done.length })
+        : tr('achievement.tasks100.progress', { n: done.length }),
     },
     {
       key:         'study_master',
       icon:        '📚',
       iconMat:     'school',
-      title:       'Study Master',
-      description: 'Log 10 h of study focus time.',
+      title:       tr('achievement.studyMaster.title'),
+      description: tr('achievement.studyMaster.desc'),
       unlocked:    studyMins >= 600,
-      value:       studyMins >= 600 ? `${Math.floor(studyMins / 60)}h ${studyMins % 60}m study time` : null,
+      value:       studyMins >= 600
+        ? tr('achievement.studyMaster.value', { h: Math.floor(studyMins / 60), m: studyMins % 60 })
+        : null,
     },
     {
       key:         'work_champion',
       icon:        '💼',
       iconMat:     'work',
-      title:       'Work Champion',
-      description: 'Log 10 h of work focus time.',
+      title:       tr('achievement.workChampion.title'),
+      description: tr('achievement.workChampion.desc'),
       unlocked:    workMins >= 600,
-      value:       workMins >= 600 ? `${Math.floor(workMins / 60)}h ${workMins % 60}m work time` : null,
+      value:       workMins >= 600
+        ? tr('achievement.workChampion.value', { h: Math.floor(workMins / 60), m: workMins % 60 })
+        : null,
     },
   ];
 

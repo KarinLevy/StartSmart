@@ -1,78 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import FooterPageShell from '../../components/FooterPageShell/FooterPageShell';
+import { useLocale } from '../../i18n/LocaleContext';
 import './FooterPage.css';
-
-const SECTIONS = [
-  {
-    icon: 'play_circle',
-    title: 'Getting Started',
-    items: [
-      { q: 'How do I create an account?', a: 'Open StartSmart and click "Get started" on the home page. Enter your name, email address, and a password, then confirm your email when the verification link arrives.' },
-      { q: 'How do I log in?', a: 'Click "Log in" and enter your email and password. If you forgot your password, use the "Forgot password?" link to receive a reset email.' },
-      { q: 'How do I change my theme?', a: 'Open your Profile page and toggle between Light and Dark mode under the Appearance section.' },
-    ],
-  },
-  {
-    icon: 'task_alt',
-    title: 'Tasks',
-    items: [
-      { q: 'How do I create a task?', a: 'Click the "+" button from the Dashboard or navigate to Create Task. Fill in the title, estimated time, priority, optional due date, and any tags, then save.' },
-      { q: 'How do I edit a task?', a: 'Open the task from your Dashboard or Task History and click the Edit button. You can update all task fields, including the estimated time and scheduled date.' },
-      { q: 'How do I delete a task?', a: 'Open the task and choose Delete from the options menu. Deleted tasks are moved to a soft-delete state and removed from your active lists.' },
-      { q: 'What are tags?', a: 'Tags let you categorise tasks (e.g. Study, Work, Personal). They are used to group tasks in statistics and calculate focus time per category for achievements.' },
-    ],
-  },
-  {
-    icon: 'timer',
-    title: 'Focus Mode',
-    items: [
-      { q: 'How do I start a focus session?', a: 'From the Dashboard or a task detail page, click "Start Focus". The timer will count down from your estimated duration. You can pause or end the session at any time.' },
-      { q: 'What happens when the timer ends?', a: 'StartSmart records the actual time you spent and saves it against the task. The gap between estimated and actual time is then visible in your statistics.' },
-      { q: 'Can I take breaks during a session?', a: 'Yes. Use the pause button to log a break. Break time is tracked separately and not counted as focus time.' },
-    ],
-  },
-  {
-    icon: 'calendar_month',
-    title: 'Schedule',
-    items: [
-      { q: 'How does the Schedule view work?', a: 'The Schedule shows your tasks organised by day, week, or month. Switch views using the controls at the top. Click a task to open it, or navigate to a different date using the arrows.' },
-      { q: 'Can I drag tasks between days?', a: 'You can reschedule a task by editing it and changing its scheduled date. Direct drag-and-drop scheduling is planned for a future update.' },
-    ],
-  },
-  {
-    icon: 'bar_chart',
-    title: 'Statistics',
-    items: [
-      { q: 'What do the statistics show?', a: 'Statistics display your task completion rate, focus time by category, estimation accuracy, gap trends, and productivity patterns over time. All values are calculated from your real task data.' },
-      { q: 'Why are my statistics empty?', a: 'Statistics require completed tasks with logged focus time. Complete a few tasks using Focus Mode and your charts will populate automatically.' },
-    ],
-  },
-  {
-    icon: 'person',
-    title: 'Profile & Settings',
-    items: [
-      { q: 'How do I update my profile?', a: 'Go to your Profile page to update your display name, avatar, role, and timezone. Changes are saved instantly.' },
-      { q: 'How do I change my notification preferences?', a: 'Notification settings are available in the Settings section of your profile. You can control which types of alerts you receive.' },
-    ],
-  },
-  {
-    icon: 'lock_reset',
-    title: 'Password Recovery',
-    items: [
-      { q: 'I forgot my password. What do I do?', a: 'On the Login page, click "Forgot password?" and enter your email address. You will receive a reset link shortly. Check your spam folder if it does not arrive within a few minutes.' },
-      { q: 'The reset link is not working.', a: 'Password reset links expire after a short period for security. If the link has expired, request a new one from the Login page. If the problem persists, contact support.' },
-    ],
-  },
-  {
-    icon: 'support_agent',
-    title: 'Contact Support',
-    items: [
-      { q: 'How do I report a bug?', a: 'Use the Contact page and select "Bug report" as the topic. Please describe what you did, what you expected to happen, and what actually happened. Screenshots are helpful.' },
-      { q: 'How quickly will I get a response?', a: 'We aim to respond to all enquiries within 24 hours on business days. For urgent issues, email support@startsmart-app.com directly.' },
-    ],
-  },
-];
 
 const HelpSection = ({ icon, title, items }) => {
   const [openIndex, setOpenIndex] = useState(null);
@@ -103,26 +33,102 @@ const HelpSection = ({ icon, title, items }) => {
   );
 };
 
-const HelpCenter = () => (
-  <FooterPageShell>
-    <div className="fp-hero">
-      <div className="fp-badge">
-        <span className="material-symbols-outlined">menu_book</span>
-        Help Center
-      </div>
-      <h1 className="fp-title">How can we help?</h1>
-      <p className="fp-subtitle">
-        Find answers to common questions about using StartSmart. Still stuck?{' '}
-        <Link to="/contact" style={{ color: 'var(--color-secondary)' }}>Contact us</Link> and we will help you out.
-      </p>
-    </div>
+const HelpCenter = () => {
+  const { t } = useLocale();
 
-    <div className="fp-body">
-      {SECTIONS.map((s) => (
-        <HelpSection key={s.title} {...s} />
-      ))}
-    </div>
-  </FooterPageShell>
-);
+  const SECTIONS = [
+    {
+      icon: 'play_circle',
+      title: t('help.s1Title'),
+      items: [
+        { q: t('help.s1q1'), a: t('help.s1a1') },
+        { q: t('help.s1q2'), a: t('help.s1a2') },
+        { q: t('help.s1q3'), a: t('help.s1a3') },
+      ],
+    },
+    {
+      icon: 'task_alt',
+      title: t('help.s2Title'),
+      items: [
+        { q: t('help.s2q1'), a: t('help.s2a1') },
+        { q: t('help.s2q2'), a: t('help.s2a2') },
+        { q: t('help.s2q3'), a: t('help.s2a3') },
+        { q: t('help.s2q4'), a: t('help.s2a4') },
+      ],
+    },
+    {
+      icon: 'timer',
+      title: t('help.s3Title'),
+      items: [
+        { q: t('help.s3q1'), a: t('help.s3a1') },
+        { q: t('help.s3q2'), a: t('help.s3a2') },
+        { q: t('help.s3q3'), a: t('help.s3a3') },
+      ],
+    },
+    {
+      icon: 'calendar_month',
+      title: t('help.s4Title'),
+      items: [
+        { q: t('help.s4q1'), a: t('help.s4a1') },
+        { q: t('help.s4q2'), a: t('help.s4a2') },
+      ],
+    },
+    {
+      icon: 'bar_chart',
+      title: t('help.s5Title'),
+      items: [
+        { q: t('help.s5q1'), a: t('help.s5a1') },
+        { q: t('help.s5q2'), a: t('help.s5a2') },
+      ],
+    },
+    {
+      icon: 'person',
+      title: t('help.s6Title'),
+      items: [
+        { q: t('help.s6q1'), a: t('help.s6a1') },
+        { q: t('help.s6q2'), a: t('help.s6a2') },
+      ],
+    },
+    {
+      icon: 'lock_reset',
+      title: t('help.s7Title'),
+      items: [
+        { q: t('help.s7q1'), a: t('help.s7a1') },
+        { q: t('help.s7q2'), a: t('help.s7a2') },
+      ],
+    },
+    {
+      icon: 'support_agent',
+      title: t('help.s8Title'),
+      items: [
+        { q: t('help.s8q1'), a: t('help.s8a1') },
+        { q: t('help.s8q2'), a: t('help.s8a2') },
+      ],
+    },
+  ];
+
+  return (
+    <FooterPageShell>
+      <div className="fp-hero">
+        <div className="fp-badge">
+          <span className="material-symbols-outlined">menu_book</span>
+          {t('help.badge')}
+        </div>
+        <h1 className="fp-title">{t('help.title')}</h1>
+        <p className="fp-subtitle">
+          {t('help.subtitle')}{' '}
+          <Link to="/contact" style={{ color: 'var(--color-secondary)' }}>{t('help.contactLink')}</Link>{' '}
+          {t('common.or')} we will help you out.
+        </p>
+      </div>
+
+      <div className="fp-body">
+        {SECTIONS.map((s) => (
+          <HelpSection key={s.title} {...s} />
+        ))}
+      </div>
+    </FooterPageShell>
+  );
+};
 
 export default HelpCenter;
