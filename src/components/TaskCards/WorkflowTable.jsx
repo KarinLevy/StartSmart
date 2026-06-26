@@ -1,50 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
 import './TaskCards.css';
 
 const fmtMin = (m) => {
   if (m == null) return '--';
-  if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60 > 0 ? m % 60 + 'm' : ''}`.trim();
+  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}`;
   return `${m}m`;
 };
 const fmtGap = (g) => (g == null ? '--' : g > 0 ? `+${g}m` : `${g}m`);
 
-const StatusBadge = ({ status }) => {
-  const map = { in_progress: ['In Progress', 'in-progress'], pending: ['Pending', 'pending'], done: ['Done', 'done'] };
-  const [label, cls] = map[status] || ['Unknown', 'pending'];
-  return <span className={`status-badge ${cls}`}>{label}</span>;
+const FILTERS = [
+  { key: 'all',         label: 'All' },
+  { key: 'pending',     label: 'Pending' },
+  { key: 'in_progress', label: 'In Progress' },
+  { key: 'done',        label: 'Done' },
+  { key: 'high',        label: 'High Priority' },
+];
+
+const STATUS_CFG = {
+  in_progress: { label: 'In Progress', cls: 'in-progress' },
+  pending:     { label: 'Pending',     cls: 'pending' },
+  done:        { label: 'Done',        cls: 'done' },
 };
+const DOT_CLS = { in_progress: 'secondary', pending: 'outline', done: 'green' };
 
 const WorkflowTable = () => {
   const { tasks } = useTasks();
   const navigate = useNavigate();
+  const [filter, setFilter] = useState('all');
 
-  const visible = tasks.slice(0, 5);
+  const filtered = tasks.filter((t) => {
+    if (filter === 'all')         return true;
+    if (filter === 'high')        return t.priorityHigh;
+    return t.status === filter;
+  });
+
+  const visible = filtered.slice(0, 6);
 
   return (
-    <div className="glass-card workflow-card">
+    <div className="glass-card workflow-card" style={{ overflow: 'hidden' }}>
+      {/* Header */}
       <div className="workflow-header">
         <h4 className="workflow-title">Priority Workflow</h4>
-        <div className="workflow-actions">
-          <button className="workflow-action-btn" aria-label="Filter">
-            <span className="material-symbols-outlined">filter_list</span>
-          </button>
-        </div>
+        <span style={{ fontSize: 'var(--font-size-label-sm)', color: 'var(--color-on-surface-variant)' }}>
+          {filtered.length} task{filtered.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
+      {/* Filter bar */}
+      <div className="wf-filter-bar" role="group" aria-label="Filter tasks">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            className={`wf-filter-chip${filter === f.key ? ' active' : ''}`}
+            onClick={() => setFilter(f.key)}
+            aria-pressed={filter === f.key}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Table or empty */}
       {visible.length === 0 ? (
         <div className="workflow-empty">
-          <span className="material-symbols-outlined">inbox</span>
-          <p>No tasks yet. <Link to="/create-task">Create one →</Link></p>
+          <span className="material-symbols-outlined" aria-hidden="true">inbox</span>
+          <p>
+            No {filter !== 'all' ? filter.replace('_', ' ') + ' ' : ''}tasks.{' '}
+            <Link to="/create-task">Create one →</Link>
+          </p>
         </div>
       ) : (
         <div className="workflow-table-wrapper">
-          <table className="workflow-table">
+          <table className="workflow-table" aria-label="Task workflow">
             <thead>
               <tr>
-                <th>Task Name</th>
-                <th className="center">Est. Time</th>
+                <th>Task</th>
+                <th className="center">Est.</th>
                 <th className="center">Actual</th>
                 <th className="center">Gap</th>
                 <th>Status</th>
@@ -53,26 +86,51 @@ const WorkflowTable = () => {
             </thead>
             <tbody>
               {visible.map((task) => {
+                const { label, cls } = STATUS_CFG[task.status] || STATUS_CFG.pending;
+                const dotCls = DOT_CLS[task.status] || 'outline';
+                const gapCls = task.gap == null ? 'neutral' : task.gap > 0 ? 'error' : 'success';
                 const isDone = task.status === 'done';
-                const gapVal = task.gap;
-                const gapCls = gapVal == null ? 'neutral' : gapVal > 0 ? 'error' : 'success';
+
                 return (
-                  <tr key={task.id} className={`workflow-row${isDone ? ' opacity-60' : ''}`}>
+                  <tr
+                    key={task.id}
+                    className="workflow-row"
+                    style={{ opacity: isDone ? 0.7 : 1 }}
+                  >
                     <td>
-                      <div className="task-name-cell" style={{ opacity: isDone ? 0.6 : 1 }}>
-                        <div className={`task-dot ${isDone ? 'green' : task.status === 'in_progress' ? 'secondary' : 'outline'}`} />
-                        <span className="task-name">{task.title}</span>
+                      <div className="task-name-cell">
+                        <div className={`task-dot ${dotCls}`} aria-hidden="true" />
+                        <span className="task-name">
+                          {task.priorityHigh && (
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: '14px', color: 'var(--color-error)', verticalAlign: 'middle', marginRight: '3px' }}
+                              aria-label="High priority"
+                            >flag</span>
+                          )}
+                          <button
+                            className="task-name-link"
+                            onClick={() => navigate(`/task-details/${task.id}`)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit', padding: 0, textAlign: 'left' }}
+                          >
+                            {task.title}
+                          </button>
+                        </span>
                       </div>
                     </td>
                     <td className="center task-time">{fmtMin(task.estimatedMinutes)}</td>
                     <td className="center task-time">{fmtMin(task.actualMinutes)}</td>
                     <td className="center">
-                      <span className={`task-gap ${gapCls}`}>{fmtGap(gapVal)}</span>
+                      <span className={`task-gap ${gapCls}`} aria-label={`Gap: ${fmtGap(task.gap)}`}>
+                        {fmtGap(task.gap)}
+                      </span>
                     </td>
-                    <td><StatusBadge status={task.status} /></td>
+                    <td>
+                      <span className={`status-badge ${cls}`} role="status">{label}</span>
+                    </td>
                     <td className="right">
                       {isDone ? (
-                        <span className="material-symbols-outlined action-icon">check_circle</span>
+                        <span className="material-symbols-outlined action-icon" aria-label="Completed">check_circle</span>
                       ) : task.status === 'in_progress' ? (
                         <button className="action-btn" onClick={() => navigate(`/focus-mode/${task.id}`)}>Resume</button>
                       ) : (
@@ -89,8 +147,8 @@ const WorkflowTable = () => {
 
       <div className="workflow-footer">
         <Link to="/task-history" className="workflow-footer-link">
-          View All Task History
-          <span className="material-symbols-outlined icon-sm">arrow_forward</span>
+          View all task history
+          <span className="material-symbols-outlined icon-sm" aria-hidden="true">arrow_forward</span>
         </Link>
       </div>
     </div>

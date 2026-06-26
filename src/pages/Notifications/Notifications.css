@@ -1,0 +1,90 @@
+.notif-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.notif-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.notif-page-title {
+  font-size: var(--font-size-display-sm);
+  font-weight: 800;
+  color: var(--color-on-background);
+  margin: 0 0 0.25rem;
+}
+.notif-page-sub {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+.notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  color: var(--color-on-surface-variant);
+  font-size: var(--font-size-body-md);
+}
+.notif-empty-icon {
+  font-size: 3.5rem;
+  opacity: 0.4;
+}
+
+.notif-full-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notif-full-item {
+  border-radius: var(--rounded-xl);
+  background: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.notif-full-item:hover { box-shadow: var(--shadow-md); }
+.notif-full-item.unread {
+  border-color: rgba(107,56,212,0.25);
+  background: color-mix(in srgb, var(--color-surface-container-lowest) 95%, var(--color-secondary) 5%);
+}
+
+.notif-full-btn {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.notif-full-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.notif-full-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+/* reuse shared notif classes from NotificationDropdown.css */

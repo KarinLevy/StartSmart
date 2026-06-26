@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TasksProvider } from './context/TasksContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { NotificationsProvider } from './context/NotificationsContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -15,10 +16,12 @@ import TaskHistory from './pages/TaskHistory/TaskHistory';
 import Statistics from './pages/Statistics/Statistics';
 import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings/Settings';
+import Notifications from './pages/Notifications/Notifications';
 
 function App() {
   return (
     <ThemeProvider>
+    <NotificationsProvider>
     <TasksProvider>
     <Router>
       <Routes>
@@ -38,9 +41,11 @@ function App() {
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </Router>
     </TasksProvider>
+    </NotificationsProvider>
     </ThemeProvider>
   );
 }
