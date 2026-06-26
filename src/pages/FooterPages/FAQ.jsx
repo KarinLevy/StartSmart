@@ -4,16 +4,46 @@ import FooterPageShell from '../../components/FooterPageShell/FooterPageShell';
 import './FooterPage.css';
 
 const FAQS = [
-  { q: 'What is StartSmart?', a: 'StartSmart is a productivity app that tracks the Gap between how long you think tasks will take and how long they actually take. By making that delta visible, it helps you schedule more accurately over time.' },
-  { q: 'What is "the Gap"?', a: 'The Gap is the difference between your estimated time and your actual time for a task. A positive Gap (+7 min) means the task ran over. A negative Gap means you finished early. StartSmart shows your Gap trends so you can improve your planning.' },
-  { q: 'Is StartSmart free to use?', a: 'Yes — StartSmart has a free tier that includes unlimited task tracking, focus sessions, and basic statistics. A Pro plan with advanced insights, calendar integrations, and team features is coming soon.' },
-  { q: 'Is my data private?', a: 'Absolutely. Your productivity data is yours and is never sold or shared with third parties. During the current beta, all data is stored locally in your browser. See our Privacy Policy for full details.' },
-  { q: 'How does the Focus Mode timer work?', a: 'When you start a Focus session on a task, a countdown timer runs against your estimated time. When you finish, StartSmart records the actual duration, computes the Gap, and saves it to your task history.' },
-  { q: 'Can I edit or delete tasks?', a: 'Yes. Open any task from the Dashboard or Task History and click Edit. You can update the title, description, estimated time, scheduled date, and priority. You can also delete a task from the Task Details page.' },
-  { q: 'Does StartSmart work on mobile?', a: 'Yes — StartSmart is fully responsive and works on screens as small as 375px. We recommend adding it to your home screen as a PWA for the best mobile experience.' },
-  { q: 'Will there be calendar integration?', a: "Google Calendar and Apple Calendar integrations are on our roadmap. In the meantime, the Schedule view lets you plan tasks by day, week, and month within StartSmart." },
-  { q: 'How do I reset my password?', a: "Visit the Login page and click 'Forgot password?'. Enter your email and we'll send you a reset link." },
-  { q: 'How can I contact support?', a: 'You can reach us via our Contact page or email support@startsmart.app. We typically respond within 24 hours.' },
+  {
+    q: 'What is StartSmart?',
+    a: 'StartSmart is a personal productivity application that helps you plan tasks, track focus time, and understand where your time actually goes. It combines task management, a Focus Mode timer, a weekly/monthly schedule, and statistics — all in one place.',
+  },
+  {
+    q: 'Who is StartSmart designed for?',
+    a: 'Anyone who wants better focus and time management. That includes students balancing coursework, employees managing projects, freelancers tracking billable hours, managers coordinating work, and anyone else who finds planning stressful or unreliable.',
+  },
+  {
+    q: 'How does Focus Mode work?',
+    a: 'Focus Mode runs a countdown timer against your task\'s estimated time. When you start a session, the timer counts down and tracks how long you actually work. When you finish, StartSmart saves the real duration alongside your estimate — giving you an accurate picture of how you plan versus how you perform.',
+  },
+  {
+    q: 'How are productivity insights generated?',
+    a: 'All insights are calculated directly from your task history — completed tasks, focus session durations, estimated vs. actual times, and tag categories. Nothing is manually set or hardcoded. The more you use StartSmart, the more accurate and useful your insights become.',
+  },
+  {
+    q: 'Is StartSmart free to use?',
+    a: 'Yes. StartSmart is free for all core features including unlimited task tracking, Focus Mode, scheduling, and statistics. A Pro plan with additional capabilities is available for users who want more.',
+  },
+  {
+    q: 'How do I reset my password?',
+    a: 'On the Login page, click "Forgot password?" and enter your email address. You will receive a reset link within a few minutes. Check your spam folder if it does not arrive.',
+  },
+  {
+    q: 'Can I export my data?',
+    a: 'Data export is on the roadmap and will be available in a future update. You will be able to export your task history and focus logs as a structured file.',
+  },
+  {
+    q: 'Can I change the application language?',
+    a: 'Multi-language support is currently in development. English is the default language. Additional language options will be available in a future release.',
+  },
+  {
+    q: 'Is my information secure?',
+    a: 'Yes. StartSmart uses Supabase for authentication and data storage. All data is encrypted in transit using TLS and at rest. Your productivity data is never sold or shared with third parties. See our Privacy Policy for full details.',
+  },
+  {
+    q: 'How do I contact support?',
+    a: 'You can reach us via the Contact page or by emailing support@startsmart-app.com. We aim to respond within 24 hours on business days.',
+  },
 ];
 
 const FAQItem = ({ q, a }) => {
@@ -34,12 +64,14 @@ const FAQ = () => (
     <div className="fp-hero">
       <div className="fp-badge">
         <span className="material-symbols-outlined">help</span>
-        Help
+        FAQ
       </div>
       <h1 className="fp-title">Frequently Asked Questions</h1>
       <p className="fp-subtitle">
-        Everything you need to know about StartSmart. Can&apos;t find an answer?{' '}
-        <Link to="/contact" style={{ color: 'var(--color-secondary)' }}>Contact us</Link>.
+        Quick answers to common questions. Need more help?{' '}
+        <Link to="/help" style={{ color: 'var(--color-secondary)' }}>Visit the Help Center</Link>{' '}
+        or{' '}
+        <Link to="/contact" style={{ color: 'var(--color-secondary)' }}>contact us</Link>.
       </p>
     </div>
 

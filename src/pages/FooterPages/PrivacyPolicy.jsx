@@ -4,12 +4,84 @@ import FooterPageShell from '../../components/FooterPageShell/FooterPageShell';
 import './FooterPage.css';
 
 const SECTIONS = [
-  { title: 'Information We Collect', body: ['We collect information you provide directly to us when you create an account, such as your name, email address, and profile photo.', 'We also collect data about how you use StartSmart — including task titles, estimated vs. actual durations, focus session timestamps, and productivity patterns — to power the Gap analysis features that make StartSmart useful.'] },
-  { title: 'How We Use Your Information', body: ['Your task and focus data is used solely to generate your personal productivity insights. We never sell your personal data to third parties.', 'We may use aggregated, anonymised data (not linked to any individual) to improve product features.'], items: ['Calculate and display your Gap metrics and trends', 'Send in-app notifications about your tasks and sessions', 'Provide customer support and respond to inquiries', 'Improve the accuracy of our time-estimation suggestions'] },
-  { title: 'Data Storage & Security', body: ['All data is encrypted in transit using TLS 1.3 and at rest using AES-256 encryption. We follow industry-standard security practices and conduct regular security reviews.', 'StartSmart is currently in beta. Task data you create during this phase is stored locally in your browser (localStorage). No data is transmitted to external servers in this version.'] },
-  { title: 'Cookies', body: ['We use only essential cookies required to maintain your session and remember your theme preference. We do not use advertising or tracking cookies.'] },
-  { title: 'Your Rights', body: ['You have the right to access, correct, export, or delete your personal data at any time from the Settings page. If you wish to close your account entirely, contact us at privacy@startsmart.app.'], items: ['Access — see what data we hold about you', 'Correction — fix inaccurate information', 'Erasure — request deletion of your account and data', 'Portability — export your task history as JSON or CSV'] },
-  { title: 'Changes to This Policy', body: ['We may update this Privacy Policy from time to time. When we make significant changes, we will notify you via an in-app notification and update the "Last updated" date below.', 'Last updated: June 2026'] },
+  {
+    title: 'Information We Collect',
+    body: [
+      'When you create an account, we collect your email address and, if provided, your display name. This information is used solely to identify your account and personalise your experience.',
+      'We also collect the data you create within StartSmart — task titles, descriptions, estimated and actual durations, focus session records, tags, and scheduling information. This data is used to calculate your productivity statistics and power the insights shown in the application.',
+    ],
+  },
+  {
+    title: 'Authentication',
+    body: [
+      'StartSmart uses Supabase Auth to handle user authentication. When you sign in, Supabase issues a secure session token that is stored in your browser. We do not store your password — it is hashed and managed by Supabase.',
+      'Password reset emails are sent via Supabase using the email address associated with your account.',
+    ],
+  },
+  {
+    title: 'Data Storage',
+    body: [
+      'All user data is stored in a Supabase-managed PostgreSQL database. Data is protected by row-level security, meaning each user can only access their own records.',
+      'Your data is stored on Supabase infrastructure and is subject to Supabase\'s own security and compliance standards. You can learn more at supabase.com/security.',
+    ],
+  },
+  {
+    title: 'Cookies',
+    body: [
+      'StartSmart uses only essential cookies — specifically, a session cookie required to keep you logged in. We do not use advertising cookies, tracking pixels, or third-party analytics cookies.',
+      'You can review full details on our Cookies page.',
+    ],
+  },
+  {
+    title: 'How We Use Your Information',
+    body: [
+      'Your data is used only to provide and improve the StartSmart service. Specifically:',
+    ],
+    items: [
+      'Display your tasks, schedule, and focus history',
+      'Calculate productivity statistics, gap analysis, and achievement progress',
+      'Send in-app notifications related to your account and tasks',
+      'Respond to support enquiries you submit through the Contact page',
+    ],
+  },
+  {
+    title: 'Data Sharing',
+    body: [
+      'We do not sell, rent, or share your personal data with any third parties for commercial or advertising purposes. The only third-party service that processes your data is Supabase, which acts as our database and authentication provider.',
+    ],
+  },
+  {
+    title: 'Your Rights',
+    body: [
+      'You have the right to access, correct, or delete the data associated with your account at any time.',
+    ],
+    items: [
+      'Access — view your profile and task data from within the application',
+      'Correction — update your name, email, and preferences in Settings',
+      'Erasure — request full account and data deletion by contacting us',
+      'Portability — data export will be available in a future update',
+    ],
+  },
+  {
+    title: 'Account Deletion',
+    body: [
+      'To delete your account and all associated data, please contact us at support@startsmart-app.com. We will process your request within 14 days and confirm once complete.',
+    ],
+  },
+  {
+    title: 'Security',
+    body: [
+      'All data is encrypted in transit using TLS. Data at rest is protected by Supabase\'s AES-256 encryption. Row-level security ensures that no user can read or modify another user\'s data.',
+      'We take security seriously and review our implementation regularly. If you discover a potential vulnerability, please report it to support@startsmart-app.com.',
+    ],
+  },
+  {
+    title: 'Changes to This Policy',
+    body: [
+      'We may update this Privacy Policy as the application evolves. When significant changes are made, we will notify you via an in-app message and update the date below.',
+      'Last updated: June 2026',
+    ],
+  },
 ];
 
 const PrivacyPolicy = () => (
@@ -21,7 +93,7 @@ const PrivacyPolicy = () => (
       </div>
       <h1 className="fp-title">Privacy Policy</h1>
       <p className="fp-subtitle">
-        Your privacy matters to us. This policy explains what data StartSmart collects, how we use it, and the controls you have over it.
+        This policy explains what data StartSmart collects, how it is used, and the controls you have over it.
       </p>
     </div>
 
@@ -40,8 +112,8 @@ const PrivacyPolicy = () => (
 
       <div className="fp-card">
         <p className="fp-text">
-          Questions about this policy? Contact our privacy team at{' '}
-          <a href="mailto:privacy@startsmart.app" style={{ color: 'var(--color-secondary)' }}>privacy@startsmart.app</a>{' '}
+          Questions about this policy? Contact us at{' '}
+          <a href="mailto:support@startsmart-app.com" style={{ color: 'var(--color-secondary)' }}>support@startsmart-app.com</a>{' '}
           or visit our <Link to="/contact" style={{ color: 'var(--color-secondary)' }}>Contact page</Link>.
         </p>
       </div>

@@ -463,12 +463,15 @@ const en = {
   'settings.upgradeDesc':  'Upgrade to StartSmart Pro for AI-powered time insights, advanced analytics, and calendar sync.',
 
   // ── Footer ─────────────────────────────────────────────────────────────────
-  'footer.about':   'About',
-  'footer.faq':     'FAQ',
-  'footer.privacy': 'Privacy',
-  'footer.terms':   'Terms',
-  'footer.contact': 'Contact',
-  'footer.github':  'GitHub',
+  'footer.about':         'About',
+  'footer.faq':           'FAQ',
+  'footer.help':          'Help Center',
+  'footer.privacy':       'Privacy',
+  'footer.terms':         'Terms',
+  'footer.cookies':       'Cookies',
+  'footer.accessibility': 'Accessibility',
+  'footer.contact':       'Contact',
+  'footer.github':        'GitHub',
 
   // ── Premium ────────────────────────────────────────────────────────────────
   'premium.backToSettings': '← Back to Settings',

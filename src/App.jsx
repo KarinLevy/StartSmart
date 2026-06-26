@@ -26,6 +26,9 @@ import Terms from './pages/FooterPages/Terms';
 import About from './pages/FooterPages/About';
 import FAQ from './pages/FooterPages/FAQ';
 import Contact from './pages/FooterPages/Contact';
+import HelpCenter from './pages/FooterPages/HelpCenter';
+import Cookies from './pages/FooterPages/Cookies';
+import Accessibility from './pages/FooterPages/Accessibility';
 import Insights from './pages/Insights/Insights';
 import Premium from './pages/Premium/Premium';
 
@@ -58,6 +61,9 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/accessibility" element={<Accessibility />} />
         <Route path="/premium" element={<Premium />} />
 
         {/* Protected app routes */}

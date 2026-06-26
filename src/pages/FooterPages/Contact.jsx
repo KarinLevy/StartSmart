@@ -5,9 +5,9 @@ import './FooterPage.css';
 const TOPICS = ['General enquiry', 'Bug report', 'Feature request', 'Billing & plans', 'Privacy & data', 'Other'];
 
 const CHANNELS = [
-  { icon: 'email',    label: 'Email',         text: 'support@startsmart.app', href: 'mailto:support@startsmart.app' },
-  { icon: 'forum',    label: 'Community',     text: 'Join our Discord',        href: '#' },
-  { icon: 'schedule', label: 'Response time', text: 'Within 24 hours',         href: null },
+  { icon: 'support_agent', label: 'Support',        text: 'support@startsmart-app.com', href: 'mailto:support@startsmart-app.com' },
+  { icon: 'mail',          label: 'General',         text: 'hello@startsmart-app.com',   href: 'mailto:hello@startsmart-app.com' },
+  { icon: 'schedule',      label: 'Response time',   text: 'Within 24 hours on business days', href: null },
 ];
 
 const Contact = () => {
@@ -20,11 +20,11 @@ const Contact = () => {
       <div className="fp-hero">
         <div className="fp-badge">
           <span className="material-symbols-outlined">chat</span>
-          Get in touch
+          Contact
         </div>
-        <h1 className="fp-title">We&apos;d love to hear from you.</h1>
+        <h1 className="fp-title">Get in touch.</h1>
         <p className="fp-subtitle">
-          Have a question, bug report, or feature idea? Send us a message and we&apos;ll get back to you within 24 hours.
+          Have a question, a bug to report, or a feature idea? Send a message and we will get back to you promptly.
         </p>
       </div>
 
@@ -54,7 +54,7 @@ const Contact = () => {
                 <span className="material-symbols-outlined">check_circle</span>
               </div>
               <h3>Message sent!</h3>
-              <p>Thanks for reaching out. We&apos;ll reply to {form.email || 'your email'} within 24 hours.</p>
+              <p>Thanks for reaching out. We will reply to {form.email || 'your email'} within 24 hours.</p>
               <button
                 className="btn-secondary"
                 style={{ marginTop: '0.5rem' }}
@@ -68,11 +68,11 @@ const Contact = () => {
               <div className="fp-form-row">
                 <div className="fp-field">
                   <label htmlFor="contact-name">Name</label>
-                  <input id="contact-name" type="text" placeholder="Maya Cohen" value={form.name} onChange={set('name')} required autoComplete="name" />
+                  <input id="contact-name" type="text" placeholder="Your name" value={form.name} onChange={set('name')} required autoComplete="name" />
                 </div>
                 <div className="fp-field">
                   <label htmlFor="contact-email">Email</label>
-                  <input id="contact-email" type="email" placeholder="maya@example.com" value={form.email} onChange={set('email')} required autoComplete="email" />
+                  <input id="contact-email" type="email" placeholder="your@email.com" value={form.email} onChange={set('email')} required autoComplete="email" />
                 </div>
               </div>
               <div className="fp-field">
@@ -84,7 +84,7 @@ const Contact = () => {
               </div>
               <div className="fp-field">
                 <label htmlFor="contact-message">Message</label>
-                <textarea id="contact-message" placeholder="Describe your question or issue in detail…" value={form.message} onChange={set('message')} required />
+                <textarea id="contact-message" placeholder="Describe your question or issue…" value={form.message} onChange={set('message')} required />
               </div>
               <button type="submit" className="btn-primary" style={{ alignSelf: 'flex-start' }}>
                 <span className="material-symbols-outlined" aria-hidden="true">send</span>
