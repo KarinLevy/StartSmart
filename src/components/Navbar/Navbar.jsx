@@ -5,25 +5,27 @@ import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
 import { useNotifications } from '../../context/NotificationsContext';
 import { useProfile } from '../../context/ProfileContext';
+import { useLocale } from '../../i18n/LocaleContext';
 import Avatar from '../Avatar/Avatar';
 import './Navbar.css';
-
-const NAV_LINKS = [
-  { to: '/dashboard',    icon: 'dashboard',       label: 'Dashboard' },
-  { to: '/create-task',  icon: 'add_task',         label: 'Create Task' },
-  { to: '/focus-mode',   icon: 'timer',            label: 'Focus Mode',  noExact: true },
-  { to: '/schedule',     icon: 'calendar_today',   label: 'Schedule' },
-  { to: '/task-history', icon: 'history',          label: 'Task History' },
-  { to: '/statistics',   icon: 'insights',         label: 'Statistics' },
-  { to: '/profile',      icon: 'person',           label: 'Profile' },
-  { to: '/settings',     icon: 'settings',         label: 'Settings' },
-];
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen]   = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const { unreadCount } = useNotifications();
   const { profile } = useProfile();
+  const { t } = useLocale();
+
+  const NAV_LINKS = [
+    { to: '/dashboard',    icon: 'dashboard',       label: t.nav.dashboard },
+    { to: '/create-task',  icon: 'add_task',         label: t.nav.createTask },
+    { to: '/focus-mode',   icon: 'timer',            label: t.nav.focusMode },
+    { to: '/schedule',     icon: 'calendar_today',   label: t.nav.schedule },
+    { to: '/task-history', icon: 'history',          label: t.nav.taskHistory },
+    { to: '/statistics',   icon: 'insights',         label: t.nav.statistics },
+    { to: '/profile',      icon: 'person',           label: t.nav.profile },
+    { to: '/settings',     icon: 'settings',         label: t.nav.settings },
+  ];
 
   const closeMenu = () => setMenuOpen(false);
 

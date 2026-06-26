@@ -5,6 +5,7 @@ import { TasksProvider } from './context/TasksContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationsProvider } from './context/NotificationsContext';
 import { ProfileProvider } from './context/ProfileContext';
+import { LocaleProvider } from './i18n/LocaleContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -37,6 +38,7 @@ function ProtectedRoute({ children }) {
 function App() {
   return (
     <ThemeProvider>
+    <LocaleProvider>
     <AuthProvider>
     <NotificationsProvider>
     <TasksProvider>
@@ -76,6 +78,7 @@ function App() {
     </TasksProvider>
     </NotificationsProvider>
     </AuthProvider>
+    </LocaleProvider>
     </ThemeProvider>
   );
 }

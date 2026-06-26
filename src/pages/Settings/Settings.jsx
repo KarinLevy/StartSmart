@@ -1,9 +1,31 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { useTasks } from '../../context/TasksContext';
+import { useProfile } from '../../context/ProfileContext';
+import { useLocale, LANGUAGES } from '../../i18n/LocaleContext';
+import { saveSettings, exportUserData, triggerDownload, reportProblem } from '../../services/settingsService';
 import './Settings.css';
+
+// ── Persistence key ───────────────────────────────────────────────────────────
+const SETTINGS_KEY = 'ss_settings_v1';
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function persistSettings(s) {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {}
+  // Backend integration point: PATCH /api/user/settings
+}
+
+// ── Sub-components ────────────────────────────────────────────────────────────
 
 const Toggle = ({ id, checked, onChange, label }) => (
   <button
@@ -39,141 +61,304 @@ const Row = ({ label, desc, control, danger }) => (
   </div>
 );
 
-const Settings = () => {
-  const { theme } = useTheme();
+const Spinner = () => <span className="set-spinner" aria-hidden="true" />;
 
-  const [notifs, setNotifs] = useState({
+// ── Settings page ─────────────────────────────────────────────────────────────
+
+const DEFAULT_SETTINGS = {
+  notifs: {
     taskReminders: true,
     timeGapAlerts: true,
     weeklySummary: false,
     soundEffects: true,
     focusEndAlert: true,
-  });
-  const [focus, setFocus] = useState({
+  },
+  focus: {
     autoStartBreak: false,
     showGapLive: true,
     confirmFinish: true,
-  });
-  const [privacy, setPrivacy] = useState({
+  },
+  privacy: {
     publicProfile: false,
     shareStats: false,
-  });
-  const [goal, setGoal] = useState('4');
-  const [defaultEst, setDefaultEst] = useState('30');
-  const [language, setLanguage] = useState('en');
+  },
+  goal: '4',
+  defaultEst: '30',
+};
 
-  const toggleN = (k) => setNotifs((p) => ({ ...p, [k]: !p[k] }));
-  const toggleF = (k) => setFocus((p) => ({ ...p, [k]: !p[k] }));
-  const toggleP = (k) => setPrivacy((p) => ({ ...p, [k]: !p[k] }));
+const Settings = () => {
+  const { theme } = useTheme();
+  const { logout } = useAuth();
+  const { tasks } = useTasks();
+  const { profile } = useProfile();
+  const { locale, setLocale, t, LANGUAGES } = useLocale();
+  const navigate = useNavigate();
+
+  // Load persisted settings or fall back to defaults
+  const [settings, setSettings] = useState(() => {
+    const saved = loadSettings();
+    return saved ? { ...DEFAULT_SETTINGS, ...saved } : DEFAULT_SETTINGS;
+  });
+
+  const { notifs, focus, privacy, goal, defaultEst } = settings;
+
+  // Persist whenever settings change
+  useEffect(() => { persistSettings(settings); }, [settings]);
+
+  const patch = (key, val) => setSettings((p) => ({ ...p, [key]: val }));
+  const toggleN = (k) => patch('notifs',  { ...notifs,  [k]: !notifs[k] });
+  const toggleF = (k) => patch('focus',   { ...focus,   [k]: !focus[k] });
+  const toggleP = (k) => patch('privacy', { ...privacy, [k]: !privacy[k] });
+
+  // ── Language change ──────────────────────────────────────────────────────
+  const handleLanguageChange = (e) => {
+    setLocale(e.target.value);
+    // Backend integration point: PATCH /api/user/settings { language: e.target.value }
+  };
+
+  // ── Export data ──────────────────────────────────────────────────────────
+  const [exportState, setExportState] = useState('idle'); // idle | loading | success | error
+
+  const handleExport = async () => {
+    if (exportState === 'loading') return;
+    setExportState('loading');
+
+    const exportPayload = {
+      exportedAt: new Date().toISOString(),
+      profile: {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        username: profile.username,
+        email: profile.email,
+        phone: profile.phone ?? '',
+        bio: profile.bio ?? '',
+      },
+      tasks,
+      settings,
+      // Backend integration point: also include focus sessions from API
+      focusSessions: [],
+    };
+
+    // Backend integration point: GET /api/user/export (replaces client-side generation)
+    const { data: blob, error } = await exportUserData(exportPayload);
+
+    if (error) { setExportState('error'); setTimeout(() => setExportState('idle'), 3000); return; }
+
+    const filename = `startsmart-export-${new Date().toISOString().slice(0, 10)}.json`;
+    triggerDownload(blob, filename);
+    setExportState('success');
+    setTimeout(() => setExportState('idle'), 3000);
+  };
+
+  // ── Logout ───────────────────────────────────────────────────────────────
+  const handleLogout = () => {
+    logout(); // clears ss_auth_token + ss_auth_user from localStorage
+    navigate('/');
+  };
+
+  // ── Report a problem ─────────────────────────────────────────────────────
+  const [reportState, setReportState] = useState('idle');
+
+  const handleReport = async () => {
+    if (reportState === 'loading') return;
+    setReportState('loading');
+    // Backend integration point: POST /api/support/report
+    const { error } = await reportProblem({
+      category: 'user_report',
+      userAgent: navigator.userAgent,
+      description: '',
+    });
+    setReportState(error ? 'error' : 'success');
+    setTimeout(() => setReportState('idle'), 3000);
+    if (!error) navigate('/contact');
+  };
+
+  const exportLabel = exportState === 'loading'
+    ? t.settings.privacy.exporting
+    : exportState === 'success'
+    ? t.settings.privacy.exportSuccess
+    : t.settings.privacy.exportData;
 
   return (
-    <PageShell narrow title="Settings" subtitle="Tune StartSmart to fit how you work.">
+    <PageShell narrow title={t.settings.title} subtitle={t.settings.subtitle}>
 
-      {/* Appearance */}
-      <Section icon="palette" title="Appearance">
+      {/* ── Appearance ── */}
+      <Section icon="palette" title={t.settings.appearance.title}>
         <Row
-          label="Theme"
-          desc={`Currently using ${theme === 'dark' ? 'dark' : 'light'} mode. Your preference is saved automatically.`}
+          label={t.settings.appearance.theme}
+          desc={t.settings.appearance.themeDesc(theme)}
           control={<ThemeToggle />}
         />
         <Row
-          label="Language"
-          desc="Interface language for labels and messages."
+          label={t.settings.appearance.language}
+          desc={t.settings.appearance.languageDesc}
           control={
-            <select className="set-select" value={language} onChange={(e) => setLanguage(e.target.value)} aria-label="Language">
-              <option value="en">English</option>
-              <option value="he">Hebrew</option>
-              <option value="fr">French</option>
-              <option value="de">German</option>
-            </select>
+            <div className="set-lang-wrap">
+              <span className="set-lang-flag" aria-hidden="true">
+                {LANGUAGES.find((l) => l.code === locale)?.flag ?? '🌐'}
+              </span>
+              <select
+                className="set-select"
+                value={locale}
+                onChange={handleLanguageChange}
+                aria-label={t.settings.appearance.language}
+              >
+                {LANGUAGES.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.nativeName}
+                  </option>
+                ))}
+              </select>
+            </div>
           }
         />
       </Section>
 
-      {/* Focus & planning */}
-      <Section icon="timer" title="Focus & planning">
+      {/* ── Focus & Planning ── */}
+      <Section icon="timer" title={t.settings.focus.title}>
         <Row
-          label="Daily focus goal"
-          desc="Target focus time used for the daily progress ring."
+          label={t.settings.focus.dailyGoal}
+          desc={t.settings.focus.dailyGoalDesc}
           control={
-            <select className="set-select" value={goal} onChange={(e) => setGoal(e.target.value)} aria-label="Daily focus goal">
-              <option value="1">1 hour</option>
-              <option value="2">2 hours</option>
-              <option value="3">3 hours</option>
-              <option value="4">4 hours</option>
-              <option value="6">6 hours</option>
-              <option value="8">8 hours</option>
+            <select className="set-select" value={goal} onChange={(e) => patch('goal', e.target.value)} aria-label={t.settings.focus.dailyGoal}>
+              {Object.entries(t.settings.hours).map(([v, label]) => (
+                <option key={v} value={v}>{label}</option>
+              ))}
             </select>
           }
         />
         <Row
-          label="Default task estimate"
-          desc="Pre-filled estimate when creating a new task."
+          label={t.settings.focus.defaultEst}
+          desc={t.settings.focus.defaultEstDesc}
           control={
-            <select className="set-select" value={defaultEst} onChange={(e) => setDefaultEst(e.target.value)} aria-label="Default estimate">
-              <option value="15">15 min</option>
-              <option value="30">30 min</option>
-              <option value="45">45 min</option>
-              <option value="60">60 min</option>
-              <option value="90">90 min</option>
+            <select className="set-select" value={defaultEst} onChange={(e) => patch('defaultEst', e.target.value)} aria-label={t.settings.focus.defaultEst}>
+              {Object.entries(t.settings.minutes).map(([v, label]) => (
+                <option key={v} value={v}>{label}</option>
+              ))}
             </select>
           }
         />
-        <Row label="Show live gap during focus" desc="Display the running gap counter while the timer is active." control={<Toggle id="showGapLive" checked={focus.showGapLive} onChange={() => toggleF('showGapLive')} label="Show live gap during focus" />} />
-        <Row label="Auto-start break timer" desc="Automatically begin a 5-min break when a focus session ends." control={<Toggle id="autoStartBreak" checked={focus.autoStartBreak} onChange={() => toggleF('autoStartBreak')} label="Auto-start break timer" />} />
-        <Row label="Confirm before finishing" desc="Show a confirmation dialog before logging actual time." control={<Toggle id="confirmFinish" checked={focus.confirmFinish} onChange={() => toggleF('confirmFinish')} label="Confirm before finishing" />} />
+        <Row label={t.settings.focus.showGapLive}   desc={t.settings.focus.showGapLiveDesc}   control={<Toggle id="showGapLive"   checked={focus.showGapLive}   onChange={() => toggleF('showGapLive')}   label={t.settings.focus.showGapLive} />} />
+        <Row label={t.settings.focus.autoBreak}     desc={t.settings.focus.autoBreakDesc}     control={<Toggle id="autoStartBreak" checked={focus.autoStartBreak} onChange={() => toggleF('autoStartBreak')} label={t.settings.focus.autoBreak} />} />
+        <Row label={t.settings.focus.confirmFinish} desc={t.settings.focus.confirmFinishDesc} control={<Toggle id="confirmFinish"  checked={focus.confirmFinish}  onChange={() => toggleF('confirmFinish')}  label={t.settings.focus.confirmFinish} />} />
       </Section>
 
-      {/* Notifications */}
-      <Section icon="notifications" title="Notifications">
-        <Row label="Task reminders"    desc="Get a nudge before a scheduled task begins."            control={<Toggle id="taskReminders" checked={notifs.taskReminders} onChange={() => toggleN('taskReminders')} label="Task reminders" />} />
-        <Row label="Time-gap alerts"   desc="Be notified when you run over an estimate."             control={<Toggle id="timeGapAlerts" checked={notifs.timeGapAlerts} onChange={() => toggleN('timeGapAlerts')} label="Time-gap alerts" />} />
-        <Row label="Focus end alert"   desc="Play a sound or notification when the timer finishes."  control={<Toggle id="focusEndAlert"  checked={notifs.focusEndAlert}  onChange={() => toggleN('focusEndAlert')}  label="Focus end alert" />} />
-        <Row label="Weekly summary"    desc="A recap of your productivity every Sunday."             control={<Toggle id="weeklySummary"  checked={notifs.weeklySummary}  onChange={() => toggleN('weeklySummary')}  label="Weekly summary" />} />
-        <Row label="Focus sounds"      desc="Play ambient audio during Focus Mode."                  control={<Toggle id="soundEffects"   checked={notifs.soundEffects}   onChange={() => toggleN('soundEffects')}   label="Focus sounds" />} />
+      {/* ── Notifications ── */}
+      <Section icon="notifications" title={t.settings.notifications.title}>
+        <Row label={t.settings.notifications.taskReminders}  desc={t.settings.notifications.taskRemindersDesc}  control={<Toggle id="taskReminders" checked={notifs.taskReminders} onChange={() => toggleN('taskReminders')} label={t.settings.notifications.taskReminders} />} />
+        <Row label={t.settings.notifications.timeGapAlerts}  desc={t.settings.notifications.timeGapAlertsDesc}  control={<Toggle id="timeGapAlerts" checked={notifs.timeGapAlerts} onChange={() => toggleN('timeGapAlerts')} label={t.settings.notifications.timeGapAlerts} />} />
+        <Row label={t.settings.notifications.focusEndAlert}  desc={t.settings.notifications.focusEndAlertDesc}  control={<Toggle id="focusEndAlert"  checked={notifs.focusEndAlert}  onChange={() => toggleN('focusEndAlert')}  label={t.settings.notifications.focusEndAlert} />} />
+        <Row label={t.settings.notifications.weeklySummary}  desc={t.settings.notifications.weeklySummaryDesc}  control={<Toggle id="weeklySummary"  checked={notifs.weeklySummary}  onChange={() => toggleN('weeklySummary')}  label={t.settings.notifications.weeklySummary} />} />
+        <Row label={t.settings.notifications.focusSounds}    desc={t.settings.notifications.focusSoundsDesc}    control={<Toggle id="soundEffects"   checked={notifs.soundEffects}   onChange={() => toggleN('soundEffects')}   label={t.settings.notifications.focusSounds} />} />
       </Section>
 
-      {/* Privacy */}
-      <Section icon="lock" title="Privacy">
-        <Row label="Public profile"  desc="Let other StartSmart users view your profile."            control={<Toggle id="publicProfile" checked={privacy.publicProfile} onChange={() => toggleP('publicProfile')} label="Public profile" />} />
-        <Row label="Share statistics" desc="Contribute anonymised usage data to improve StartSmart." control={<Toggle id="shareStats"    checked={privacy.shareStats}    onChange={() => toggleP('shareStats')}    label="Share statistics" />} />
+      {/* ── Privacy ── */}
+      <Section icon="lock" title={t.settings.privacy.title}>
+        <Row label={t.settings.privacy.publicProfile} desc={t.settings.privacy.publicProfileDesc} control={<Toggle id="publicProfile" checked={privacy.publicProfile} onChange={() => toggleP('publicProfile')} label={t.settings.privacy.publicProfile} />} />
+        <Row label={t.settings.privacy.shareStats}    desc={t.settings.privacy.shareStatsDesc}    control={<Toggle id="shareStats"    checked={privacy.shareStats}    onChange={() => toggleP('shareStats')}    label={t.settings.privacy.shareStats} />} />
         <Row
-          label="Export my data"
-          desc="Download all your tasks and focus session history as JSON."
+          label={t.settings.privacy.exportData}
+          desc={t.settings.privacy.exportDataDesc}
           control={
-            <button className="set-action-btn" onClick={() => alert('Export coming soon!')}>
-              <span className="material-symbols-outlined" aria-hidden="true">download</span>
-              Export
+            <button
+              className={`set-action-btn${exportState === 'success' ? ' success' : exportState === 'error' ? ' error' : ''}`}
+              onClick={handleExport}
+              disabled={exportState === 'loading'}
+              aria-live="polite"
+            >
+              {exportState === 'loading'
+                ? <><Spinner />{t.settings.privacy.exporting}</>
+                : exportState === 'success'
+                ? <><span className="material-symbols-outlined" aria-hidden="true">check_circle</span>{t.settings.privacy.exportSuccess}</>
+                : exportState === 'error'
+                ? <><span className="material-symbols-outlined" aria-hidden="true">error</span>Error</>
+                : <><span className="material-symbols-outlined" aria-hidden="true">download</span>Export</>
+              }
             </button>
           }
         />
       </Section>
 
-      {/* Account */}
-      <Section icon="manage_accounts" title="Account">
+      {/* ── Account ── */}
+      <Section icon="manage_accounts" title={t.settings.account.title}>
         <Row
-          label="Profile settings"
-          desc="Update your name, avatar, email, and bio."
+          label={t.settings.account.profileSettings}
+          desc={t.settings.account.profileSettingsDesc}
           control={
             <Link to="/profile" className="set-action-btn">
               <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-              Open
+              {t.common.open}
             </Link>
           }
         />
         <Row
-          label="Sign out"
-          desc="Sign out of your account on this device."
+          label={t.settings.account.signOut}
+          desc={t.settings.account.signOutDesc}
+          danger
           control={
-            <button className="set-action-btn" onClick={() => alert('Sign out coming soon!')}>
+            <button className="set-action-btn set-signout-btn" onClick={handleLogout}>
               <span className="material-symbols-outlined" aria-hidden="true">logout</span>
-              Sign out
+              {t.common.signOut}
             </button>
           }
         />
       </Section>
 
-      {/* Upgrade banner */}
+      {/* ── Help & Support ── */}
+      <Section icon="help" title={t.settings.help.title}>
+        <Row
+          label={t.settings.help.helpCenter}
+          desc={t.settings.help.helpCenterDesc}
+          control={
+            /* Backend integration point: replace href with real help docs URL */
+            <button className="set-action-btn" onClick={() => alert('Help Center coming soon — documentation is being prepared.')}>
+              <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
+              {t.common.open}
+            </button>
+          }
+        />
+        <Row
+          label={t.settings.help.faq}
+          desc={t.settings.help.faqDesc}
+          control={
+            <Link to="/faq" className="set-action-btn">
+              <span className="material-symbols-outlined" aria-hidden="true">quiz</span>
+              {t.common.open}
+            </Link>
+          }
+        />
+        <Row
+          label={t.settings.help.contactSupport}
+          desc={t.settings.help.contactSupportDesc}
+          control={
+            <Link to="/contact" className="set-action-btn">
+              <span className="material-symbols-outlined" aria-hidden="true">mail</span>
+              {t.common.open}
+            </Link>
+          }
+        />
+        <Row
+          label={t.settings.help.reportProblem}
+          desc={t.settings.help.reportProblemDesc}
+          control={
+            <button
+              className={`set-action-btn${reportState === 'success' ? ' success' : reportState === 'error' ? ' error' : ''}`}
+              onClick={handleReport}
+              disabled={reportState === 'loading'}
+            >
+              {reportState === 'loading'
+                ? <Spinner />
+                : <span className="material-symbols-outlined" aria-hidden="true">bug_report</span>}
+              {reportState === 'loading' ? t.common.loading
+                : reportState === 'success' ? 'Sent!'
+                : reportState === 'error'   ? 'Error'
+                : t.common.open}
+            </button>
+          }
+        />
+      </Section>
+
+      {/* ── Upgrade banner ── */}
       <div className="set-upgrade">
         <div className="set-upgrade-text">
           <span className="chip set-upgrade-chip">Pro</span>
@@ -184,7 +369,7 @@ const Settings = () => {
         </div>
         <Link to="/premium" className="btn set-upgrade-btn">
           <span className="material-symbols-outlined" aria-hidden="true">bolt</span>
-          Upgrade to Pro
+          {t.common.upgrade}
         </Link>
       </div>
 
