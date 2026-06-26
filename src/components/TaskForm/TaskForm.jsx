@@ -13,6 +13,7 @@ import {
   filterSuggestions,
   getTagDisplayColor,
 } from '../../utils/tagUtils';
+import { useLocale } from '../../i18n/LocaleContext';
 import './TaskForm.css';
 
 /*
@@ -135,6 +136,7 @@ function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, 
 const TaskForm = () => {
   const { addTask, tasks } = useTasks();
   const navigate           = useNavigate();
+  const { t }              = useLocale();
   const tagInputRef        = useRef(null);
   const paletteRef         = useRef(null);
 
@@ -262,12 +264,12 @@ const TaskForm = () => {
 
         <div className="form-group">
           <label className="form-label" htmlFor="task-name">
-            Task Name <span className="form-label-required">*</span>
+            {t('form.titleLabel')} <span className="form-label-required">*</span>
           </label>
           <input
             className="form-input"
             id="task-name"
-            placeholder="e.g., Prepare Quarterly Presentation"
+            placeholder={t('form.titlePh')}
             required
             type="text"
             value={title}
@@ -276,11 +278,11 @@ const TaskForm = () => {
         </div>
 
         <div className="form-group">
-          <label className="form-label" htmlFor="task-desc">Description (Optional)</label>
+          <label className="form-label" htmlFor="task-desc">{t('form.descLabel')}</label>
           <textarea
             className="form-input form-textarea"
             id="task-desc"
-            placeholder="Detail the task and any required tools..."
+            placeholder={t('form.descPh')}
             rows="4"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -289,7 +291,7 @@ const TaskForm = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label" htmlFor="task-datetime">Execution Date &amp; Time</label>
+            <label className="form-label" htmlFor="task-datetime">{t('form.dateLabel')}</label>
             <div className="input-with-icon">
               <span className="material-symbols-outlined input-icon-left">calendar_month</span>
               <input
@@ -304,14 +306,14 @@ const TaskForm = () => {
 
           <div className="form-group">
             <label className="form-label">
-              Estimated Duration <span className="form-label-required">*</span>
+              {t('form.estimateLabel')} <span className="form-label-required">*</span>
             </label>
             <div className="duration-inputs">
               <div className="duration-input-wrapper">
                 <input
                   className="form-input duration-input"
                   min="0"
-                  placeholder="Hours"
+                  placeholder={t('form.hoursPlaceholder')}
                   type="number"
                   value={estHours}
                   onChange={(e) => setEstHours(e.target.value)}
@@ -323,7 +325,7 @@ const TaskForm = () => {
                   className="form-input duration-input"
                   max="59"
                   min="0"
-                  placeholder="Min"
+                  placeholder={t('common.minutes')}
                   type="number"
                   value={estMins}
                   onChange={(e) => setEstMins(e.target.value)}
@@ -337,7 +339,7 @@ const TaskForm = () => {
         {/* ── Tags ── */}
         <div className="form-group">
           <div className="tag-label-row">
-            <label className="form-label" htmlFor="tag-input">Tags</label>
+            <label className="form-label" htmlFor="tag-input">{t('form.tagsLabel')}</label>
             <span className="tag-count-badge" aria-live="polite">
               {tags.length}/{MAX_TAGS}
             </span>

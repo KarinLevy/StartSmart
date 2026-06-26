@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
+import { useLocale } from '../../i18n/LocaleContext';
 import './TaskCards.css';
 
 const fmtMin = (m) => {
@@ -28,6 +29,7 @@ const DOT_CLS = { in_progress: 'secondary', pending: 'outline', done: 'green' };
 const WorkflowTable = () => {
   const { tasks, loading, error } = useTasks();
   const navigate = useNavigate();
+  const { t } = useLocale();
   const [filter, setFilter] = useState('all');
 
   const filtered = tasks.filter((t) => {
@@ -84,12 +86,12 @@ const WorkflowTable = () => {
           <table className="workflow-table" aria-label="Task workflow">
             <thead>
               <tr>
-                <th>Task</th>
-                <th className="center">Est.</th>
-                <th className="center">Actual</th>
-                <th className="center">Gap</th>
-                <th>Status</th>
-                <th className="right">Action</th>
+                <th>{t('common.task')}</th>
+                <th className="center">{t('history.est')}</th>
+                <th className="center">{t('history.actual')}</th>
+                <th className="center">{t('stats.gap')}</th>
+                <th>{t('common.status')}</th>
+                <th className="right">{t('common.action')}</th>
               </tr>
             </thead>
             <tbody>
