@@ -1,42 +1,33 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
+import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../i18n/LocaleContext';
 import '../Auth/Auth.css';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 const ForgotPassword = () => {
   const [email,    setEmail]    = useState('');
   const [status,   setStatus]   = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const { resetPassword } = useAuth();
   const { t } = useLocale();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email.trim()) {
+      setStatus('error');
+      setErrorMsg(t('forgot.err.emailEmpty') || 'Please enter your email.');
+      return;
+    }
     setStatus('loading');
     setErrorMsg('');
 
-    try {
-      const res  = await fetch(`${API_BASE}/api/auth/forgot-password`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email }),
-      });
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        setStatus('success');
-      } else {
-        setStatus('error');
-        setErrorMsg(
-          data.message ||
-          (res.status === 404 ? t('forgot.err.notFound') : t('forgot.err.generic'))
-        );
-      }
-    } catch {
+    const { error } = await resetPassword(email.trim());
+    if (error) {
       setStatus('error');
-      setErrorMsg(t('forgot.err.network'));
+      setErrorMsg(error.message || t('forgot.err.generic'));
+    } else {
+      setStatus('success');
     }
   };
 

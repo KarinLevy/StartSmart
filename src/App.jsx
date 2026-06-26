@@ -29,10 +29,11 @@ import Contact from './pages/FooterPages/Contact';
 import Insights from './pages/Insights/Insights';
 import Premium from './pages/Premium/Premium';
 
-/* Redirects unauthenticated users to /login */
+/* Redirects unauthenticated users to /login; shows nothing while auth loads */
 function ProtectedRoute({ children }) {
-  const { token } = useAuth();
-  return token ? children : <Navigate to="/login" replace />;
+  const { session, loading } = useAuth();
+  if (loading) return null;
+  return session ? children : <Navigate to="/login" replace />;
 }
 
 function App() {

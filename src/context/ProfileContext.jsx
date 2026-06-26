@@ -1,37 +1,61 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
-const PROFILE_KEY = 'ss_profile_v1';
+const ProfileContext = createContext(null);
 
 const DEFAULT_PROFILE = {
-  firstName: 'Maya',
-  lastName:  'Cohen',
-  username:  'maya_c',
-  email:     'maya@example.com',
+  firstName: '',
+  lastName:  '',
+  username:  '',
+  email:     '',
   phone:     '',
   bio:       '',
 };
 
-const load = () => {
-  try {
-    const stored = localStorage.getItem(PROFILE_KEY);
-    return stored ? { ...DEFAULT_PROFILE, ...JSON.parse(stored) } : DEFAULT_PROFILE;
-  } catch { return DEFAULT_PROFILE; }
-};
-
-const ProfileContext = createContext(null);
-
 export const ProfileProvider = ({ children }) => {
-  const [profile,   setProfileState] = useState(load);
-  // avatarSrc is kept in memory only — large base64 doesn't belong in localStorage.
-  // Backend integration point: swap for a URL returned by the upload API.
+  const [profile,   setProfileState] = useState(DEFAULT_PROFILE);
   const [avatarSrc, setAvatarSrc]    = useState(null);
 
-  const setProfile = (updates) => {
-    setProfileState((prev) => {
-      const next = { ...prev, ...updates };
-      try { localStorage.setItem(PROFILE_KEY, JSON.stringify(next)); } catch {}
-      return next;
+  // Load profile from Supabase when the auth session is available
+  useEffect(() => {
+    const load = async (userId, email) => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, username, phone, profile_image')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data) {
+        setProfileState({
+          firstName: data.first_name  ?? '',
+          lastName:  data.last_name   ?? '',
+          username:  data.username    ?? '',
+          email:     email            ?? '',
+          phone:     data.phone       ?? '',
+          bio:       '',
+        });
+        if (data.profile_image) setAvatarSrc(data.profile_image);
+      }
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) load(session.user.id, session.user.email);
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        load(session.user.id, session.user.email);
+      } else {
+        setProfileState(DEFAULT_PROFILE);
+        setAvatarSrc(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const setProfile = (updates) => {
+    setProfileState((prev) => ({ ...prev, ...updates }));
   };
 
   return (

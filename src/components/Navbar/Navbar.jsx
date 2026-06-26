@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import Logo from '../Logo/Logo';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
 import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import { useNotifications } from '../../context/NotificationsContext';
 import { useProfile } from '../../context/ProfileContext';
+import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../i18n/LocaleContext';
 import Avatar from '../Avatar/Avatar';
 import './Navbar.css';
@@ -15,7 +16,21 @@ const Navbar = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const { unreadCount } = useNotifications();
   const { profile } = useProfile();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const { t } = useLocale();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login', { replace: true });
+  };
+
+  // Derive display name: prefer profile data, fall back to user metadata or email
+  const firstName = profile?.firstName || user?.user_metadata?.first_name || '';
+  const lastName  = profile?.lastName  || user?.user_metadata?.last_name  || '';
+  const displayName = (firstName || lastName)
+    ? `${firstName} ${lastName}`.trim()
+    : (user?.email ?? '');
 
   const NAV_LINKS = [
     { to: '/dashboard',    icon: 'dashboard',       label: t('nav.dashboard') },
@@ -90,9 +105,17 @@ const Navbar = () => {
 
           <div className="navbar-profile">
             <div className="navbar-profile-info">
-              <span className="navbar-profile-name">{profile.firstName} {profile.lastName}</span>
+              <span className="navbar-profile-name">{displayName}</span>
             </div>
             <Avatar size="md" className="navbar-profile-avatar" />
+            <button
+              className="navbar-logout-btn"
+              onClick={handleLogout}
+              aria-label="Sign out"
+              title="Sign out"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">logout</span>
+            </button>
           </div>
         </div>
       </div>

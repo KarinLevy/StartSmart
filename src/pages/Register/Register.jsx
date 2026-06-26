@@ -5,28 +5,6 @@ import Logo from '../../components/Logo/Logo';
 import { useLocale } from '../../i18n/LocaleContext';
 import '../Auth/Auth.css';
 
-/*
- * TODO (Backend): Implement POST /api/auth/register
- *
- * Request body:
- *   { "firstName", "lastName", "username", "email", "password", "phone" (optional) }
- *
- * Success response (201):
- *   {
- *     "token": "<jwt_or_session_token>",
- *     "user": { "id": "...", "name": "...", "email": "..." }
- *   }
- *
- * Error responses:
- *   409: { "message": "An account with this email already exists." }
- *   409: { "message": "This username is already taken." }
- *   422: { "message": "Validation error description" }
- *
- * Set VITE_API_BASE_URL in .env to point to the backend.
- * Until this endpoint exists every registration attempt will fail with a network error.
- */
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 /* Generate a consistent colour from a string */
 const AVATAR_COLORS = [
@@ -46,10 +24,10 @@ const PHONE_RE = /^[\d\s\-+().]{7,15}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Register = () => {
-  const navigate  = useNavigate();
-  const { login } = useAuth();
-  const fileRef   = useRef(null);
-  const { t } = useLocale();
+  const navigate   = useNavigate();
+  const { signUp } = useAuth();
+  const fileRef    = useRef(null);
+  const { t }      = useLocale();
 
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -126,27 +104,19 @@ const Register = () => {
     setSubmitting(true);
     setServerError('');
 
-    try {
-      const res  = await fetch(`${API_BASE}/api/auth/register`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ firstName, lastName, username, email, password, phone }),
-      });
-      const data = await res.json().catch(() => ({}));
+    const { error } = await signUp({ email, password, firstName, lastName, username, phone });
 
-      if (res.ok && data.token && data.user) {
-        login(data.token, data.user);
-        navigate('/dashboard', { replace: true });
+    if (error) {
+      const msg = error.message ?? '';
+      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already in use')) {
+        setServerError(t('register.err.emailExists'));
       } else {
-        setServerError(
-          data.message ||
-          (res.status === 409 ? t('register.err.emailExists') : t('common.error'))
-        );
-        setSubmitting(false);
+        setServerError(msg || t('common.error'));
       }
-    } catch {
-      setServerError(t('register.err.network'));
       setSubmitting(false);
+    } else {
+      // Supabase may require email confirmation — navigate to login with a notice
+      navigate('/login', { replace: true, state: { registered: true } });
     }
   };
 
