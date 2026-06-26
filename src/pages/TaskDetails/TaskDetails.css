@@ -178,11 +178,6 @@
   font-size: var(--font-size-label-sm); font-weight: 600;
 }
 
-/* Status chips */
-.chip-pending  { background: var(--color-surface-container-high); color: var(--color-on-surface-variant); }
-.chip-done     { background: var(--color-success-container); color: var(--color-success-on); }
-.chip-progress { background: var(--color-secondary-fixed); color: var(--color-on-secondary-container); }
-
 /* Bottom actions */
 .td-actions {
   display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;

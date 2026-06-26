@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import { useTasks } from '../../context/TasksContext';
-import '../../components/FocusMode/FocusMode.css';
 import Footer from '../../components/Footer/Footer';
 import './FocusMode.css';
 
@@ -59,7 +58,7 @@ const FocusMode = () => {
     return (
       <div className="focus-mode-layout">
         <Navbar />
-        <main className="focus-mode-main fm-center">
+        <main id="main-content" className="focus-mode-main fm-center">
           <div className="fm-error-card">
             <span className="material-symbols-outlined fm-error-icon" aria-hidden="true">search_off</span>
             <h2>Task not found</h2>
@@ -103,7 +102,7 @@ const FocusMode = () => {
     return (
       <div className="focus-mode-layout">
         <Navbar />
-        <main className="focus-mode-main fm-center">
+        <main id="main-content" className="focus-mode-main fm-center">
           <div className="fm-summary">
             <div className={`fm-summary-icon-wrap ${gap > 0 ? 'over' : 'done'}`} aria-hidden="true">
               <span className="material-symbols-outlined">{gap > 0 ? 'timer_off' : 'task_alt'}</span>
@@ -153,7 +152,7 @@ const FocusMode = () => {
   return (
     <div className="focus-mode-layout">
       <Navbar />
-      <main className="focus-mode-main">
+      <main id="main-content" className="focus-mode-main">
 
         {/* Task info banner */}
         <div className="focus-bento-card fm-task-banner">

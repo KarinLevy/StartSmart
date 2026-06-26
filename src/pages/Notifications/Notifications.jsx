@@ -10,7 +10,7 @@ const Notifications = () => {
   return (
     <div className="app-layout">
       <Navbar />
-      <main className="page-content notif-page">
+      <main id="main-content" className="page-content notif-page">
         <div className="notif-page-header">
           <div>
             <h1 className="notif-page-title">Notifications</h1>

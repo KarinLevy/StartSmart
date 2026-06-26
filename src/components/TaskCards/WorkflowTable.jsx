@@ -132,9 +132,9 @@ const WorkflowTable = () => {
                       {isDone ? (
                         <span className="material-symbols-outlined action-icon" aria-label="Completed">check_circle</span>
                       ) : task.status === 'in_progress' ? (
-                        <button className="action-btn" onClick={() => navigate(`/focus-mode/${task.id}`)}>Resume</button>
+                        <button className="action-btn" aria-label={`Resume focus on ${task.title}`} onClick={() => navigate(`/focus-mode/${task.id}`)}>Resume</button>
                       ) : (
-                        <button className="action-btn" onClick={() => navigate(`/focus-mode/${task.id}`)}>Start</button>
+                        <button className="action-btn" aria-label={`Start focus on ${task.title}`} onClick={() => navigate(`/focus-mode/${task.id}`)}>Start</button>
                       )}
                     </td>
                   </tr>

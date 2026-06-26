@@ -22,12 +22,12 @@ const Dashboard = () => {
     <div className="dashboard-layout">
       <Navbar />
 
-      <main className="dashboard-main">
+      <main id="main-content" className="dashboard-main">
         <div className="dashboard-content">
 
           <div className="dashboard-header">
             <div>
-              <h2 className="dashboard-greeting">{greet()}, Maya 👋</h2>
+              <h1 className="dashboard-greeting">{greet()}, Maya <span aria-hidden="true">👋</span></h1>
               <div className="dashboard-date">
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>calendar_today</span>
                 <span>{today}</span>

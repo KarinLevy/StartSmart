@@ -82,7 +82,7 @@ const Insights = () => {
   return (
     <div className="insights-layout">
       <Navbar />
-      <main className="insights-main">
+      <main id="main-content" className="insights-main">
         {/* Header */}
         <div className="ins-header">
           <div>

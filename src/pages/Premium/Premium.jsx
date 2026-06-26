@@ -42,7 +42,7 @@ const Premium = () => {
   return (
     <div className="prem-layout">
       <Navbar />
-      <main className="prem-main">
+      <main id="main-content" className="prem-main">
 
         {/* Hero */}
         <div className="prem-hero">

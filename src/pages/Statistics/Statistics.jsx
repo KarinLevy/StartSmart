@@ -78,7 +78,7 @@ const Statistics = () => {
   return (
     <div className="statistics-layout">
       <Navbar />
-      <main className="statistics-main">
+      <main id="main-content" className="statistics-main">
 
         {/* Header */}
         <section className="statistics-header">

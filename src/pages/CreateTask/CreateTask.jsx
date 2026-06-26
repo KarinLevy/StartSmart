@@ -14,7 +14,7 @@ const TIPS = [
 const CreateTask = () => (
   <div className="create-task-layout">
     <Navbar />
-    <main className="create-task-main">
+    <main id="main-content" className="create-task-main">
       <div className="create-task-inner">
 
         {/* Left: form */}
