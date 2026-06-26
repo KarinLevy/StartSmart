@@ -1,20 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
 import './TaskForm.css';
 
+/*
+ * TODO (Backend): When persisting tasks, POST /api/tasks with body:
+ * {
+ *   title:            string,
+ *   description:      string,
+ *   scheduledDate:    string (ISO 8601),
+ *   estimatedMinutes: number,
+ *   priorityHigh:     boolean,
+ *   tags:             Array<{ name: string, color: string }>
+ * }
+ *
+ * Tag storage options (choose before backend implementation):
+ *   Option A — inline on task:  tags: string[]  (simplest, no join table)
+ *   Option B — normalized:      Tag { id, user_id, name, color, created_at }
+ *                               TaskTag { task_id, tag_id }
+ *
+ * Current frontend shape uses { name, color } objects.
+ * Upgrading to Option B only requires a data-layer change, not UI changes.
+ */
+
+const TAG_COLOR   = '#6b38d4';
+const TAG_MAX_LEN = 24;
+
 const TaskForm = () => {
   const { addTask } = useTasks();
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
+  const tagInputRef = useRef(null);
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title,         setTitle]        = useState('');
+  const [description,   setDescription]  = useState('');
   const [scheduledDate, setScheduledDate] = useState('');
-  const [estHours, setEstHours] = useState('');
-  const [estMins, setEstMins] = useState('');
-  const [priorityHigh, setPriorityHigh] = useState(false);
-  const [tags, setTags] = useState([]);
-  const [tagInput, setTagInput] = useState('');
+  const [estHours,      setEstHours]     = useState('');
+  const [estMins,       setEstMins]      = useState('');
+  const [priorityHigh,  setPriorityHigh] = useState(false);
+  const [tags,          setTags]         = useState([]);
+  const [tagInput,      setTagInput]     = useState('');
+  const [tagError,      setTagError]     = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,9 +51,39 @@ const TaskForm = () => {
 
   const addTag = () => {
     const name = tagInput.trim();
-    if (!name || tags.find((t) => t.name === name)) return;
-    setTags((prev) => [...prev, { name, color: '#6b38d4' }]);
+    setTagError('');
+
+    if (!name) {
+      setTagError('Please enter a tag name.');
+      tagInputRef.current?.focus();
+      return;
+    }
+    if (name.length > TAG_MAX_LEN) {
+      setTagError(`Tags can be at most ${TAG_MAX_LEN} characters.`);
+      return;
+    }
+    if (tags.some((t) => t.name.toLowerCase() === name.toLowerCase())) {
+      setTagError(`"${name}" is already added.`);
+      return;
+    }
+
+    setTags((prev) => [...prev, { name, color: TAG_COLOR }]);
     setTagInput('');
+    tagInputRef.current?.focus();
+  };
+
+  const removeTag = (name) => {
+    setTags((prev) => prev.filter((t) => t.name !== name));
+  };
+
+  const handleTagKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+    if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+      removeTag(tags[tags.length - 1].name);
+    }
   };
 
   return (
@@ -109,32 +164,72 @@ const TaskForm = () => {
           </div>
         </div>
 
-        {tags.length > 0 && (
-          <div className="form-tags-preview">
+        {/* ── Tags ── */}
+        <div className="form-group">
+          <label className="form-label" htmlFor="tag-input">Tags</label>
+          <p className="form-field-hint">
+            Press <kbd className="kbd">Enter</kbd> or click <strong>Add</strong> to create a tag.
+            <kbd className="kbd">Backspace</kbd> on empty input removes the last tag.
+          </p>
+
+          <div
+            className={`tag-field-box${tagError ? ' tag-field-box--error' : ''}`}
+            onClick={() => tagInputRef.current?.focus()}
+            role="group"
+            aria-label="Tag chips"
+          >
             {tags.map((t) => (
-              <span key={t.name} className="form-tag-chip" style={{ background: t.color + '20', color: t.color }}>
-                {t.name}
-                <button type="button" aria-label={`Remove ${t.name}`} onClick={() => setTags((p) => p.filter((x) => x.name !== t.name))}>×</button>
+              <span key={t.name} className="tag-chip">
+                <span className="material-symbols-outlined tag-chip-icon" aria-hidden="true">label</span>
+                <span className="tag-chip-name">{t.name}</span>
+                <button
+                  type="button"
+                  className="tag-chip-remove"
+                  aria-label={`Remove tag ${t.name}`}
+                  onClick={(e) => { e.stopPropagation(); removeTag(t.name); }}
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
               </span>
             ))}
-          </div>
-        )}
-
-        <div className="form-options">
-          <div className="form-tag-input-row">
             <input
-              className="form-input form-tag-input"
-              placeholder="Tag name…"
+              ref={tagInputRef}
+              id="tag-input"
+              className="tag-inline-input"
               type="text"
+              placeholder={tags.length === 0 ? 'e.g., work, study, urgent…' : 'Add another…'}
               value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+              maxLength={TAG_MAX_LEN + 1}
+              onChange={(e) => { setTagInput(e.target.value); setTagError(''); }}
+              onKeyDown={handleTagKeyDown}
+              aria-describedby={tagError ? 'tag-error' : undefined}
+              aria-invalid={!!tagError}
             />
-            <button className="option-btn option-btn-primary" type="button" onClick={addTag}>
-              <span className="material-symbols-outlined option-icon">label</span>
-              Add Tag
+          </div>
+
+          <div className="tag-field-footer">
+            {tagError ? (
+              <p id="tag-error" className="tag-error" role="alert">
+                <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                {tagError}
+              </p>
+            ) : (
+              <span className="tag-count" aria-live="polite">
+                {tags.length > 0 ? `${tags.length} tag${tags.length !== 1 ? 's' : ''} added` : ''}
+              </span>
+            )}
+            <button
+              type="button"
+              className="tag-add-btn"
+              onClick={addTag}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">add</span>
+              Add
             </button>
           </div>
+        </div>
+
+        <div className="form-options">
           <button
             className={`option-btn ${priorityHigh ? 'option-btn-active' : 'option-btn-secondary'}`}
             type="button"
