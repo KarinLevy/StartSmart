@@ -163,6 +163,24 @@ const TaskForm = () => {
     [tagInput, existingTags, tags]
   );
 
+  // Read "Plan Again" prefill from sessionStorage (written by TaskHistory on duplicate)
+  useEffect(() => {
+    const raw = sessionStorage.getItem('ss_create_prefill');
+    if (!raw) return;
+    sessionStorage.removeItem('ss_create_prefill');
+    try {
+      const p = JSON.parse(raw);
+      if (p.title)            setTitle(p.title);
+      if (p.description)      setDescription(p.description);
+      if (p.priorityHigh)     setPriorityHigh(p.priorityHigh);
+      if (p.tags?.length)     setTags(p.tags);
+      if (p.estimatedMinutes) {
+        setEstHours(String(Math.floor(p.estimatedMinutes / 60) || ''));
+        setEstMins(String(p.estimatedMinutes % 60 || ''));
+      }
+    } catch { /* ignore malformed prefill */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Recompute auto-color whenever the input changes, but only if the user
   // hasn't manually picked a color for this typing session.
   useEffect(() => {
