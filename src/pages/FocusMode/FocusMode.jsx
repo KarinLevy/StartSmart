@@ -23,7 +23,7 @@ const nowISO  = () => new Date().toISOString();
  */
 
 // ── Confirmation dialog ───────────────────────────────────────────────────────
-function CancelDialog({ onConfirm, onKeepWorking }) {
+function CancelDialog({ onConfirm, onKeepWorking, t }) {
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onKeepWorking(); };
     document.addEventListener('keydown', handler);
@@ -36,10 +36,8 @@ function CancelDialog({ onConfirm, onKeepWorking }) {
         <div className="fm-dialog-icon" aria-hidden="true">
           <span className="material-symbols-outlined">timer_off</span>
         </div>
-        <h2 id="fm-dialog-title" className="fm-dialog-title">Cancel this session?</h2>
-        <p className="fm-dialog-body">
-          Your progress will not be saved. The task will be restored to its previous status.
-        </p>
+        <h2 id="fm-dialog-title" className="fm-dialog-title">{t('focus.cancelTitle')}</h2>
+        <p className="fm-dialog-body">{t('focus.cancelBody')}</p>
         <div className="fm-dialog-actions">
           <button
             type="button"
@@ -48,7 +46,7 @@ function CancelDialog({ onConfirm, onKeepWorking }) {
             autoFocus
           >
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
-            Cancel Session
+            {t('focus.cancelSession')}
           </button>
           <button
             type="button"
@@ -56,7 +54,7 @@ function CancelDialog({ onConfirm, onKeepWorking }) {
             onClick={onKeepWorking}
           >
             <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
-            Keep Working
+            {t('focus.keepWorking')}
           </button>
         </div>
       </div>
@@ -271,9 +269,9 @@ const FocusMode = () => {
   if (finished) {
     const gap = actualMin - task.estimatedMinutes;
     const insight =
-      gap === 0 ? 'Perfect estimate — you nailed it!' :
-      gap > 0   ? `You went over by ${gap} minute${gap !== 1 ? 's' : ''}. Consider adding a small buffer next time.` :
-                  `You finished ${Math.abs(gap)} minute${Math.abs(gap) !== 1 ? 's' : ''} early — great pacing!`;
+      gap === 0 ? t('focus.perfectEst') :
+      gap > 0   ? t('focus.wentOver').replace('{n}', gap) :
+                  t('focus.finishedEarly').replace('{n}', Math.abs(gap));
 
     return (
       <div className="focus-mode-layout">
@@ -283,25 +281,25 @@ const FocusMode = () => {
             <div className={`fm-summary-icon-wrap ${gap > 0 ? 'over' : 'done'}`} aria-hidden="true">
               <span className="material-symbols-outlined">{gap > 0 ? 'timer_off' : 'task_alt'}</span>
             </div>
-            <h2 className="fm-summary-title">Session complete!</h2>
+            <h2 className="fm-summary-title">{t('focus.sessionComplete')}</h2>
             <p className="fm-summary-task">{task.title}</p>
 
             <div className="fm-summary-stats">
               <div className="fm-stat">
                 <span className="fm-stat-val">{fmtMin(task.estimatedMinutes)}</span>
-                <span className="fm-stat-key">Planned</span>
+                <span className="fm-stat-key">{t('focus.planned')}</span>
               </div>
               <div className="fm-stat-divider" aria-hidden="true" />
               <div className="fm-stat">
                 <span className="fm-stat-val">{fmtMin(actualMin)}</span>
-                <span className="fm-stat-key">Actual</span>
+                <span className="fm-stat-key">{t('stats.actual')}</span>
               </div>
               <div className="fm-stat-divider" aria-hidden="true" />
               <div className="fm-stat">
                 <span className={`fm-stat-val ${gap > 0 ? 'over' : 'under'}`}>
                   {gap > 0 ? `+${gap}m` : `${gap}m`}
                 </span>
-                <span className="fm-stat-key">Gap</span>
+                <span className="fm-stat-key">{t('stats.gap')}</span>
               </div>
             </div>
 
@@ -310,11 +308,11 @@ const FocusMode = () => {
             <div className="fm-summary-actions">
               <Link to="/dashboard" className="btn btn-secondary">
                 <span className="material-symbols-outlined" aria-hidden="true">dashboard</span>
-                Dashboard
+                {t('focus.dashboard')}
               </Link>
               <Link to="/insights" className="btn btn-primary">
                 <span className="material-symbols-outlined" aria-hidden="true">insights</span>
-                View insights
+                {t('focus.viewInsights')}
               </Link>
             </div>
           </div>
@@ -333,7 +331,7 @@ const FocusMode = () => {
         {/* Task info banner */}
         <div className="focus-bento-card fm-task-banner">
           <div className="fm-task-banner-left">
-            <span className="fm-now-label">Now focusing</span>
+            <span className="fm-now-label">{t('focus.nowFocusing')}</span>
             <h2 className="fm-task-title">{task.title}</h2>
             {task.description && <p className="fm-task-desc">{task.description}</p>}
           </div>
@@ -341,12 +339,12 @@ const FocusMode = () => {
             {task.priorityHigh && (
               <span className="chip chip-priority">
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">flag</span>
-                High priority
+                {t('focus.highPriority')}
               </span>
             )}
             <div className="fm-est-badge">
               <span className="material-symbols-outlined" aria-hidden="true">hourglass_top</span>
-              {fmtMin(task.estimatedMinutes)} goal
+              {fmtMin(task.estimatedMinutes)} {t('focus.goal')}
             </div>
           </div>
         </div>
@@ -384,10 +382,12 @@ const FocusMode = () => {
               {fmtSecs(elapsed)}
             </span>
             <span className="fm-timer-status">
-              {running ? 'Focusing…' : elapsed === 0 ? 'Ready' : 'Paused'}
+              {running ? t('focus.statusFocusing') : elapsed === 0 ? t('focus.statusReady') : t('focus.statusPaused')}
             </span>
             <span className="fm-remaining" aria-live="off">
-              {isOver ? `${fmtSecs(remaining)} elapsed` : `${fmtSecs(remaining)} left`}
+              {isOver
+                ? t('focus.elapsed').replace('{time}', fmtSecs(remaining))
+                : t('focus.left').replace('{time}', fmtSecs(remaining))}
             </span>
           </div>
         </div>
@@ -397,7 +397,7 @@ const FocusMode = () => {
           <div className="fm-over-banner" role="status" aria-live="polite">
             <span className="material-symbols-outlined" aria-hidden="true">trending_up</span>
             <span>
-              <strong>+{overMins > 0 ? `${overMins} min` : 'less than 1 min'}</strong> over your estimate — keep going, you're almost there!
+              <strong>+{overMins > 0 ? `${overMins} min` : t('focus.lessThan1Min')}</strong> {t('focus.overBannerSuffix')}
             </span>
           </div>
         )}
@@ -406,7 +406,7 @@ const FocusMode = () => {
         {elapsed > 0 && (
           <div className="fm-gap-bar-wrap">
             <span className="fm-gap-bar-label">
-              {isOver ? 'Over estimate' : 'Progress toward estimate'}
+              {isOver ? t('focus.overEstimate') : t('focus.progressEst')}
             </span>
             <div
               className="fm-gap-bar-track"
@@ -437,7 +437,7 @@ const FocusMode = () => {
                 aria-label={elapsed === 0 ? 'Start timer' : 'Resume timer'}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
-                {elapsed === 0 ? 'Start' : 'Resume'}
+                {elapsed === 0 ? t('focus.start') : t('focus.resume')}
               </button>
             ) : (
               <button
@@ -446,7 +446,7 @@ const FocusMode = () => {
                 aria-label="Pause timer"
               >
                 <span className="material-symbols-outlined" aria-hidden="true">pause</span>
-                Pause
+                {t('focus.pause')}
               </button>
             )}
             <button
@@ -456,7 +456,7 @@ const FocusMode = () => {
               aria-label="Finish session and save progress"
             >
               <span className="material-symbols-outlined" aria-hidden="true">check</span>
-              Finish
+              {t('focus.finish')}
             </button>
           </div>
 
@@ -468,7 +468,7 @@ const FocusMode = () => {
               aria-label="Cancel and discard this focus session"
             >
               <span className="material-symbols-outlined" aria-hidden="true">close</span>
-              Discard session
+              {t('focus.discardSession')}
             </button>
           )}
         </div>
@@ -485,6 +485,7 @@ const FocusMode = () => {
         <CancelDialog
           onConfirm={handleCancelConfirm}
           onKeepWorking={() => setShowCancel(false)}
+          t={t}
         />
       )}
     </div>

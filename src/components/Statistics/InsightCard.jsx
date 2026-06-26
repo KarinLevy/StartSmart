@@ -1,26 +1,28 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocale } from '../../i18n/LocaleContext';
 import './Statistics.css';
 
 const InsightCard = ({ tasks = [] }) => {
   const navigate = useNavigate();
-  const done = tasks.filter((t) => t.status === 'done' && t.estimatedMinutes && t.actualMinutes);
+  const { t } = useLocale();
+  const done = tasks.filter((task) => task.status === 'done' && task.estimatedMinutes && task.actualMinutes);
 
   let efficiency = null;
   let avgGap = null;
-  let recommendation = 'Complete a few tasks to unlock personalised insights.';
+  let recommendation = t('insightCard.noData');
   let effLabel = null;
 
   if (done.length > 0) {
-    const totalEst = done.reduce((s, t) => s + t.estimatedMinutes, 0);
-    const totalAct = done.reduce((s, t) => s + t.actualMinutes, 0);
+    const totalEst = done.reduce((s, task) => s + task.estimatedMinutes, 0);
+    const totalAct = done.reduce((s, task) => s + task.actualMinutes, 0);
     efficiency = Math.min(Math.round((totalEst / totalAct) * 100), 100);
-    avgGap = Math.round(done.reduce((s, t) => s + (t.gap || 0), 0) / done.length);
+    avgGap = Math.round(done.reduce((s, task) => s + (task.gap || 0), 0) / done.length);
 
-    if (efficiency >= 90)       { effLabel = 'Excellent'; recommendation = 'You estimate time very accurately. Keep scheduling ambitious focus sessions.'; }
-    else if (efficiency >= 75)  { effLabel = 'Good';      recommendation = 'Your estimates are close. Try adding a 10–15 min buffer to complex tasks.'; }
-    else if (efficiency >= 60)  { effLabel = 'Fair';      recommendation = 'Tasks are running over consistently. Break large tasks into sub-tasks.'; }
-    else                        { effLabel = 'Needs work'; recommendation = 'Your estimates are significantly under. Review past gaps and adjust baselines.'; }
+    if (efficiency >= 90)       { effLabel = t('insightCard.excellent'); recommendation = t('insightCard.recExcellent'); }
+    else if (efficiency >= 75)  { effLabel = t('insightCard.good');      recommendation = t('insightCard.recGood'); }
+    else if (efficiency >= 60)  { effLabel = t('insightCard.fair');      recommendation = t('insightCard.recFair'); }
+    else                        { effLabel = t('insightCard.needsWork'); recommendation = t('insightCard.recNeedsWork'); }
   }
 
   return (
@@ -30,14 +32,14 @@ const InsightCard = ({ tasks = [] }) => {
 
       <div className="insight-header">
         <span className="material-symbols-outlined text-white" aria-hidden="true">lightbulb</span>
-        <h3 className="insight-title">Insights</h3>
+        <h3 className="insight-title">{t('insightCard.title')}</h3>
       </div>
 
       <div className="insight-content">
         {efficiency !== null ? (
           <>
             <div className="insight-metric">
-              <p className="insight-metric-label">Estimation Accuracy</p>
+              <p className="insight-metric-label">{t('insightCard.estAccuracy')}</p>
               <div className="insight-metric-value-container">
                 <span className="insight-metric-value">{efficiency}%</span>
                 <span className="insight-metric-badge">{effLabel}</span>
@@ -45,20 +47,20 @@ const InsightCard = ({ tasks = [] }) => {
             </div>
 
             <div className="insight-metric">
-              <p className="insight-metric-label">Average Gap</p>
+              <p className="insight-metric-label">{t('insightCard.avgGap')}</p>
               <div className="insight-metric-value-container">
                 <span className="insight-metric-value" style={{ fontSize: '1.5rem' }}>
                   {avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`}
                 </span>
                 <span className="insight-metric-badge">
-                  {avgGap > 0 ? 'over' : avgGap < 0 ? 'under' : 'on target'}
+                  {avgGap > 0 ? t('insightCard.over') : avgGap < 0 ? t('insightCard.under') : t('insightCard.onTarget')}
                 </span>
               </div>
             </div>
           </>
         ) : (
           <div className="insight-metric">
-            <p className="insight-metric-label">Estimation Accuracy</p>
+            <p className="insight-metric-label">{t('insightCard.estAccuracy')}</p>
             <div className="insight-metric-value-container">
               <span className="insight-metric-value">—</span>
             </div>
@@ -66,13 +68,13 @@ const InsightCard = ({ tasks = [] }) => {
         )}
 
         <div className="insight-recommendation">
-          <p className="insight-rec-label">Recommendation</p>
+          <p className="insight-rec-label">{t('insightCard.recommendation')}</p>
           <p className="insight-rec-text">{recommendation}</p>
         </div>
       </div>
 
       <button className="insight-btn" onClick={() => navigate('/insights')}>
-        View All Insights
+        {t('insightCard.viewAll')}
       </button>
     </div>
   );

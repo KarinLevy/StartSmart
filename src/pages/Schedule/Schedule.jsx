@@ -15,11 +15,6 @@ const taskAccentColor = (task) => {
   return DEFAULT_ACCENT;
 };
 
-// ── Constants ──────────────────────────────────────────────────────────────────
-const DAY_NAMES_FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const DAY_NAMES_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 // 25 hour marks: 0–23 are full rows, 24 is the closing midnight line
 const DAY_HOURS = Array.from({ length: 25 }, (_, i) => i);
 // Pixel height of one hour on the timeline canvas
@@ -60,27 +55,7 @@ const getTaskMinutes = (task) => {
 
 const statusCls = (s) => s === 'done' ? 'sc-done' : s === 'in_progress' ? 'sc-progress' : 'sc-pending';
 
-// ── Smart labels ───────────────────────────────────────────────────────────────
-// ── Centralised header label helper ──────────────────────────────────────────
-// Returns { title, subtitle } — title and subtitle are NEVER the same string.
-//
-// Daily:
-//   smart day  → { title: 'Today',     subtitle: 'Friday, June 26' }
-//   other day  → { title: 'Mon, Jun 30', subtitle: 'Daily view' }
-//
-// Weekly:
-//   smart week → { title: 'This Week', subtitle: 'Jun 22 – Jun 28' }
-//   other week → { title: 'Jun 22 – Jun 28', subtitle: 'Weekly view' }
-//
-// Monthly:
-//   smart month → { title: 'This Month', subtitle: 'June 2026' }
-//   other month → { title: 'June 2026',  subtitle: 'Monthly view' }
-
-const weekRange = (monday) => {
-  const end = addDays(monday, 6);
-  return `${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-};
-
+// ── Header label helper ────────────────────────────────────────────────────────
 const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
   if (period === 'Daily') {
     const todayKey = toKey(new Date());
@@ -93,13 +68,13 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
       diff === 1 ? t('schedule.tomorrow') : null;
 
     if (smartTitle) {
-      const subtitle = viewDate.toLocaleDateString('en-US', {
+      const subtitle = viewDate.toLocaleDateString(undefined, {
         weekday: 'long', month: 'long', day: 'numeric',
       });
       return { title: smartTitle, subtitle };
     }
     return {
-      title: viewDate.toLocaleDateString('en-US', {
+      title: viewDate.toLocaleDateString(undefined, {
         weekday: 'short', month: 'short', day: 'numeric',
       }),
       subtitle: t('schedule.daily'),
@@ -114,17 +89,19 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
       diff === -7 ? t('schedule.lastWeek') :
       diff === 7 ? t('schedule.nextWeek') : null;
 
+    const end = addDays(monday, 6);
+    const weekRangeStr = `${monday.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
     if (smartTitle) {
-      return { title: smartTitle, subtitle: weekRange(monday) };
+      return { title: smartTitle, subtitle: weekRangeStr };
     }
-    return { title: weekRange(monday), subtitle: t('schedule.weekly') };
+    return { title: weekRangeStr, subtitle: t('schedule.weekly') };
   }
 
   // Monthly
   const { year, month } = monthYear;
   const n = new Date();
   const ny = n.getFullYear(), nm = n.getMonth();
-  const fullMonthYear = `${MONTHS[month]} ${year}`;
+  const fullMonthYear = `${t(`schedule.month${month}`)} ${year}`;
   const prev = new Date(ny, nm - 1, 1);
   const next = new Date(ny, nm + 1, 1);
   const smartTitle =
@@ -139,10 +116,8 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
 };
 
 // ── DailyView ──────────────────────────────────────────────────────────────────
-// Continuous absolute-positioned canvas: each hour = HOUR_PX pixels.
-// Tasks are positioned at (startMinutes / 60) * HOUR_PX from the top
-// and sized by (durationMinutes / 60) * HOUR_PX.
 const DailyView = ({ viewDate, tasks }) => {
+  const { t } = useLocale();
   const todayKey = toKey(new Date());
   const key      = toKey(viewDate);
   const isToday  = key === todayKey;
@@ -187,7 +162,7 @@ const DailyView = ({ viewDate, tasks }) => {
             >
               <div className="sc-hour-label">
                 <span>{fmtHour24(h)}</span>
-                {isNowHour && <span className="sc-now-badge" aria-label="Current hour">Now</span>}
+                {isNowHour && <span className="sc-now-badge" aria-label="Current hour">{t('schedule.now')}</span>}
               </div>
               <div className="sc-hour-line" aria-hidden="true" />
             </div>
@@ -241,7 +216,7 @@ const DailyView = ({ viewDate, tasks }) => {
         <div className="sc-unslotted">
           <div className="sc-unslotted-label">
             <span className="material-symbols-outlined" aria-hidden="true">schedule</span>
-            Unscheduled
+            {t('schedule.unscheduled')}
           </div>
           <div className="sc-unslotted-tasks">
             {unslotted.map((t) => {
@@ -266,10 +241,10 @@ const DailyView = ({ viewDate, tasks }) => {
       {dayTasks.length === 0 && (
         <div className="sc-empty-state">
           <span className="material-symbols-outlined sc-empty-icon" aria-hidden="true">today</span>
-          <p>No tasks scheduled{isToday ? ' for today' : ' for this day'}.</p>
+          <p>{isToday ? t('schedule.emptyToday') : t('schedule.emptyDay')}</p>
           <Link to="/create-task" className="btn btn-primary">
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
-            Create Task
+            {t('schedule.emptyBtn')}
           </Link>
         </div>
       )}
@@ -279,8 +254,10 @@ const DailyView = ({ viewDate, tasks }) => {
 
 // ── WeeklyView ─────────────────────────────────────────────────────────────────
 const WeeklyView = ({ monday, tasks, onDayClick }) => {
+  const { t, isRTL } = useLocale();
   const todayKey   = toKey(new Date());
   const days       = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+  const DAY_SHORT = [t('schedule.sun'), t('schedule.mon'), t('schedule.tue'), t('schedule.wed'), t('schedule.thu'), t('schedule.fri'), t('schedule.sat')];
   const tasksByDate = {};
   tasks.forEach((t) => {
     if (!t.scheduledDate) return;
@@ -295,10 +272,10 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
       {weekTotal === 0 && (
         <div className="sc-empty-state sc-empty-inline">
           <span className="material-symbols-outlined sc-empty-icon" aria-hidden="true">calendar_view_week</span>
-          <p>No tasks scheduled this week.</p>
+          <p>{t('schedule.emptyWeek')}</p>
           <Link to="/create-task" className="btn btn-primary">
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
-            Create Task
+            {t('schedule.emptyBtn')}
           </Link>
         </div>
       )}
@@ -316,12 +293,12 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
               aria-label={`${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}, ${dayTasks.length} task${dayTasks.length !== 1 ? 's' : ''} — click to view`}
             >
               <div className="sc-day-head">
-                <span className="sc-day-name">{DAY_NAMES_SHORT[d.getDay()]}</span>
+                <span className="sc-day-name">{DAY_SHORT[d.getDay()]}</span>
                 <span className={`sc-day-date${isToday ? ' today-dot' : ''}`}>{d.getDate()}</span>
               </div>
               <div className="sc-day-body">
                 {dayTasks.length === 0 ? (
-                  <span className="sc-day-empty">No tasks</span>
+                  <span className="sc-day-empty">{t('schedule.noTasks')}</span>
                 ) : (
                   dayTasks.map((t) => {
                     const accent = taskAccentColor(t);
@@ -342,8 +319,8 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
               </div>
               {dayTasks.length > 0 && (
                 <div className="sc-day-footer">
-                  <span className="sc-day-count">{dayTasks.length} task{dayTasks.length !== 1 ? 's' : ''}</span>
-                  <span className="material-symbols-outlined sc-day-arrow" aria-hidden="true">arrow_forward</span>
+                  <span className="sc-day-count">{dayTasks.length} {dayTasks.length !== 1 ? t('schedule.tasks') : t('schedule.task')}</span>
+                  <span className="material-symbols-outlined sc-day-arrow flip-rtl" aria-hidden="true">arrow_forward</span>
                 </div>
               )}
             </button>
@@ -356,6 +333,7 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
 
 // ── MonthlyView ────────────────────────────────────────────────────────────────
 const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
+  const { t } = useLocale();
   const todayKey = toKey(new Date());
   const firstDay = new Date(year, month, 1);
   const lastDay  = new Date(year, month + 1, 0);
@@ -382,16 +360,16 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
       {monthTotal === 0 && (
         <div className="sc-empty-state sc-empty-inline">
           <span className="material-symbols-outlined sc-empty-icon" aria-hidden="true">calendar_month</span>
-          <p>No tasks scheduled this month.</p>
+          <p>{t('schedule.emptyMonth')}</p>
           <Link to="/create-task" className="btn btn-primary">
             <span className="material-symbols-outlined" aria-hidden="true">add</span>
-            Create Task
+            {t('schedule.emptyBtn')}
           </Link>
         </div>
       )}
       <div className="sc-month-dow-row">
-        {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((n) => (
-          <div key={n} className="sc-month-dow">{n}</div>
+        {['mon','tue','wed','thu','fri','sat','sun'].map((d) => (
+          <div key={d} className="sc-month-dow">{t(`schedule.${d}`)}</div>
         ))}
       </div>
       <div className="sc-month-grid">
@@ -425,7 +403,7 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
                 );
               })}
               {dayTasks.length > MAX && (
-                <span className="sc-month-more">+{dayTasks.length - MAX} more</span>
+                <span className="sc-month-more">{t('schedule.moreItems').replace('{n}', dayTasks.length - MAX)}</span>
               )}
             </button>
           );
@@ -438,7 +416,7 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
 // ── Schedule (main) ────────────────────────────────────────────────────────────
 const Schedule = () => {
   const { tasks, loading } = useTasks();
-  const { t } = useLocale();
+  const { t, isRTL } = useLocale();
 
   // Period & pivot state
   const [period, setPeriod] = useState('Weekly');
@@ -515,7 +493,7 @@ const Schedule = () => {
       actions={
         <Link to="/create-task" className="btn btn-primary">
           <span className="material-symbols-outlined" aria-hidden="true">add</span>
-          New task
+          {t('schedule.newTask')}
         </Link>
       }
     >
@@ -527,7 +505,11 @@ const Schedule = () => {
       {/* Toolbar */}
       <div className="sc-toolbar surface-card">
         <div className="sc-period-toggle" role="tablist" aria-label="View period">
-          {['Daily', 'Weekly', 'Monthly'].map((p) => (
+          {[
+            { key: 'Daily', label: t('schedule.daily') },
+            { key: 'Weekly', label: t('schedule.weekly') },
+            { key: 'Monthly', label: t('schedule.monthly') },
+          ].map(({ key: p, label }) => (
             <button
               key={p}
               role="tab"
@@ -535,7 +517,7 @@ const Schedule = () => {
               className={`sc-period-btn${period === p ? ' active' : ''}`}
               onClick={() => setPeriod(p)}
             >
-              {p}
+              {label}
             </button>
           ))}
         </div>
@@ -546,7 +528,7 @@ const Schedule = () => {
             onClick={() => nav(-1)}
             aria-label={`Previous ${period.toLowerCase()}`}
           >
-            <span className="material-symbols-outlined">chevron_left</span>
+            <span className="material-symbols-outlined">{isRTL ? 'chevron_right' : 'chevron_left'}</span>
           </button>
 
           <div className="sc-range" aria-live="polite">
@@ -561,26 +543,26 @@ const Schedule = () => {
             onClick={() => nav(1)}
             aria-label={`Next ${period.toLowerCase()}`}
           >
-            <span className="material-symbols-outlined">chevron_right</span>
+            <span className="material-symbols-outlined">{isRTL ? 'chevron_left' : 'chevron_right'}</span>
           </button>
         </div>
 
         <button className="sc-today-btn" onClick={goToday} aria-label="Jump to today">
           <span className="material-symbols-outlined" aria-hidden="true">today</span>
-          Today
+          {t('schedule.today')}
         </button>
       </div>
 
       {/* Filter bar */}
       <div className="sc-filter-bar surface-card">
         <div className="sc-filter-section">
-          <span className="sc-filter-label" id="status-filter-label">Status</span>
+          <span className="sc-filter-label" id="status-filter-label">{t('schedule.statusLabel')}</span>
           <div className="sc-filter-group" role="group" aria-labelledby="status-filter-label">
             {[
-              { v: 'all', label: 'All' },
-              { v: 'pending', label: 'Pending' },
-              { v: 'in_progress', label: 'In Progress' },
-              { v: 'done', label: 'Done' },
+              { v: 'all', label: t('schedule.all') },
+              { v: 'pending', label: t('schedule.pending') },
+              { v: 'in_progress', label: t('schedule.inProgress') },
+              { v: 'done', label: t('schedule.done') },
             ].map(({ v, label }) => (
               <button
                 key={v}
@@ -603,7 +585,7 @@ const Schedule = () => {
             aria-pressed={filterPriority}
           >
             <span className="material-symbols-outlined" aria-hidden="true">flag</span>
-            High Priority
+            {t('schedule.highPriority')}
           </button>
         </div>
 
@@ -611,14 +593,14 @@ const Schedule = () => {
           <>
             <div className="sc-filter-sep" aria-hidden="true" />
             <div className="sc-filter-section">
-              <span className="sc-filter-label" id="tag-filter-label">Tags</span>
+              <span className="sc-filter-label" id="tag-filter-label">{t('schedule.tagsLabel')}</span>
               <div className="sc-filter-group" role="group" aria-labelledby="tag-filter-label">
                 <button
                   className={`sc-filter-btn${!filterTag ? ' active' : ''}`}
                   onClick={() => setFilterTag('')}
                   aria-pressed={!filterTag}
                 >
-                  All
+                  {t('schedule.all')}
                 </button>
                 {allTagNames.map((name) => (
                   <button
@@ -642,7 +624,7 @@ const Schedule = () => {
             aria-label="Clear all filters"
           >
             <span className="material-symbols-outlined" aria-hidden="true">close</span>
-            Clear
+            {t('schedule.clear')}
           </button>
         )}
       </div>

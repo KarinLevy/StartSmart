@@ -386,3 +386,8 @@ html {
 [dir="rtl"] .pr-actions {
   flex-direction: row-reverse;
 }
+
+/* RTL directional icon flip */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}

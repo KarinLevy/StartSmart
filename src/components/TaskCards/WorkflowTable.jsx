@@ -163,7 +163,7 @@ const WorkflowTable = () => {
       <div className="workflow-footer">
         <Link to="/task-history" className="workflow-footer-link">
           {t('workflow.viewAll')}
-          <span className="material-symbols-outlined icon-sm" aria-hidden="true">arrow_forward</span>
+          <span className="material-symbols-outlined icon-sm flip-rtl" aria-hidden="true">arrow_forward</span>
         </Link>
       </div>
     </div>
