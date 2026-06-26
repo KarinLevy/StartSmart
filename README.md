@@ -94,7 +94,7 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 
 The database was designed in Supabase and includes normalized tables with defined relationships, primary keys, foreign keys, and Row Level Security policies that enforce per-user data isolation at the database level.
 
-![ERD](docs/ERD.png)
+![ERD]
 <img width="2846" height="1808" alt="image" src="https://github.com/user-attachments/assets/70cb8db3-7783-488b-b21f-1b59ef6f64af" />
 
 
