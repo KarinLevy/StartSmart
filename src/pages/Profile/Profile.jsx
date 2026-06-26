@@ -4,6 +4,12 @@ import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
 import Avatar from '../../components/Avatar/Avatar';
+import {
+  updateProfile,
+  uploadAvatar,
+  changePassword,
+  deleteAccount,
+} from '../../services/userService';
 import './Profile.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -14,11 +20,17 @@ const fmtMin = (m) => {
   return `${m}m`;
 };
 
-const validatePhone = (ph) => {
-  if (!ph) return null;
-  const digits = ph.replace(/\D/g, '');
-  if (digits.length < 7 || digits.length > 15) return 'Enter a valid phone number (7–15 digits).';
-  return null;
+const validateProfile = ({ firstName, lastName, email, phone }) => {
+  const errs = {};
+  if (!firstName.trim()) errs.firstName = 'First name is required.';
+  if (!lastName.trim())  errs.lastName  = 'Last name is required.';
+  if (!email.trim())     errs.email     = 'Email is required.';
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Enter a valid email address.';
+  if (phone) {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 7 || digits.length > 15) errs.phone = 'Enter a valid phone number (7–15 digits).';
+  }
+  return errs;
 };
 
 // ── Stat Card ─────────────────────────────────────────────────────────────────
@@ -40,14 +52,19 @@ const StatCard = ({ icon, value, label, sublabel, onClick, colorClass = '' }) =>
 
 // ── Achievement Card ──────────────────────────────────────────────────────────
 
-const AchievementCard = ({ icon, title, description, unlocked = false, value = null }) => (
+const AchievementCard = ({ icon, title, description, unlocked = false }) => (
   <div className={`pr-achievement-card${unlocked ? ' unlocked' : ''}`} aria-label={`${title}${unlocked ? ', unlocked' : ', locked'}`}>
     <div className="pr-achievement-icon" aria-hidden="true">{icon}</div>
-    {value !== null && <div className="pr-achievement-value">{value}</div>}
     <div className="pr-achievement-title">{title}</div>
     <div className="pr-achievement-desc">{description}</div>
     {!unlocked && <span className="pr-achievement-lock material-symbols-outlined" aria-hidden="true">lock</span>}
   </div>
+);
+
+// ── Spinner ───────────────────────────────────────────────────────────────────
+
+const Spinner = () => (
+  <span className="pr-spinner" aria-hidden="true" />
 );
 
 // ── Change Password Modal ─────────────────────────────────────────────────────
@@ -55,7 +72,9 @@ const AchievementCard = ({ icon, title, description, unlocked = false, value = n
 const ChangePasswordModal = ({ onClose }) => {
   const [form, setForm]       = useState({ current: '', next: '', confirm: '' });
   const [errors, setErrors]   = useState({});
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
@@ -66,7 +85,7 @@ const ChangePasswordModal = ({ onClose }) => {
   const set = (k) => (e) => {
     setForm((p) => ({ ...p, [k]: e.target.value }));
     setErrors((p) => ({ ...p, [k]: null }));
-    setSuccess(false);
+    setApiError(null);
   };
 
   const validate = () => {
@@ -77,13 +96,19 @@ const ChangePasswordModal = ({ onClose }) => {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    // Backend integration point: POST /api/auth/change-password { currentPassword, newPassword }
+
+    setLoading(true);
+    setApiError(null);
+    // Backend integration point: PATCH /api/user/password
+    const { error } = await changePassword({ currentPassword: form.current, newPassword: form.next });
+    setLoading(false);
+
+    if (error) { setApiError(error); return; }
     setSuccess(true);
-    setForm({ current: '', next: '', confirm: '' });
     setTimeout(onClose, 1500);
   };
 
@@ -96,7 +121,7 @@ const ChangePasswordModal = ({ onClose }) => {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="pr-modal-card">
-        <button className="pr-modal-close" onClick={onClose} aria-label="Close">
+        <button className="pr-modal-close" onClick={onClose} aria-label="Close" disabled={loading}>
           <span className="material-symbols-outlined">close</span>
         </button>
 
@@ -117,6 +142,13 @@ const ChangePasswordModal = ({ onClose }) => {
           </div>
         ) : (
           <form className="pr-modal-form" onSubmit={handleSubmit} noValidate>
+            {apiError && (
+              <div className="pr-api-error" role="alert">
+                <span className="material-symbols-outlined">error</span>
+                {apiError}
+              </div>
+            )}
+
             <div className="auth-field">
               <label className="auth-label" htmlFor="pw-current">Current Password</label>
               <input
@@ -127,6 +159,7 @@ const ChangePasswordModal = ({ onClose }) => {
                 onChange={set('current')}
                 autoComplete="current-password"
                 placeholder="Enter your current password"
+                disabled={loading}
               />
               {errors.current && <p className="pr-field-error">{errors.current}</p>}
             </div>
@@ -141,6 +174,7 @@ const ChangePasswordModal = ({ onClose }) => {
                 onChange={set('next')}
                 autoComplete="new-password"
                 placeholder="At least 8 characters"
+                disabled={loading}
               />
               {errors.next && <p className="pr-field-error">{errors.next}</p>}
             </div>
@@ -155,15 +189,16 @@ const ChangePasswordModal = ({ onClose }) => {
                 onChange={set('confirm')}
                 autoComplete="new-password"
                 placeholder="Repeat new password"
+                disabled={loading}
               />
               {errors.confirm && <p className="pr-field-error">{errors.confirm}</p>}
             </div>
 
             <div className="pr-modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-              <button type="submit" className="btn btn-primary">
-                <span className="material-symbols-outlined" aria-hidden="true">lock_reset</span>
-                Update Password
+              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading ? <Spinner /> : <span className="material-symbols-outlined" aria-hidden="true">lock_reset</span>}
+                {loading ? 'Updating…' : 'Update Password'}
               </button>
             </div>
           </form>
@@ -173,17 +208,136 @@ const ChangePasswordModal = ({ onClose }) => {
   );
 };
 
-// ── Profile page ──────────────────────────────────────────────────────────────
+// ── Delete Account Modal ──────────────────────────────────────────────────────
 
-// Backend integration point: replace with real achievements from GET /api/profile/achievements
+const DELETE_CONFIRMATION = 'DELETE';
+
+const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
+  const [typed, setTyped]     = useState('');
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    const handler = (e) => { if (e.key === 'Escape' && !loading) onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose, loading]);
+
+  const confirmed = typed === DELETE_CONFIRMATION;
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    if (!confirmed) return;
+    setLoading(true);
+    setApiError(null);
+    // Backend integration point: DELETE /api/user/account
+    const { error } = await deleteAccount({ confirmationText: typed });
+    if (error) {
+      setLoading(false);
+      setApiError(error);
+      return;
+    }
+    // Backend integration point: clear auth token from AuthContext + localStorage
+    onConfirmed();
+  };
+
+  return (
+    <div
+      className="pr-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Delete account"
+      onClick={(e) => { if (e.target === e.currentTarget && !loading) onClose(); }}
+    >
+      <div className="pr-modal-card pr-delete-modal-card">
+        <button className="pr-modal-close" onClick={onClose} aria-label="Close" disabled={loading}>
+          <span className="material-symbols-outlined">close</span>
+        </button>
+
+        <div className="pr-modal-header">
+          <div className="pr-modal-icon-wrap danger" aria-hidden="true">
+            <span className="material-symbols-outlined">warning</span>
+          </div>
+          <div>
+            <h2 className="pr-modal-title">Delete Account</h2>
+            <p className="pr-modal-subtitle">This action is permanent and cannot be undone.</p>
+          </div>
+        </div>
+
+        <div className="pr-delete-warning">
+          <p>Deleting your account will permanently remove:</p>
+          <ul>
+            <li>Your profile and personal information</li>
+            <li>All tasks and history</li>
+            <li>Focus time records and statistics</li>
+            <li>All achievements and streaks</li>
+          </ul>
+        </div>
+
+        <form onSubmit={handleDelete} noValidate>
+          {apiError && (
+            <div className="pr-api-error" role="alert">
+              <span className="material-symbols-outlined">error</span>
+              {apiError}
+            </div>
+          )}
+
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="del-confirm">
+              Type <strong>{DELETE_CONFIRMATION}</strong> to confirm
+            </label>
+            <input
+              id="del-confirm"
+              ref={inputRef}
+              type="text"
+              className={`auth-input${typed && !confirmed ? ' input-error' : ''}`}
+              value={typed}
+              onChange={(e) => { setTyped(e.target.value); setApiError(null); }}
+              placeholder={DELETE_CONFIRMATION}
+              autoComplete="off"
+              disabled={loading}
+              aria-describedby="del-confirm-hint"
+            />
+            <p id="del-confirm-hint" className="pr-field-hint">
+              This confirmation is case-sensitive.
+            </p>
+          </div>
+
+          <div className="pr-modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn pr-delete-confirm-btn"
+              disabled={!confirmed || loading}
+              aria-disabled={!confirmed || loading}
+            >
+              {loading ? <Spinner /> : <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>}
+              {loading ? 'Deleting…' : 'Delete My Account'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// ── Achievements config ───────────────────────────────────────────────────────
+
+// Backend integration point: replace with real achievements from GET /api/user/achievements
 const ACHIEVEMENTS_CONFIG = [
-  { icon: '🏆', title: 'First Task',         description: 'Completed your first task',        key: 'first_task' },
-  { icon: '🔥', title: '7-Day Streak',        description: '7 consecutive productive days',    key: 'streak_7' },
-  { icon: '🎯', title: '90% Accuracy',        description: 'Estimation accuracy above 90%',   key: 'accuracy_90' },
-  { icon: '⭐', title: '100 Tasks',           description: 'Completed 100 tasks total',        key: 'tasks_100' },
-  { icon: '📚', title: 'Study Master',        description: 'Logged 10h of study focus time',  key: 'study_master' },
-  { icon: '💼', title: 'Work Champion',       description: 'Logged 10h of work focus time',   key: 'work_champion' },
+  { icon: '🏆', title: 'First Task',   description: 'Completed your first task',       key: 'first_task' },
+  { icon: '🔥', title: '7-Day Streak', description: '7 consecutive productive days',   key: 'streak_7' },
+  { icon: '🎯', title: '90% Accuracy', description: 'Estimation accuracy above 90%',  key: 'accuracy_90' },
+  { icon: '⭐', title: '100 Tasks',    description: 'Completed 100 tasks total',       key: 'tasks_100' },
+  { icon: '📚', title: 'Study Master', description: 'Logged 10h of study focus time', key: 'study_master' },
+  { icon: '💼', title: 'Work Champion',description: 'Logged 10h of work focus time',  key: 'work_champion' },
 ];
+
+// ── Profile page ──────────────────────────────────────────────────────────────
 
 const Profile = () => {
   const navigate  = useNavigate();
@@ -191,10 +345,12 @@ const Profile = () => {
   const { profile, setProfile, avatarSrc, setAvatarSrc } = useProfile();
 
   const [form, setFormState]      = useState({ ...profile });
-  const [phoneError, setPhoneError] = useState(null);
-  const [saved, setSaved]           = useState(false);
-  const [uploadState, setUpload]    = useState('idle');
-  const [showPwModal, setShowPwModal] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [saving, setSaving]       = useState(false);
+  const [saveResult, setSaveResult] = useState(null); // 'success' | string (error)
+  const [uploadState, setUpload]  = useState('idle'); // idle | uploading | error
+  const [showPwModal, setShowPwModal]   = useState(false);
+  const [showDelModal, setShowDelModal] = useState(false);
 
   const fileRef = useRef(null);
 
@@ -202,35 +358,57 @@ const Profile = () => {
 
   const setField = (k) => (e) => {
     setFormState((p) => ({ ...p, [k]: e.target.value }));
-    setSaved(false);
-    if (k === 'phone') setPhoneError(null);
+    setSaveResult(null);
+    setFieldErrors((p) => ({ ...p, [k]: null }));
   };
 
-  const handleFile = (e) => {
+  // ── Avatar upload ────────────────────────────────────────────────────────
+  const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) { setUpload('error'); return; }
     if (file.size > 5 * 1024 * 1024)    { setUpload('error'); return; }
+
     setUpload('uploading');
+    // Backend integration point: POST /api/user/avatar (multipart)
+    const { data, error } = await uploadAvatar(file);
+    if (error) { setUpload('error'); return; }
+
+    // In DEV_MODE the service creates an object URL; in production use data.avatarUrl
     const reader = new FileReader();
     reader.onload  = (ev) => { setAvatarSrc(ev.target.result); setUpload('idle'); };
     reader.onerror = () => setUpload('error');
     reader.readAsDataURL(file);
   };
 
-  const handleSave = (e) => {
+  // ── Save profile ─────────────────────────────────────────────────────────
+  const handleSave = async (e) => {
     e.preventDefault();
-    const phoneErr = validatePhone(form.phone);
-    if (phoneErr) { setPhoneError(phoneErr); return; }
-    // Backend integration point: PATCH /api/profile { ...form }
+    const errs = validateProfile(form);
+    if (Object.keys(errs).length > 0) { setFieldErrors(errs); return; }
+
+    setSaving(true);
+    setSaveResult(null);
+    // Backend integration point: PATCH /api/user/profile
+    const { error } = await updateProfile(form);
+    setSaving(false);
+
+    if (error) { setSaveResult(error); return; }
     setProfile(form);
-    setSaved(true);
+    setSaveResult('success');
   };
 
   const handleReset = () => {
     setFormState({ ...profile });
-    setPhoneError(null);
-    setSaved(false);
+    setFieldErrors({});
+    setSaveResult(null);
+  };
+
+  // ── Delete account ────────────────────────────────────────────────────────
+  const handleAccountDeleted = () => {
+    // Backend integration point: clear auth token from AuthContext
+    // e.g.: logout(); navigate('/');
+    navigate('/');
   };
 
   // ── Derived stats ──────────────────────────────────────────────────────────
@@ -242,16 +420,16 @@ const Profile = () => {
     : null;
   const avgGapLabel = avgGap !== null ? (avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`) : '—';
 
-  // Backend integration point: GET /api/profile/streak
-  const streakDays = 0; // replace with real data
+  // Backend integration point: GET /api/user/streak
+  const streakDays = 0;
 
-  // Backend integration point: GET /api/profile/achievements
-  const unlockedKeys = new Set(
-    done.length >= 1  ? ['first_task']  : [],
-  );
+  // Auto-unlock achievements from local data (replace with API response)
+  const unlockedKeys = new Set();
+  if (done.length >= 1)   unlockedKeys.add('first_task');
   if (done.length >= 100) unlockedKeys.add('tasks_100');
 
-  const closePwModal = useCallback(() => setShowPwModal(false), []);
+  const closePwModal  = useCallback(() => setShowPwModal(false), []);
+  const closeDelModal = useCallback(() => setShowDelModal(false), []);
 
   return (
     <PageShell narrow title="Profile" subtitle="Manage your personal details and account info.">
@@ -262,8 +440,10 @@ const Profile = () => {
           <div className="pr-avatar-wrap">
             <Avatar size="xl" className="pr-banner-avatar" />
             <label htmlFor="pr-photo-input" className="pr-avatar-overlay" aria-label="Change profile photo">
-              <span className="material-symbols-outlined" aria-hidden="true">photo_camera</span>
-              <span className="pr-overlay-text">Change</span>
+              {uploadState === 'uploading'
+                ? <Spinner />
+                : <span className="material-symbols-outlined" aria-hidden="true">photo_camera</span>}
+              <span className="pr-overlay-text">{uploadState === 'uploading' ? 'Uploading' : 'Change'}</span>
             </label>
             <input
               id="pr-photo-input"
@@ -272,13 +452,15 @@ const Profile = () => {
               accept="image/*"
               className="pr-file-input"
               onChange={handleFile}
+              disabled={uploadState === 'uploading'}
             />
           </div>
           <div className="pr-banner-info">
             <h2 className="pr-full-name">{profile.firstName} {profile.lastName}</h2>
             <span className="pr-username">@{profile.username}</span>
-            {uploadState === 'uploading' && <span className="pr-upload-status">Uploading…</span>}
-            {uploadState === 'error'     && <span className="pr-upload-status error">Invalid file — use an image under 5 MB.</span>}
+            {uploadState === 'error' && (
+              <span className="pr-upload-status error">Invalid file — use an image under 5 MB.</span>
+            )}
           </div>
         </div>
       </div>
@@ -325,7 +507,7 @@ const Profile = () => {
           <span className="pr-streak-flame" aria-hidden="true">🔥</span>
           <div>
             <div className="pr-streak-title">Current Streak</div>
-            {/* Backend integration point: replace streakDays with API data */}
+            {/* Backend integration point: replace with API data */}
             {streakDays > 0
               ? <div className="pr-streak-value">{streakDays} productive {streakDays === 1 ? 'day' : 'days'} in a row</div>
               : <div className="pr-streak-value pr-streak-empty">No active streak yet — complete a task today to start one!</div>
@@ -344,7 +526,7 @@ const Profile = () => {
           <span className="material-symbols-outlined" aria-hidden="true">emoji_events</span>
           Achievements
         </h3>
-        {/* Backend integration point: fetch achievements from GET /api/profile/achievements */}
+        {/* Backend integration point: fetch from GET /api/user/achievements */}
         <div className="pr-achievements-grid" role="list" aria-label="Achievements">
           {ACHIEVEMENTS_CONFIG.map((a) => (
             <AchievementCard
@@ -368,11 +550,27 @@ const Profile = () => {
           <div className="pr-grid">
             <div className="auth-field">
               <label className="auth-label" htmlFor="pr-first">First name</label>
-              <input className="auth-input" id="pr-first" value={form.firstName} onChange={setField('firstName')} required autoComplete="given-name" />
+              <input
+                className={`auth-input${fieldErrors.firstName ? ' input-error' : ''}`}
+                id="pr-first"
+                value={form.firstName}
+                onChange={setField('firstName')}
+                autoComplete="given-name"
+                disabled={saving}
+              />
+              {fieldErrors.firstName && <p className="pr-field-error">{fieldErrors.firstName}</p>}
             </div>
             <div className="auth-field">
               <label className="auth-label" htmlFor="pr-last">Last name</label>
-              <input className="auth-input" id="pr-last" value={form.lastName} onChange={setField('lastName')} required autoComplete="family-name" />
+              <input
+                className={`auth-input${fieldErrors.lastName ? ' input-error' : ''}`}
+                id="pr-last"
+                value={form.lastName}
+                onChange={setField('lastName')}
+                autoComplete="family-name"
+                disabled={saving}
+              />
+              {fieldErrors.lastName && <p className="pr-field-error">{fieldErrors.lastName}</p>}
             </div>
           </div>
 
@@ -380,7 +578,7 @@ const Profile = () => {
             <label className="auth-label" htmlFor="pr-username">Username</label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">alternate_email</span>
-              <input className="auth-input" id="pr-username" value={form.username} onChange={setField('username')} autoComplete="username" />
+              <input className="auth-input" id="pr-username" value={form.username} onChange={setField('username')} autoComplete="username" disabled={saving} />
             </div>
           </div>
 
@@ -388,8 +586,17 @@ const Profile = () => {
             <label className="auth-label" htmlFor="pr-email">Email</label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
-              <input className="auth-input" id="pr-email" type="email" value={form.email} onChange={setField('email')} autoComplete="email" />
+              <input
+                className={`auth-input${fieldErrors.email ? ' input-error' : ''}`}
+                id="pr-email"
+                type="email"
+                value={form.email}
+                onChange={setField('email')}
+                autoComplete="email"
+                disabled={saving}
+              />
             </div>
+            {fieldErrors.email && <p className="pr-field-error">{fieldErrors.email}</p>}
           </div>
 
           <div className="auth-field">
@@ -399,16 +606,17 @@ const Profile = () => {
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">phone</span>
               <input
-                className={`auth-input${phoneError ? ' input-error' : ''}`}
+                className={`auth-input${fieldErrors.phone ? ' input-error' : ''}`}
                 id="pr-phone"
                 type="tel"
                 value={form.phone}
                 onChange={setField('phone')}
                 autoComplete="tel"
                 placeholder="+1 (555) 000-0000"
+                disabled={saving}
               />
             </div>
-            {phoneError && <p className="pr-field-error">{phoneError}</p>}
+            {fieldErrors.phone && <p className="pr-field-error">{fieldErrors.phone}</p>}
           </div>
 
           <div className="auth-field">
@@ -422,20 +630,29 @@ const Profile = () => {
               placeholder="A short bio about yourself…"
               value={form.bio}
               onChange={setField('bio')}
+              disabled={saving}
             />
           </div>
 
           <div className="pr-actions">
-            {saved && (
-              <span className="pr-saved-msg">
+            {saveResult === 'success' && (
+              <span className="pr-saved-msg" role="status">
                 <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
                 Changes saved
               </span>
             )}
-            <button type="button" className="btn btn-secondary" onClick={handleReset}>Reset</button>
-            <button type="submit" className="btn btn-primary">
-              <span className="material-symbols-outlined" aria-hidden="true">check</span>
-              Save changes
+            {saveResult && saveResult !== 'success' && (
+              <span className="pr-save-error" role="alert">
+                <span className="material-symbols-outlined" aria-hidden="true">error</span>
+                {saveResult}
+              </span>
+            )}
+            <button type="button" className="btn btn-secondary" onClick={handleReset} disabled={saving}>
+              Reset
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? <Spinner /> : <span className="material-symbols-outlined" aria-hidden="true">check</span>}
+              {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </form>
@@ -468,13 +685,25 @@ const Profile = () => {
         <div className="pr-danger-row">
           <div>
             <span className="pr-danger-label">Delete account</span>
-            <span className="pr-danger-desc">Permanently delete your account and all associated data. This cannot be undone.</span>
+            <span className="pr-danger-desc">
+              Permanently delete your account and all associated data. This cannot be undone.
+            </span>
           </div>
-          <button type="button" className="pr-danger-btn">Delete account</button>
+          <button type="button" className="pr-danger-btn" onClick={() => setShowDelModal(true)}>
+            <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
+            Delete account
+          </button>
         </div>
       </div>
 
-      {showPwModal && <ChangePasswordModal onClose={closePwModal} />}
+      {showPwModal  && <ChangePasswordModal onClose={closePwModal} />}
+      {showDelModal && (
+        <DeleteAccountModal
+          userEmail={profile.email}
+          onClose={closeDelModal}
+          onConfirmed={handleAccountDeleted}
+        />
+      )}
     </PageShell>
   );
 };

@@ -454,3 +454,127 @@
   flex-shrink: 0;
 }
 .pr-danger-btn:hover { background: rgba(186,26,26,0.06); }
+.pr-danger-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ── Spinner ── */
+@keyframes pr-spin {
+  to { transform: rotate(360deg); }
+}
+.pr-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pr-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+.btn-secondary .pr-spinner {
+  border-color: rgba(0,0,0,0.15);
+  border-top-color: var(--color-on-surface-variant);
+}
+
+/* ── Disabled state ── */
+.btn:disabled,
+.pr-danger-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.auth-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Inline API error banner ── */
+.pr-api-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(186,26,26,0.07);
+  border: 1px solid rgba(186,26,26,0.2);
+  border-radius: var(--rounded-md);
+  color: var(--color-error);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+}
+.pr-api-error .material-symbols-outlined { font-size: 1.1rem; flex-shrink: 0; }
+
+/* ── Save error in actions row ── */
+.pr-save-error {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--font-size-label-sm);
+  font-weight: 700;
+  color: var(--color-error);
+  margin-right: auto;
+}
+.pr-save-error .material-symbols-outlined { font-size: 1rem; }
+
+/* ── Field hint (below input) ── */
+.pr-field-hint {
+  font-size: var(--font-size-label-xs);
+  color: var(--color-on-surface-variant);
+  margin: 0.2rem 0 0;
+}
+
+/* ── Delete Account modal extras ── */
+.pr-delete-modal-card { max-width: 480px; }
+
+.pr-modal-icon-wrap.danger {
+  background: rgba(186,26,26,0.1);
+  color: var(--color-error);
+}
+
+.pr-delete-warning {
+  background: rgba(186,26,26,0.05);
+  border: 1px solid rgba(186,26,26,0.15);
+  border-radius: var(--rounded-md);
+  padding: 0.875rem 1rem;
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+}
+.pr-delete-warning p {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: var(--color-on-surface);
+}
+.pr-delete-warning ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pr-delete-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border: none;
+  border-radius: var(--rounded-md);
+  background: var(--color-error);
+  color: #fff;
+  font-size: var(--font-size-label-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+.pr-delete-confirm-btn:hover:not(:disabled) { background: #b91c1c; }
+.pr-delete-confirm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.pr-delete-confirm-btn .pr-spinner {
+  border-color: rgba(255,255,255,0.3);
+  border-top-color: #fff;
+}
