@@ -54,18 +54,31 @@ async function syncTags(taskId, userId, tags) {
     return;
   }
 
-  // Upsert each tag and collect IDs
+  // Find-or-create each tag (no unique constraint on user_id+tag_name, so
+  // we select first to avoid duplicate inserts)
   const tagIds = [];
   for (const tag of tags) {
-    const { data, error } = await supabase
+    // Try to find existing tag by name for this user
+    const { data: existing } = await supabase
       .from('tags')
-      .upsert(
-        { user_id: userId, tag_name: tag.name, color: tag.color },
-        { onConflict: 'user_id,tag_name', ignoreDuplicates: false }
-      )
       .select('id')
+      .eq('user_id', userId)
+      .eq('tag_name', tag.name)
       .single();
-    if (!error && data) tagIds.push(data.id);
+
+    if (existing) {
+      // Update color in case it changed
+      await supabase.from('tags').update({ color: tag.color }).eq('id', existing.id);
+      tagIds.push(existing.id);
+    } else {
+      // Insert new tag
+      const { data: newTag } = await supabase
+        .from('tags')
+        .insert({ user_id: userId, tag_name: tag.name, color: tag.color })
+        .select('id')
+        .single();
+      if (newTag) tagIds.push(newTag.id);
+    }
   }
 
   // Replace task_tags
