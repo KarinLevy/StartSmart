@@ -274,6 +274,35 @@ const Login = () => {
               </span>
             ) : 'Log in'}
           </button>
+
+          {/* ── DEV BYPASS ─────────────────────────────────────────────────────
+               Visible ONLY in Vite development mode (import.meta.env.DEV).
+               Dead-code eliminated by the bundler in production builds.
+               TO REMOVE: delete this entire block when the backend is ready.
+          ──────────────────────────────────────────────────────────────────── */}
+          {import.meta.env.DEV && (
+            <>
+              <div className="auth-divider" aria-hidden="true">dev only</div>
+              <button
+                type="button"
+                className="auth-dev-bypass"
+                onClick={() => {
+                  login('dev-token', {
+                    id:    'dev-user',
+                    name:  'Dev User',
+                    email: 'dev@localhost',
+                  });
+                  navigate(from, { replace: true });
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">
+                  code
+                </span>
+                Continue in Dev Mode
+              </button>
+            </>
+          )}
+          {/* ── END DEV BYPASS ─────────────────────────────────────────────── */}
         </form>
 
         <p className="auth-foot">

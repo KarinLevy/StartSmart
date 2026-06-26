@@ -405,3 +405,56 @@
 .auth-avatar-preview {
   overflow: hidden;
 }
+
+/* ── Dev-only bypass button ─────────────────────────────────────────────────
+   Only rendered in Vite dev mode. Dead-code eliminated in production builds.
+   Remove the button block in Login.jsx when the backend is ready.
+──────────────────────────────────────────────────────────────────────────── */
+.auth-dev-bypass {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(234, 179, 8, 0.08),
+    rgba(234, 179, 8, 0.08) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  border: 1.5px dashed rgba(234, 179, 8, 0.6);
+  border-radius: var(--rounded-md);
+  color: #92670a;
+  font-size: var(--font-size-label-md);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+[data-theme="dark"] .auth-dev-bypass {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.45);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(251, 191, 36, 0.06),
+    rgba(251, 191, 36, 0.06) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+.auth-dev-bypass:hover {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(234, 179, 8, 0.15),
+    rgba(234, 179, 8, 0.15) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  border-color: rgba(234, 179, 8, 0.9);
+}
+.auth-dev-bypass:focus-visible {
+  outline: 3px solid rgba(234, 179, 8, 0.7);
+  outline-offset: 2px;
+}
