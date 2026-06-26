@@ -176,6 +176,25 @@ const en = {
   'dashboard.emptyTitle':    'No tasks yet.',
   'dashboard.emptyHint':     'Create your first task to start tracking your time.',
 
+  // ── Workflow Table (Priority Workflow card on Dashboard) ───────────────────
+  'workflow.title':          'Priority Workflow',
+  'workflow.taskCount':      '{n} task',
+  'workflow.taskCountPlural':'{n} tasks',
+  'workflow.filterAll':      'All',
+  'workflow.filterPending':  'Pending',
+  'workflow.filterProgress': 'In Progress',
+  'workflow.filterDone':     'Done',
+  'workflow.filterHigh':     'High Priority',
+  'workflow.emptyNo':        'No',
+  'workflow.emptyTasks':     'tasks.',
+  'workflow.createOne':      'Create one',
+  'workflow.resume':         'Resume',
+  'workflow.start':          'Start',
+  'workflow.statusPending':  'Pending',
+  'workflow.statusProgress': 'In Progress',
+  'workflow.statusDone':     'Done',
+  'workflow.viewAll':        'View all task history',
+
   // ── Create Task ────────────────────────────────────────────────────────────
   'createTask.badge':        'New task',
   'createTask.title':        'Plan your next focus session',

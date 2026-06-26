@@ -11,19 +11,6 @@ const fmtMin = (m) => {
 };
 const fmtGap = (g) => (g == null ? '--' : g > 0 ? `+${g}m` : `${g}m`);
 
-const FILTERS = [
-  { key: 'all',         label: 'All' },
-  { key: 'pending',     label: 'Pending' },
-  { key: 'in_progress', label: 'In Progress' },
-  { key: 'done',        label: 'Done' },
-  { key: 'high',        label: 'High Priority' },
-];
-
-const STATUS_CFG = {
-  in_progress: { label: 'In Progress', cls: 'in-progress' },
-  pending:     { label: 'Pending',     cls: 'pending' },
-  done:        { label: 'Done',        cls: 'done' },
-};
 const DOT_CLS = { in_progress: 'secondary', pending: 'outline', done: 'green' };
 
 const WorkflowTable = () => {
@@ -31,6 +18,20 @@ const WorkflowTable = () => {
   const navigate = useNavigate();
   const { t } = useLocale();
   const [filter, setFilter] = useState('all');
+
+  const FILTERS = [
+    { key: 'all',         label: t('workflow.filterAll') },
+    { key: 'pending',     label: t('workflow.filterPending') },
+    { key: 'in_progress', label: t('workflow.filterProgress') },
+    { key: 'done',        label: t('workflow.filterDone') },
+    { key: 'high',        label: t('workflow.filterHigh') },
+  ];
+
+  const STATUS_CFG = {
+    in_progress: { label: t('workflow.statusProgress'), cls: 'in-progress' },
+    pending:     { label: t('workflow.statusPending'),  cls: 'pending' },
+    done:        { label: t('workflow.statusDone'),     cls: 'done' },
+  };
 
   const filtered = tasks.filter((t) => {
     if (filter === 'all')         return true;
@@ -52,9 +53,11 @@ const WorkflowTable = () => {
     <div className="glass-card workflow-card" style={{ overflow: 'hidden' }}>
       {/* Header */}
       <div className="workflow-header">
-        <h4 className="workflow-title">Priority Workflow</h4>
+        <h4 className="workflow-title">{t('workflow.title')}</h4>
         <span style={{ fontSize: 'var(--font-size-label-sm)', color: 'var(--color-on-surface-variant)' }}>
-          {filtered.length} task{filtered.length !== 1 ? 's' : ''}
+          {filtered.length !== 1
+            ? t('workflow.taskCountPlural').replace('{n}', filtered.length)
+            : t('workflow.taskCount').replace('{n}', filtered.length)}
         </span>
       </div>
 
@@ -77,8 +80,10 @@ const WorkflowTable = () => {
         <div className="workflow-empty">
           <span className="material-symbols-outlined" aria-hidden="true">inbox</span>
           <p>
-            No {filter !== 'all' ? filter.replace('_', ' ') + ' ' : ''}tasks.{' '}
-            <Link to="/create-task">Create one →</Link>
+            {t('workflow.emptyNo')}{' '}
+            {filter !== 'all' ? FILTERS.find(f => f.key === filter)?.label + ' ' : ''}
+            {t('workflow.emptyTasks')}{' '}
+            <Link to="/create-task">{t('workflow.createOne')} →</Link>
           </p>
         </div>
       ) : (
@@ -142,9 +147,9 @@ const WorkflowTable = () => {
                       {isDone ? (
                         <span className="material-symbols-outlined action-icon" aria-label="Completed">check_circle</span>
                       ) : task.status === 'in_progress' ? (
-                        <button className="action-btn" aria-label={`Resume focus on ${task.title}`} onClick={() => navigate(`/focus-mode/${task.id}`)}>Resume</button>
+                        <button className="action-btn" aria-label={`${t('workflow.resume')} ${task.title}`} onClick={() => navigate(`/focus-mode/${task.id}`)}>{t('workflow.resume')}</button>
                       ) : (
-                        <button className="action-btn" aria-label={`Start focus on ${task.title}`} onClick={() => navigate(`/focus-mode/${task.id}`)}>Start</button>
+                        <button className="action-btn" aria-label={`${t('workflow.start')} ${task.title}`} onClick={() => navigate(`/focus-mode/${task.id}`)}>{t('workflow.start')}</button>
                       )}
                     </td>
                   </tr>
@@ -157,7 +162,7 @@ const WorkflowTable = () => {
 
       <div className="workflow-footer">
         <Link to="/task-history" className="workflow-footer-link">
-          View all task history
+          {t('workflow.viewAll')}
           <span className="material-symbols-outlined icon-sm" aria-hidden="true">arrow_forward</span>
         </Link>
       </div>
