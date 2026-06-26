@@ -4,6 +4,12 @@ import { supabase } from '../lib/supabaseClient';
 
 /** DB row → app shape (camelCase) */
 function fromDB(row) {
+  // Use the most recent time_log for actualMinutes / gap
+  const logs = row.time_logs ?? [];
+  const latestLog = logs.length > 0
+    ? logs.reduce((a, b) => (new Date(a.created_at) > new Date(b.created_at) ? a : b))
+    : null;
+
   return {
     id:               row.id,
     title:            row.title,
@@ -12,9 +18,8 @@ function fromDB(row) {
     scheduledDate:    row.scheduled_date ?? '',
     status:           row.task_status,
     priorityHigh:     row.priority_high ?? false,
-    // actualMinutes / gap are populated from time_logs in B3; null for now
-    actualMinutes:    null,
-    gap:              null,
+    actualMinutes:    latestLog?.actual_duration ?? null,
+    gap:              latestLog?.gap             ?? null,
     tags: (row.task_tags ?? []).map((jt) => ({
       name:  jt.tags?.tag_name ?? '',
       color: jt.tags?.color    ?? '#6b7280',
@@ -82,9 +87,8 @@ export async function listTasks() {
     .from('tasks')
     .select(`
       *,
-      task_tags (
-        tags ( id, tag_name, color )
-      )
+      task_tags ( tags ( id, tag_name, color ) ),
+      time_logs ( actual_duration, gap, created_at )
     `)
     .order('created_at', { ascending: false });
 
@@ -100,9 +104,8 @@ export async function getTaskById(id) {
     .from('tasks')
     .select(`
       *,
-      task_tags (
-        tags ( id, tag_name, color )
-      )
+      task_tags ( tags ( id, tag_name, color ) ),
+      time_logs ( actual_duration, gap, created_at )
     `)
     .eq('id', id)
     .single();

@@ -49,17 +49,19 @@ export function TasksProvider({ children }) {
     await tasksService.deleteTask(id);
   }, [user]);
 
-  /** Called by FocusMode when a session finishes — B3 will also write time_logs */
+  /** Called by FocusMode when a session finishes */
   const finishFocus = useCallback(async (id, actualMinutes) => {
     if (!user) throw new Error('Not authenticated');
     const estimatedMinutes = tasks.find((t) => t.id === id)?.estimatedMinutes ?? 0;
     const gap = actualMinutes - estimatedMinutes;
-    // Optimistic update
+    // Optimistic update for immediate summary display
     setTasks((prev) =>
       prev.map((t) => t.id === id ? { ...t, status: 'done', actualMinutes, gap } : t)
     );
     await tasksService.updateTask(id, user.id, { status: 'done' });
-  }, [user, tasks]);
+    // Refresh after a brief delay so time_logs have been inserted by FocusMode
+    setTimeout(() => refresh(), 2000);
+  }, [user, tasks, refresh]);
 
   return (
     <TasksContext.Provider value={{ tasks, loading, error, addTask, updateTask, deleteTask, finishFocus, refresh }}>

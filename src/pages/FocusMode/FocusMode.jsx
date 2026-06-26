@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import { useTasks } from '../../context/TasksContext';
+import { useAuth } from '../../context/AuthContext';
+import { insertTimeLog, insertBreakLog } from '../../services/timeLogsService';
 import Footer from '../../components/Footer/Footer';
 import './FocusMode.css';
 
@@ -65,15 +67,18 @@ function CancelDialog({ onConfirm, onKeepWorking }) {
 const FocusMode = () => {
   const { id }                           = useParams();
   const { tasks, finishFocus, updateTask } = useTasks();
+  const { user }                         = useAuth();
   const navigate                         = useNavigate();
 
   const task = tasks.find((t) => t.id === id);
 
-  // Capture the task's status BEFORE the mount effect changes it,
-  // so Cancel can restore it.
   const prevStatusRef = useRef(task?.status ?? 'pending');
 
-  // Backend-ready session log (refs — no re-render needed)
+  // Timing refs for Supabase writes
+  const startedAtRef  = useRef(null);   // ISO string set on first Start
+  const pauseStartRef = useRef(null);   // ISO string set on Pause
+  const breakEvents   = useRef([]);     // [{ stoppedAt, resumedAt }]
+
   const sessionData = useRef({
     taskId:            id,
     estimatedMinutes:  task?.estimatedMinutes ?? 0,
@@ -147,32 +152,78 @@ const FocusMode = () => {
     if (!running) {
       if (elapsed === 0) {
         // First start
-        sessionData.current.startedAt = nowISO();
+        const now = nowISO();
+        startedAtRef.current          = now;
+        sessionData.current.startedAt = now;
         logEvent('start');
         updateTask(id, { status: 'in_progress' });
       } else {
+        // Resume from pause — record the break
+        const resumedAt = nowISO();
+        if (pauseStartRef.current) {
+          const stoppedAt     = pauseStartRef.current;
+          const breakDuration = Math.round(
+            (new Date(resumedAt) - new Date(stoppedAt)) / 60000
+          );
+          breakEvents.current.push({ stoppedAt, resumedAt, breakDuration });
+          pauseStartRef.current = null;
+        }
         logEvent('resume');
       }
     } else {
+      // Pausing — record when the pause started
+      pauseStartRef.current = nowISO();
       logEvent('pause');
     }
     setRunning((r) => !r);
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     clearInterval(intervalRef.current);
     setRunning(false);
-    const mins = Math.max(1, Math.round(elapsed / 60));
-    sessionData.current.finishedAt    = nowISO();
+
+    const endedAt  = nowISO();
+    const mins     = Math.max(1, Math.round(elapsed / 60));
+    const estMins  = task?.estimatedMinutes ?? 0;
+    const gap      = mins - estMins;
+
+    sessionData.current.finishedAt    = endedAt;
     sessionData.current.actualMinutes = mins;
-    sessionData.current.gap           = mins - (task?.estimatedMinutes ?? 0);
+    sessionData.current.gap           = gap;
     logEvent('finish');
 
     setActualMin(mins);
+    // Optimistic local update + DB status → 'done'
     finishFocus(id, mins);
     setFinished(true);
 
-    // TODO (Backend): POST sessionData.current to /api/sessions here
+    // Write time_log + break_logs to Supabase (best-effort; don't block UI)
+    if (user && startedAtRef.current) {
+      try {
+        const timeLog = await insertTimeLog({
+          taskId:            id,
+          userId:            user.id,
+          startedAt:         startedAtRef.current,
+          endedAt,
+          actualDuration:    mins,
+          estimatedDuration: estMins,
+          gap,
+        });
+
+        for (const brk of breakEvents.current) {
+          await insertBreakLog({
+            timeLogId:     timeLog.id,
+            taskId:        id,
+            userId:        user.id,
+            stoppedAt:     brk.stoppedAt,
+            resumedAt:     brk.resumedAt,
+            breakDuration: brk.breakDuration,
+          });
+        }
+      } catch (err) {
+        console.error('[FocusMode] Failed to save time log:', err.message);
+      }
+    }
   };
 
   const handleCancelConfirm = () => {

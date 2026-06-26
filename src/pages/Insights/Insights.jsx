@@ -106,7 +106,7 @@ const TrendItem = ({ icon, text, badge = null, positive = null }) => (
 // ── Main component ────────────────────────────────────────────────────────────
 
 const Insights = () => {
-  const { tasks } = useTasks();
+  const { tasks, loading, error } = useTasks();
   const { t } = useLocale();
   const done = tasks.filter((tk) => tk.status === 'done' && tk.estimatedMinutes && tk.actualMinutes);
 
@@ -207,6 +207,24 @@ const Insights = () => {
       value: null,
     },
   ];
+
+  if (loading) return (
+    <div className="insights-layout">
+      <Navbar />
+      <main id="main-content" className="insights-main" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'var(--color-outline)', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+      </main>
+    </div>
+  );
+
+  if (error) return (
+    <div className="insights-layout">
+      <Navbar />
+      <main id="main-content" className="insights-main">
+        <p style={{ color: 'var(--color-error)', padding: '2rem' }}>{error}</p>
+      </main>
+    </div>
+  );
 
   return (
     <div className="insights-layout">

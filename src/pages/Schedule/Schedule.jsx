@@ -399,7 +399,7 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
 
 // ── Schedule (main) ────────────────────────────────────────────────────────────
 const Schedule = () => {
-  const { tasks } = useTasks();
+  const { tasks, loading } = useTasks();
   const { t } = useLocale();
 
   // Period & pivot state
@@ -481,6 +481,11 @@ const Schedule = () => {
         </Link>
       }
     >
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'var(--color-outline)', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+        </div>
+      ) : <>
       {/* Toolbar */}
       <div className="sc-toolbar surface-card">
         <div className="sc-period-toggle" role="tablist" aria-label="View period">
@@ -620,6 +625,7 @@ const Schedule = () => {
           onDayClick={handleDayClick}
         />
       )}
+      </>}
     </PageShell>
   );
 };

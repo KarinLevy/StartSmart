@@ -290,7 +290,7 @@ const TaskHistoryCard = ({ task, onView }) => {
 // ── TaskHistory ───────────────────────────────────────────────────────────────
 
 const TaskHistory = () => {
-  const { tasks } = useTasks();
+  const { tasks, loading, error } = useTasks();
   const navigate  = useNavigate();
   const { t } = useLocale();
 
@@ -394,6 +394,20 @@ const TaskHistory = () => {
     setActiveTask(null);
     navigate('/create-task');
   }, [navigate]);
+
+  if (loading) return (
+    <PageShell title={t('history.title')} subtitle={t('history.subtitle')}>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'var(--color-outline)', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+      </div>
+    </PageShell>
+  );
+
+  if (error) return (
+    <PageShell title={t('history.title')} subtitle={t('history.subtitle')}>
+      <p style={{ color: 'var(--color-error)', padding: '2rem' }}>{error}</p>
+    </PageShell>
+  );
 
   return (
     <PageShell title={t('history.title')} subtitle={t('history.subtitle')}>

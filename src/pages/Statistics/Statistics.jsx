@@ -118,7 +118,7 @@ const getRangeLabel = (period, customStart, customEnd) => {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const Statistics = () => {
-  const { tasks } = useTasks();
+  const { tasks, loading, error } = useTasks();
   const { t } = useLocale();
 
   const [period,      setPeriod]      = useState('All Time');
@@ -155,6 +155,24 @@ const Statistics = () => {
     setCustomEnd('');
     setPeriod(prevPeriod);
   };
+
+  if (loading) return (
+    <div className="statistics-layout">
+      <Navbar />
+      <main id="main-content" className="statistics-main" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'var(--color-outline)', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+      </main>
+    </div>
+  );
+
+  if (error) return (
+    <div className="statistics-layout">
+      <Navbar />
+      <main id="main-content" className="statistics-main">
+        <p style={{ color: 'var(--color-error)', padding: '2rem' }}>{error}</p>
+      </main>
+    </div>
+  );
 
   return (
     <div className="statistics-layout">
