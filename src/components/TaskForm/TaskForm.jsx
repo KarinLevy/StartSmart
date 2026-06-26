@@ -1,6 +1,17 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
+import {
+  TAG_PRESETS,
+  DEFAULT_COLOR,
+  MAX_TAGS,
+  TAG_MAX_LEN,
+  resolveColor,
+  saveTagPreference,
+  validateTag,
+  collectExistingTags,
+  filterSuggestions,
+} from '../../utils/tagUtils';
 import './TaskForm.css';
 
 /*
@@ -13,43 +24,17 @@ import './TaskForm.css';
  *   priorityHigh:     boolean,
  *   tags:             Array<{ name: string, color: string }>
  * }
- *
- * Tag storage options (choose before backend implementation):
- *   Option A — inline on task:  tags: string[]  (simplest, no join table)
- *   Option B — normalized:      Tag { id, user_id, name, color, created_at }
- *                               TaskTag { task_id, tag_id }
- *
- * Current frontend shape uses { name, color } objects.
- * Upgrading to Option B only requires a data-layer change, not UI changes.
+ * See src/utils/tagUtils.js for the tag schema and smart-color logic.
  */
 
-const TAG_MAX_LEN = 24;
+// ── TagChip ───────────────────────────────────────────────────────────────────
 
-export const TAG_PRESETS = [
-  { color: '#6b38d4', label: 'Purple', hint: 'Study / University' },
-  { color: '#2563eb', label: 'Blue',   hint: 'Work'              },
-  { color: '#16a34a', label: 'Green',  hint: 'Personal'          },
-  { color: '#c2610c', label: 'Orange', hint: 'Planning'          },
-  { color: '#b91c1c', label: 'Red',    hint: 'Urgent'            },
-  { color: '#a16207', label: 'Yellow', hint: 'Reminder'          },
-  { color: '#be185d', label: 'Pink',   hint: 'Creative'          },
-  { color: '#0e7490', label: 'Cyan',   hint: 'Technical'         },
-  { color: '#525f6b', label: 'Gray',   hint: 'General'           },
-];
-
-const DEFAULT_COLOR = TAG_PRESETS[0].color;
-
-/* Render a tag chip with its saved color */
 export function TagChip({ tag, onRemove }) {
   const color = tag.color || DEFAULT_COLOR;
   return (
     <span
       className="tag-chip"
-      style={{
-        background: color + '1e',
-        color,
-        borderColor: color + '40',
-      }}
+      style={{ background: color + '1e', color, borderColor: color + '40' }}
     >
       <span className="material-symbols-outlined tag-chip-icon" aria-hidden="true">label</span>
       <span className="tag-chip-name">{tag.name}</span>
@@ -68,22 +53,23 @@ export function TagChip({ tag, onRemove }) {
   );
 }
 
-/* Small color swatch popover */
-function ColorPopover({ selectedColor, onSelect, onClose, anchorRef }) {
+// ── ColorPopover ──────────────────────────────────────────────────────────────
+
+function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, anchorRef }) {
   const popoverRef = useRef(null);
 
   useEffect(() => {
-    const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
-    const handleClick = (e) => {
+    const onKey   = (e) => { if (e.key === 'Escape') onClose(); };
+    const onClick  = (e) => {
       if (!popoverRef.current?.contains(e.target) && !anchorRef.current?.contains(e.target)) {
         onClose();
       }
     };
-    document.addEventListener('keydown', handleKey);
-    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onClick);
     return () => {
-      document.removeEventListener('keydown', handleKey);
-      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onClick);
     };
   }, [onClose, anchorRef]);
 
@@ -130,9 +116,18 @@ function ColorPopover({ selectedColor, onSelect, onClose, anchorRef }) {
           </li>
         ))}
       </ul>
+
+      {selectedColor !== DEFAULT_COLOR && (
+        <button type="button" className="tcp-reset" onClick={() => { onReset(); onClose(); }}>
+          <span className="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+          Reset to default
+        </button>
+      )}
     </div>
   );
 }
+
+// ── TaskForm ──────────────────────────────────────────────────────────────────
 
 const TaskForm = () => {
   const { addTask, tasks } = useTasks();
@@ -147,36 +142,35 @@ const TaskForm = () => {
   const [estMins,       setEstMins]      = useState('');
   const [priorityHigh,  setPriorityHigh] = useState(false);
 
-  const [tags,          setTags]         = useState([]);
-  const [tagInput,      setTagInput]     = useState('');
-  const [tagError,      setTagError]     = useState('');
-  const [tagColor,      setTagColor]     = useState(DEFAULT_COLOR);
-  const [colorOpen,     setColorOpen]    = useState(false);
-  const [showSuggest,   setShowSuggest]  = useState(false);
+  // Tag state
+  const [tags,         setTags]        = useState([]);
+  const [tagInput,     setTagInput]    = useState('');
+  const [tagError,     setTagError]    = useState('');
+  const [tagColor,     setTagColor]    = useState(DEFAULT_COLOR);
+  // colorSource: 'default' | 'suggested' | 'preference' | 'user'
+  const [colorSource,  setColorSource] = useState('default');
+  const [colorOpen,    setColorOpen]   = useState(false);
+  const [showSuggest,  setShowSuggest] = useState(false);
 
-  /* Collect unique tags from existing tasks for suggestions */
-  const existingTags = useCallback(() => {
-    const seen = new Map();
-    tasks.forEach((t) => {
-      (t.tags || []).forEach((tag) => {
-        if (!seen.has(tag.name.toLowerCase())) {
-          seen.set(tag.name.toLowerCase(), tag);
-        }
-      });
-    });
-    return Array.from(seen.values());
-  }, [tasks]);
+  // Build the pool of existing unique tags (for suggestions) once per task list change
+  const existingTags = useMemo(() => collectExistingTags(tasks), [tasks]);
 
-  /* Filter suggestions: match input, not already added */
-  const suggestions = tagInput.trim()
-    ? existingTags().filter((et) => {
-        const q = tagInput.trim().toLowerCase();
-        return (
-          et.name.toLowerCase().includes(q) &&
-          !tags.some((t) => t.name.toLowerCase() === et.name.toLowerCase())
-        );
-      }).slice(0, 5)
-    : [];
+  // Suggestions filtered to the current input
+  const suggestions = useMemo(
+    () => filterSuggestions(tagInput, existingTags, tags),
+    [tagInput, existingTags, tags]
+  );
+
+  // Recompute auto-color whenever the input changes, but only if the user
+  // hasn't manually picked a color for this typing session.
+  useEffect(() => {
+    if (colorSource === 'user') return; // user override — don't touch
+    const { color, source } = resolveColor(tagInput);
+    setTagColor(color);
+    setColorSource(source);
+  }, [tagInput]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -186,40 +180,50 @@ const TaskForm = () => {
     navigate('/dashboard');
   };
 
-  const addTag = (nameOverride, colorOverride) => {
+  const addTag = (nameOverride, colorOverride, skipPref = false) => {
     const name  = (nameOverride ?? tagInput).trim();
     const color = colorOverride ?? tagColor;
-    setTagError('');
-    setShowSuggest(false);
 
-    if (!name) {
-      setTagError('Please enter a tag name.');
-      tagInputRef.current?.focus();
-      return;
-    }
-    if (name.length > TAG_MAX_LEN) {
-      setTagError(`Tags can be at most ${TAG_MAX_LEN} characters.`);
-      return;
-    }
-    if (tags.some((t) => t.name.toLowerCase() === name.toLowerCase())) {
-      setTagError(`"${name}" is already added.`);
-      return;
+    const error = validateTag(name, tags);
+    setTagError(error ?? '');
+    setShowSuggest(false);
+    if (error) { tagInputRef.current?.focus(); return; }
+
+    // Save user's explicit color choice as a preference
+    if (!skipPref && colorSource === 'user') {
+      saveTagPreference(name, color);
     }
 
     setTags((prev) => [...prev, { name, color }]);
     setTagInput('');
+    setColorSource('default');
+    setTagColor(DEFAULT_COLOR);
     tagInputRef.current?.focus();
   };
 
-  const removeTag  = (name) => setTags((prev) => prev.filter((t) => t.name !== name));
+  const removeTag = (name) => setTags((prev) => prev.filter((t) => t.name !== name));
 
   const handleTagKeyDown = (e) => {
-    if (e.key === 'Enter')     { e.preventDefault(); addTag(); }
-    if (e.key === 'Escape')    { setShowSuggest(false); setColorOpen(false); }
+    if (e.key === 'Enter')  { e.preventDefault(); addTag(); }
+    if (e.key === 'Escape') { setShowSuggest(false); setColorOpen(false); }
     if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
       removeTag(tags[tags.length - 1].name);
     }
   };
+
+  const handleColorSelect = (color) => {
+    setTagColor(color);
+    setColorSource('user');
+  };
+
+  const handleColorReset = () => {
+    setTagColor(DEFAULT_COLOR);
+    setColorSource('default');
+  };
+
+  const atLimit = tags.length >= MAX_TAGS;
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="task-form-card">
@@ -303,50 +307,49 @@ const TaskForm = () => {
         <div className="form-group">
           <div className="tag-label-row">
             <label className="form-label" htmlFor="tag-input">Tags</label>
-            {/* Color indicator shows the active color without requiring popover */}
-            <span
-              className="tag-color-preview"
-              style={{ background: tagColor }}
-              aria-label={`Current tag color: ${TAG_PRESETS.find(p => p.color === tagColor)?.label ?? tagColor}`}
-            />
+            <span className="tag-count-badge" aria-live="polite">
+              {tags.length}/{MAX_TAGS}
+            </span>
           </div>
           <p className="form-field-hint">
             Press <kbd className="kbd">Enter</kbd> or <strong>Add</strong> to create a tag.
-            Optionally pick a color first with the palette button.
+            <kbd className="kbd">Backspace</kbd> on an empty input removes the last tag.
           </p>
 
           {/* Chip box + inline input */}
           <div
             className={`tag-field-box${tagError ? ' tag-field-box--error' : ''}`}
-            onClick={() => tagInputRef.current?.focus()}
+            onClick={() => !atLimit && tagInputRef.current?.focus()}
             role="group"
             aria-label="Tag chips"
           >
             {tags.map((t) => (
               <TagChip key={t.name} tag={t} onRemove={removeTag} />
             ))}
-            <input
-              ref={tagInputRef}
-              id="tag-input"
-              className="tag-inline-input"
-              type="text"
-              placeholder={tags.length === 0 ? 'e.g., work, study, urgent…' : 'Add another…'}
-              value={tagInput}
-              maxLength={TAG_MAX_LEN + 1}
-              autoComplete="off"
-              onChange={(e) => {
-                setTagInput(e.target.value);
-                setTagError('');
-                setShowSuggest(true);
-              }}
-              onFocus={() => setShowSuggest(true)}
-              onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
-              onKeyDown={handleTagKeyDown}
-              aria-describedby={tagError ? 'tag-error' : undefined}
-              aria-invalid={!!tagError}
-              aria-autocomplete="list"
-              aria-controls={showSuggest && suggestions.length > 0 ? 'tag-suggestions' : undefined}
-            />
+            {!atLimit && (
+              <input
+                ref={tagInputRef}
+                id="tag-input"
+                className="tag-inline-input"
+                type="text"
+                placeholder={tags.length === 0 ? 'e.g., work, study, urgent…' : 'Add another…'}
+                value={tagInput}
+                maxLength={TAG_MAX_LEN + 1}
+                autoComplete="off"
+                onChange={(e) => {
+                  setTagInput(e.target.value);
+                  setTagError('');
+                  setShowSuggest(true);
+                }}
+                onFocus={() => setShowSuggest(true)}
+                onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                onKeyDown={handleTagKeyDown}
+                aria-describedby={tagError ? 'tag-error' : undefined}
+                aria-invalid={!!tagError}
+                aria-autocomplete="list"
+                aria-controls={showSuggest && suggestions.length > 0 ? 'tag-suggestions' : undefined}
+              />
+            )}
           </div>
 
           {/* Suggestions dropdown */}
@@ -365,7 +368,7 @@ const TaskForm = () => {
                   aria-selected="false"
                   onMouseDown={(e) => {
                     e.preventDefault();
-                    addTag(s.name, s.color);
+                    addTag(s.name, s.color, true /* skipPref */);
                   }}
                 >
                   <span
@@ -379,58 +382,77 @@ const TaskForm = () => {
             </ul>
           )}
 
-          {/* Footer row: error/count | palette | add */}
+          {/* Footer row */}
           <div className="tag-field-footer">
             {tagError ? (
               <p id="tag-error" className="tag-error" role="alert">
                 <span className="material-symbols-outlined" aria-hidden="true">error</span>
                 {tagError}
               </p>
+            ) : atLimit ? (
+              <p className="tag-limit-msg" role="status">
+                <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                You can add up to {MAX_TAGS} tags per task.
+              </p>
             ) : (
-              <span className="tag-count" aria-live="polite">
-                {tags.length > 0 ? `${tags.length} tag${tags.length !== 1 ? 's' : ''} added` : ''}
+              <span className="tag-footer-left" aria-live="polite">
+                {colorSource === 'suggested' && (
+                  <span className="tag-suggested-badge">
+                    ✨ Suggested
+                  </span>
+                )}
+                {colorSource === 'preference' && (
+                  <span className="tag-pref-badge">
+                    <span className="material-symbols-outlined" aria-hidden="true">bookmark</span>
+                    Remembered
+                  </span>
+                )}
               </span>
             )}
 
-            <div className="tag-footer-actions">
-              {/* Palette button */}
-              <div className="tag-palette-wrap">
+            {!atLimit && (
+              <div className="tag-footer-actions">
+                {/* Palette button */}
+                <div className="tag-palette-wrap">
+                  <button
+                    ref={paletteRef}
+                    type="button"
+                    className={`tag-palette-btn${colorOpen ? ' tag-palette-btn--open' : ''}`}
+                    aria-label="Choose tag color"
+                    aria-expanded={colorOpen}
+                    aria-haspopup="dialog"
+                    onClick={() => setColorOpen((v) => !v)}
+                  >
+                    <span
+                      className="tag-palette-dot"
+                      style={{ background: tagColor }}
+                      aria-hidden="true"
+                    />
+                    <span className="material-symbols-outlined" aria-hidden="true">palette</span>
+                  </button>
+
+                  {colorOpen && (
+                    <ColorPopover
+                      selectedColor={tagColor}
+                      colorSource={colorSource}
+                      onSelect={handleColorSelect}
+                      onReset={handleColorReset}
+                      onClose={() => setColorOpen(false)}
+                      anchorRef={paletteRef}
+                    />
+                  )}
+                </div>
+
                 <button
-                  ref={paletteRef}
                   type="button"
-                  className={`tag-palette-btn${colorOpen ? ' tag-palette-btn--open' : ''}`}
-                  aria-label="Choose tag color"
-                  aria-expanded={colorOpen}
-                  aria-haspopup="dialog"
-                  onClick={() => setColorOpen((v) => !v)}
+                  className="tag-add-btn"
+                  onClick={() => addTag()}
                 >
-                  <span
-                    className="tag-palette-dot"
-                    style={{ background: tagColor }}
-                    aria-hidden="true"
-                  />
-                  <span className="material-symbols-outlined" aria-hidden="true">palette</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">add</span>
+                  Add
                 </button>
-
-                {colorOpen && (
-                  <ColorPopover
-                    selectedColor={tagColor}
-                    onSelect={setTagColor}
-                    onClose={() => setColorOpen(false)}
-                    anchorRef={paletteRef}
-                  />
-                )}
               </div>
-
-              <button
-                type="button"
-                className="tag-add-btn"
-                onClick={() => addTag()}
-              >
-                <span className="material-symbols-outlined" aria-hidden="true">add</span>
-                Add
-              </button>
-            </div>
+            )}
           </div>
         </div>
 
