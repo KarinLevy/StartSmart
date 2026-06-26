@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import en from './en';
 import he from './he';
 import ru from './ru';
@@ -37,12 +38,43 @@ function applyDirection(locale) {
 export function LocaleProvider({ children }) {
   const [locale, setLocaleState] = useState(loadLocale);
 
+  // Seed language from profile row on login
+  useEffect(() => {
+    const apply = async (userId) => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('language')
+        .eq('id', userId)
+        .single();
+      if (data?.language && TRANSLATIONS[data.language]) {
+        try { localStorage.setItem(LOCALE_KEY, data.language); } catch {}
+        setLocaleState(data.language);
+      }
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) apply(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) apply(session.user.id);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   useEffect(() => { applyDirection(locale); }, [locale]);
 
   const setLocale = useCallback((code) => {
     if (!TRANSLATIONS[code]) return;
     try { localStorage.setItem(LOCALE_KEY, code); } catch {}
     setLocaleState(code);
+    // Write back to profiles row (best-effort)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase.from('profiles').update({ language: code }).eq('id', session.user.id);
+      }
+    });
   }, []);
 
   /**

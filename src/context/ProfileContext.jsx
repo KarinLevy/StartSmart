@@ -4,12 +4,17 @@ import { supabase } from '../lib/supabaseClient';
 const ProfileContext = createContext(null);
 
 const DEFAULT_PROFILE = {
-  firstName: '',
-  lastName:  '',
-  username:  '',
-  email:     '',
-  phone:     '',
-  bio:       '',
+  firstName:            '',
+  lastName:             '',
+  username:             '',
+  email:                '',
+  phone:                '',
+  bio:                  '',
+  language:             'en',
+  theme:                'light',
+  timezone:             'UTC',
+  avatarColor:          '#6366f1',
+  notificationsEnabled: true,
 };
 
 export const ProfileProvider = ({ children }) => {
@@ -21,18 +26,22 @@ export const ProfileProvider = ({ children }) => {
     const load = async (userId, email) => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('first_name, last_name, username, phone, profile_image, notifications_enabled')
+        .select('first_name, last_name, username, phone, profile_image, notifications_enabled, bio, language, theme, timezone, avatar_color')
         .eq('id', userId)
         .single();
 
       if (!error && data) {
         setProfileState({
-          firstName:            data.first_name           ?? '',
-          lastName:             data.last_name            ?? '',
-          username:             data.username             ?? '',
-          email:                email                     ?? '',
-          phone:                data.phone                ?? '',
-          bio:                  '',
+          firstName:            data.first_name            ?? '',
+          lastName:             data.last_name             ?? '',
+          username:             data.username              ?? '',
+          email:                email                      ?? '',
+          phone:                data.phone                 ?? '',
+          bio:                  data.bio                   ?? '',
+          language:             data.language              ?? 'en',
+          theme:                data.theme                 ?? 'light',
+          timezone:             data.timezone              ?? 'UTC',
+          avatarColor:          data.avatar_color          ?? '#6366f1',
           notificationsEnabled: data.notifications_enabled ?? true,
         });
         if (data.profile_image) setAvatarSrc(data.profile_image);

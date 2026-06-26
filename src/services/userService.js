@@ -11,10 +11,15 @@ export async function updateProfile(fields) {
   const { error } = await supabase
     .from('profiles')
     .update({
-      first_name: fields.firstName ?? '',
-      last_name:  fields.lastName  ?? '',
-      username:   fields.username  ?? '',
-      phone:      fields.phone     || null,
+      first_name:   fields.firstName   ?? '',
+      last_name:    fields.lastName    ?? '',
+      username:     fields.username    ?? '',
+      phone:        fields.phone       || null,
+      bio:          fields.bio         || null,
+      language:     fields.language    ?? 'en',
+      theme:        fields.theme       ?? 'light',
+      timezone:     fields.timezone    ?? 'UTC',
+      avatar_color: fields.avatarColor ?? '#6366f1',
     })
     .eq('id', session.user.id);
 

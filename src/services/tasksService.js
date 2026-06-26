@@ -13,13 +13,16 @@ function fromDB(row) {
   return {
     id:               row.id,
     title:            row.title,
-    description:      row.description ?? '',
+    description:      row.description   ?? '',
     estimatedMinutes: row.estimated_duration ?? 0,
     scheduledDate:    row.scheduled_date ?? '',
     status:           row.task_status,
     priorityHigh:     row.priority_high ?? false,
     actualMinutes:    latestLog?.actual_duration ?? null,
     gap:              latestLog?.gap             ?? null,
+    completedAt:      row.completed_at  ?? null,
+    archivedAt:       row.archived_at   ?? null,
+    reflection:       row.reflection    ?? '',
     tags: (row.task_tags ?? []).map((jt) => ({
       name:  jt.tags?.tag_name ?? '',
       color: jt.tags?.color    ?? '#6b7280',
@@ -36,6 +39,8 @@ function toDB(data) {
   if (data.scheduledDate    !== undefined) out.scheduled_date     = data.scheduledDate || null;
   if (data.status           !== undefined) out.task_status        = data.status;
   if (data.priorityHigh     !== undefined) out.priority_high      = data.priorityHigh;
+  if (data.reflection       !== undefined) out.reflection         = data.reflection || null;
+  if (data.archivedAt       !== undefined) out.archived_at        = data.archivedAt  || null;
   return out;
 }
 
@@ -54,31 +59,18 @@ async function syncTags(taskId, userId, tags) {
     return;
   }
 
-  // Find-or-create each tag (no unique constraint on user_id+tag_name, so
-  // we select first to avoid duplicate inserts)
+  // Upsert each tag by (user_id, tag_name) — unique constraint now enforced by DB
   const tagIds = [];
   for (const tag of tags) {
-    // Try to find existing tag by name for this user
-    const { data: existing } = await supabase
+    const { data, error } = await supabase
       .from('tags')
+      .upsert(
+        { user_id: userId, tag_name: tag.name, color: tag.color },
+        { onConflict: 'user_id,tag_name', ignoreDuplicates: false }
+      )
       .select('id')
-      .eq('user_id', userId)
-      .eq('tag_name', tag.name)
       .single();
-
-    if (existing) {
-      // Update color in case it changed
-      await supabase.from('tags').update({ color: tag.color }).eq('id', existing.id);
-      tagIds.push(existing.id);
-    } else {
-      // Insert new tag
-      const { data: newTag } = await supabase
-        .from('tags')
-        .insert({ user_id: userId, tag_name: tag.name, color: tag.color })
-        .select('id')
-        .single();
-      if (newTag) tagIds.push(newTag.id);
-    }
+    if (!error && data) tagIds.push(data.id);
   }
 
   // Replace task_tags
@@ -103,6 +95,7 @@ export async function listTasks() {
       task_tags ( tags ( id, tag_name, color ) ),
       time_logs ( actual_duration, gap, created_at )
     `)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
@@ -168,9 +161,15 @@ export async function updateTask(id, userId, updates) {
 }
 
 /**
- * Delete a task. task_tags rows cascade via DB FK.
+ * Soft-delete a task by setting deleted_at = now().
+ * Cascaded child rows (time_logs, break_logs, task_tags) are preserved
+ * and simply disappear from the UI once the task is filtered out.
+ * Hard-delete (via DB trigger or admin function) can be added later.
  */
 export async function deleteTask(id) {
-  const { error } = await supabase.from('tasks').delete().eq('id', id);
+  const { error } = await supabase
+    .from('tasks')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
   if (error) throw error;
 }

@@ -7,23 +7,19 @@ import { useAuth } from '../../context/AuthContext';
 import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
 import { useLocale, LANGUAGES } from '../../i18n/LocaleContext';
-import { saveSettings, exportUserData, triggerDownload, reportProblem } from '../../services/settingsService';
+import { exportUserData, triggerDownload, reportProblem } from '../../services/settingsService';
 import { updateNotificationsEnabled } from '../../services/userService';
+import { loadUserSettings, saveUserSettings } from '../../services/userSettingsService';
 import './Settings.css';
 
-// ── Persistence key ───────────────────────────────────────────────────────────
-const SETTINGS_KEY = 'ss_settings_v1';
+// localStorage key kept only as instant-read cache (primary source is now Supabase)
+const SETTINGS_LS_KEY = 'ss_settings_v1';
 
-function loadSettings() {
+function loadCached() {
   try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
+    const raw = localStorage.getItem(SETTINGS_LS_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
-}
-
-function persistSettings(s) {
-  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {}
-  // Backend integration point: PATCH /api/user/settings
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -95,15 +91,24 @@ const Settings = () => {
   const { locale, setLocale, t, LANGUAGES } = useLocale();
   const navigate = useNavigate();
 
-  // Load persisted settings or fall back to defaults
+  // Initialise from cache immediately; hydrate from Supabase in background
   const [settings, setSettings] = useState(() => {
-    const saved = loadSettings();
-    return saved ? { ...DEFAULT_SETTINGS, ...saved } : DEFAULT_SETTINGS;
+    const cached = loadCached();
+    return cached ? { ...DEFAULT_SETTINGS, ...cached } : DEFAULT_SETTINGS;
   });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const { notifs, focus, privacy, goal, defaultEst } = settings;
 
-  // If the profile says notifications are globally disabled, reflect that on mount
+  // Hydrate from Supabase on mount (overwrites cache if DB has newer values)
+  useEffect(() => {
+    loadUserSettings().then((s) => {
+      setSettings((prev) => ({ ...prev, ...s }));
+      setSettingsLoaded(true);
+    });
+  }, []);
+
+  // If the profile says notifications are globally disabled, reflect that
   useEffect(() => {
     if (profile.notificationsEnabled === false) {
       setSettings((p) => ({
@@ -113,8 +118,10 @@ const Settings = () => {
     }
   }, [profile.notificationsEnabled]);
 
-  // Persist whenever settings change
-  useEffect(() => { persistSettings(settings); }, [settings]);
+  // Persist to Supabase + localStorage whenever settings change (after initial load)
+  useEffect(() => {
+    if (settingsLoaded) saveUserSettings(settings);
+  }, [settings, settingsLoaded]);
 
   const patch = (key, val) => setSettings((p) => ({ ...p, [key]: val }));
 
