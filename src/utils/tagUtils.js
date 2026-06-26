@@ -14,14 +14,14 @@ export const MAX_TAGS      = 8;
 export const TAG_MAX_LEN   = 24;
 
 export const TAG_PRESETS = [
-  { color: '#6b38d4', label: 'Purple', hint: 'Study / University' },
-  { color: '#2563eb', label: 'Blue',   hint: 'Work'              },
-  { color: '#16a34a', label: 'Green',  hint: 'Personal'          },
-  { color: '#c2610c', label: 'Orange', hint: 'Planning'          },
-  { color: '#b91c1c', label: 'Red',    hint: 'Urgent'            },
-  { color: '#a16207', label: 'Yellow', hint: 'Reminder'          },
-  { color: '#be185d', label: 'Pink',   hint: 'Creative'          },
-  { color: '#0e7490', label: 'Cyan',   hint: 'Technical'         },
+  { color: '#6b38d4', label: 'Purple', hint: 'Default / General'  },
+  { color: '#2563eb', label: 'Blue',   hint: 'Work'               },
+  { color: '#16a34a', label: 'Green',  hint: 'Personal'           },
+  { color: '#c2610c', label: 'Orange', hint: 'Study / University' },
+  { color: '#b91c1c', label: 'Red',    hint: 'Urgent'             },
+  { color: '#a16207', label: 'Yellow', hint: 'Reminder'           },
+  { color: '#be185d', label: 'Pink',   hint: 'Creative'           },
+  { color: '#0e7490', label: 'Cyan',   hint: 'Technical'          },
 ];
 
 // ── Keyword → color map ───────────────────────────────────────────────────────
@@ -76,13 +76,13 @@ const KEYWORD_MAP = [
       'manager', 'report', 'presentation', 'proposal',
       // Hebrew
       'עבודה', 'משרד', 'לקוח', 'עסק', 'קריירה', 'חברה', 'צוות',
-      'פרויקט עבודה', 'פרזנטציה', 'דו"ח', 'הצעה',
+      'פרויקט עבודה', 'פרזנטציה', 'הצעה',
     ],
   },
 
-  // ── Study / Purple ────────────────────────────────────────────────────────
+  // ── Study / University / Orange ───────────────────────────────────────────
   {
-    color: '#6b38d4',
+    color: '#c2610c',
     keywords: [
       // English
       'study', 'exam', 'homework', 'university', 'school', 'course', 'lecture',
@@ -92,20 +92,6 @@ const KEYWORD_MAP = [
       'לימודים', 'מבחן', 'שיעורי בית', 'אוניברסיטה', 'בית ספר', 'קורס',
       'הרצאה', 'עבודה אקדמית', 'תזה', 'בגרות', 'מכללה', 'סמסטר',
       'מטלה', 'שיעור',
-    ],
-  },
-
-  // ── Planning / Orange ─────────────────────────────────────────────────────
-  {
-    color: '#c2610c',
-    keywords: [
-      // English
-      'meeting', 'calendar', 'planning', 'plan', 'schedule', 'event',
-      'standup', 'sync', 'agenda', 'kickoff', 'retro', 'appointment',
-      'conference', 'workshop', 'webinar',
-      // Hebrew
-      'פגישה', 'לוח זמנים', 'תכנון', 'יומן', 'אירוע', 'סדר יום',
-      'ועידה', 'סדנה', 'תיאום', 'וועידה',
     ],
   },
 
