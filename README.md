@@ -70,6 +70,9 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 | Email | demo@startsmart.app |
 | Password | Demo2026! |
 
+
+The demo account includes preloaded tasks, completed focus sessions, statistics, achievements, notifications, and historical data, allowing the application’s core features to be explored immediately.
+
 ---
 
 ## Features
