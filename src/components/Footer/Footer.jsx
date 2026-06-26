@@ -1,21 +1,26 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => (
   <footer className="app-footer">
     <div className="footer-inner">
       <div className="footer-left">© 2026 StartSmart</div>
-      <div className="footer-right">
-        <a href="/privacy-policy">Privacy Policy</a>
-        <a href="/contact">Contact</a>
+      <nav className="footer-right" aria-label="Footer links">
+        <Link to="/about">About</Link>
+        <Link to="/faq">FAQ</Link>
+        <Link to="/privacy-policy">Privacy</Link>
+        <Link to="/terms">Terms</Link>
+        <Link to="/contact">Contact</Link>
         <a
           href="https://github.com/StartSmart"
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="StartSmart on GitHub (opens in new tab)"
         >
           GitHub
         </a>
-      </div>
+      </nav>
     </div>
   </footer>
 );

@@ -17,6 +17,11 @@ import Statistics from './pages/Statistics/Statistics';
 import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings/Settings';
 import Notifications from './pages/Notifications/Notifications';
+import PrivacyPolicy from './pages/FooterPages/PrivacyPolicy';
+import Terms from './pages/FooterPages/Terms';
+import About from './pages/FooterPages/About';
+import FAQ from './pages/FooterPages/FAQ';
+import Contact from './pages/FooterPages/Contact';
 
 function App() {
   return (
@@ -42,6 +47,13 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/notifications" element={<Notifications />} />
+
+        {/* Footer pages */}
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </Router>
     </TasksProvider>
