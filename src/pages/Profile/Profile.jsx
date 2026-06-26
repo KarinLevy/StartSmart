@@ -12,6 +12,7 @@ import {
   changePassword,
   deleteAccount,
 } from '../../services/userService';
+import { computeAchievements } from '../../utils/achievementUtils';
 import './Profile.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -329,17 +330,7 @@ const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
   );
 };
 
-// ── Achievements config ───────────────────────────────────────────────────────
-
-// Backend integration point: replace with real achievements from GET /api/user/achievements
-const ACHIEVEMENTS_CONFIG = [
-  { icon: '🏆', title: 'First Task',   description: 'Completed your first task',       key: 'first_task' },
-  { icon: '🔥', title: '7-Day Streak', description: '7 consecutive productive days',   key: 'streak_7' },
-  { icon: '🎯', title: '90% Accuracy', description: 'Estimation accuracy above 90%',  key: 'accuracy_90' },
-  { icon: '⭐', title: '100 Tasks',    description: 'Completed 100 tasks total',       key: 'tasks_100' },
-  { icon: '📚', title: 'Study Master', description: 'Logged 10h of study focus time', key: 'study_master' },
-  { icon: '💼', title: 'Work Champion',description: 'Logged 10h of work focus time',  key: 'work_champion' },
-];
+// Achievements config is now derived dynamically in the component via computeAchievements()
 
 // ── Profile page ──────────────────────────────────────────────────────────────
 
@@ -425,13 +416,7 @@ const Profile = () => {
     : null;
   const avgGapLabel = avgGap !== null ? (avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`) : '—';
 
-  // Backend integration point: GET /api/user/streak
-  const streakDays = 0;
-
-  // Auto-unlock achievements from local data (replace with API response)
-  const unlockedKeys = new Set();
-  if (done.length >= 1)   unlockedKeys.add('first_task');
-  if (done.length >= 100) unlockedKeys.add('tasks_100');
+  const { achievements, streakDays } = computeAchievements(tasks);
 
   const closePwModal  = useCallback(() => setShowPwModal(false), []);
   const closeDelModal = useCallback(() => setShowDelModal(false), []);
@@ -530,15 +515,14 @@ const Profile = () => {
           <span className="material-symbols-outlined" aria-hidden="true">emoji_events</span>
           {t('profile.achievements')}
         </h3>
-        {/* Backend integration point: fetch from GET /api/user/achievements */}
         <div className="pr-achievements-grid" role="list" aria-label="Achievements">
-          {ACHIEVEMENTS_CONFIG.map((a) => (
+          {achievements.map((a) => (
             <AchievementCard
               key={a.key}
               icon={a.icon}
               title={a.title}
               description={a.description}
-              unlocked={unlockedKeys.has(a.key)}
+              unlocked={a.unlocked}
             />
           ))}
         </div>

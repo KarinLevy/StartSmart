@@ -4,6 +4,7 @@ import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { computeAchievements } from '../../utils/achievementUtils';
 import './Insights.css';
 import '../../components/Statistics/Statistics.css';
 
@@ -158,55 +159,8 @@ const Insights = () => {
   if (done.length < 3)                 RECS.push({ icon: 'timer', title: 'Complete more Focus Sessions', explanation: 'You need at least 3 completed tasks to get personalised recommendations. Start a Focus Session to track your time.' });
   if (RECS.length === 0)               RECS.push({ icon: 'star', title: 'Great work — keep it up!', explanation: 'Your estimations are accurate and consistent. Continue scheduling focused sessions to maintain this performance.' });
 
-  // ── Achievements — backend-ready structure ──
-  // In production: fetch from API and pass `unlocked: true` + `value` when earned
-  const longestFocusTask = done.length > 0 ? done.reduce((a, b) => (a.actualMinutes || 0) > (b.actualMinutes || 0) ? a : b) : null;
-  const bestAccTask = sorted[0] || null;
-
-  const ACHIEVEMENTS = [
-    {
-      icon: 'emoji_events',
-      title: 'Most Productive Week',
-      description: 'Complete 5 tasks in a single week.',
-      unlocked: false,
-      value: null,
-    },
-    {
-      icon: 'adjust',
-      title: 'Best Estimation Accuracy',
-      description: 'Achieve 90%+ estimation accuracy.',
-      unlocked: accuracy !== null && accuracy >= 90,
-      value: accuracy !== null ? `${accuracy}% accuracy` : null,
-    },
-    {
-      icon: 'local_fire_department',
-      title: 'Focus Champion',
-      description: 'Complete your longest focus session.',
-      unlocked: longestFocusTask !== null,
-      value: longestFocusTask ? `${fmtMin(longestFocusTask.actualMinutes)} on "${longestFocusTask.title}"` : null,
-    },
-    {
-      icon: 'rocket_launch',
-      title: 'Perfect Estimate',
-      description: 'Complete a task with 0-minute gap.',
-      unlocked: done.some((t) => (t.gap || 0) === 0),
-      value: done.find((t) => (t.gap || 0) === 0)?.title || null,
-    },
-    {
-      icon: 'done_all',
-      title: 'Task Historian',
-      description: 'Complete your first 3 tasks.',
-      unlocked: done.length >= 3,
-      value: done.length >= 3 ? `${done.length} tasks completed` : null,
-    },
-    {
-      icon: 'auto_awesome',
-      title: 'AI Insights Ready',
-      description: 'Complete 5 tasks to unlock AI-powered insights.',
-      unlocked: false,
-      value: null,
-    },
-  ];
+  // ── Achievements — computed from real task data ──
+  const { achievements: ACHIEVEMENTS, streakDays } = computeAchievements(tasks);
 
   if (loading) return (
     <div className="insights-layout">
@@ -407,7 +361,7 @@ const Insights = () => {
                 Achievements
               </div>
               <div className="ins-achievements-grid">
-                {ACHIEVEMENTS.map((a, i) => <AchievementCard key={i} {...a} />)}
+                {ACHIEVEMENTS.map((a) => <AchievementCard key={a.key} icon={a.iconMat} title={a.title} description={a.description} unlocked={a.unlocked} value={a.value} />)}
               </div>
             </div>
 
