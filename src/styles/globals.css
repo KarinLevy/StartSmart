@@ -109,6 +109,9 @@
   --font-size-label-xs: 10px;
   --font-size-label-xxs: 11px;
   --font-size-body-xs: 13px;
+  --font-size-body-sm: 14px;
+  --font-size-title-lg: 26px;
+  --font-size-display-sm: 30px;
 
   /* Rounded */
   --rounded-sm: 0.25rem;
@@ -116,6 +119,7 @@
   --rounded-md: 0.75rem;
   --rounded-lg: 1rem;
   --rounded-xl: 1.5rem;
+  --rounded-2xl: 1.75rem;
   --rounded-full: 9999px;
   
   /* Shadows */

@@ -94,6 +94,7 @@ function MarketingNav() {
 
 /* ── Gap Card — Hero signature element ── */
 function GapCard() {
+  const { t } = useLocale();
   return (
     <div
       className="lp-gap-card"
@@ -101,16 +102,16 @@ function GapCard() {
       aria-label="Example task: Prepare Q3 Report — planned 45 min, actual 52 min, gap +7 minutes"
     >
       <div className="lp-gap-card-header">
-        <span className="lp-gap-card-title">Active Task</span>
-        <span className="lp-gap-card-badge">● In progress</span>
+        <span className="lp-gap-card-title">{t('landing.card.activeTask')}</span>
+        <span className="lp-gap-card-badge">● {t('landing.card.inProgress')}</span>
       </div>
       <p className="lp-gap-task-name">Prepare Q3 Report</p>
 
       <div className="lp-gap-bars">
         <div className="lp-bar-row">
           <div className="lp-bar-label-row">
-            <span className="lp-bar-label">Planned</span>
-            <span className="lp-bar-value">45 min</span>
+            <span className="lp-bar-label">{t('landing.card.planned')}</span>
+            <span className="lp-bar-value">45 {t('common.minutes')}</span>
           </div>
           <div className="lp-bar-track" role="presentation">
             <div className="lp-bar-fill planned" />
@@ -118,8 +119,8 @@ function GapCard() {
         </div>
         <div className="lp-bar-row">
           <div className="lp-bar-label-row">
-            <span className="lp-bar-label">Actual</span>
-            <span className="lp-bar-value">52 min</span>
+            <span className="lp-bar-label">{t('landing.card.actual')}</span>
+            <span className="lp-bar-value">52 {t('common.minutes')}</span>
           </div>
           <div className="lp-bar-track" role="presentation">
             <div className="lp-bar-fill actual" />
@@ -128,9 +129,9 @@ function GapCard() {
       </div>
 
       <div className="lp-gap-highlight">
-        <span className="lp-gap-pill" aria-label="7 minutes over estimate">+7 min</span>
+        <span className="lp-gap-pill" aria-label="7 minutes over estimate">+7 {t('common.minutes')}</span>
         <span className="lp-gap-insight">
-          You consistently underestimate reports. Try adding a buffer next time.
+          {t('landing.card.insight')}
         </span>
       </div>
     </div>

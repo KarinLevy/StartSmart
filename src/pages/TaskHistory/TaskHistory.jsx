@@ -505,8 +505,8 @@ const TaskHistory = () => {
               onChange={(e) => setFilterTag(e.target.value)}
               aria-label="Filter by tag"
             >
-              <option value="">All tags</option>
-              {allTags.map((t) => <option key={t} value={t}>{t}</option>)}
+              <option value="">{t('common.allTags')}</option>
+              {allTags.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
             </select>
           )}
 

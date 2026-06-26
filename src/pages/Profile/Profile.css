@@ -578,3 +578,44 @@
   border-color: rgba(255,255,255,0.3);
   border-top-color: #fff;
 }
+
+/* ── Additional mobile responsive ── */
+@media (max-width: 640px) {
+  .pr-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .pr-banner-left {
+    gap: 1rem;
+  }
+  .pr-avatar-wrap {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+  .pr-full-name {
+    font-size: var(--font-size-headline-lg-mobile);
+  }
+  .pr-section-title {
+    font-size: var(--font-size-body-md);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .pr-security-row,
+  .pr-danger-row {
+    flex-wrap: wrap;
+  }
+  .pr-actions {
+    flex-direction: column;
+  }
+  .pr-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .pr-stat-cards {
+    grid-template-columns: 1fr;
+  }
+}

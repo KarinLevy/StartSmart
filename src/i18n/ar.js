@@ -79,6 +79,11 @@ const ar = {
   'landing.cta.subheading': 'انضم إلى المخططين الذين يعرفون الآن أين يذهب وقتهم فعلاً.',
   'landing.cta.primary':    'التسجيل مجاناً',
   'landing.cta.secondary':  'تسجيل الدخول',
+  'landing.card.activeTask':  'المهمة النشطة',
+  'landing.card.inProgress':  'قيد التنفيذ',
+  'landing.card.planned':     'مخطط',
+  'landing.card.actual':      'فعلي',
+  'landing.card.insight':     'أنت تقلل باستمرار من تقدير التقارير. حاول إضافة وقت احتياطي في المرة القادمة.',
 
   'auth.backHome': 'العودة إلى StartSmart',
 
@@ -704,6 +709,28 @@ const ar = {
 
   // ── Profile streak badge ───────────────────────────────────────────────────
   'profile.streakBadgeDays': 'أيام',
+  'stats.breakdown': 'تفاصيل المهام',
+  'stats.sortBy': 'ترتيب',
+  'stats.noTasksYet': 'لا توجد مهام مكتملة بعد.',
+  'stats.showAllTime': 'عرض الكل',
+  'stats.sortNewest': 'الأحدث أولاً',
+  'stats.sortOldest': 'الأقدم أولاً',
+  'stats.sortAZ': 'أ → ي',
+  'stats.sortZA': 'ي → أ',
+  'stats.sortEstHigh': 'أعلى تقدير',
+  'stats.sortEstLow': 'أدنى تقدير',
+  'stats.sortActHigh': 'أعلى فعلي',
+  'stats.sortActLow': 'أدنى فعلي',
+  'stats.sortGapHigh': 'أكبر فجوة',
+  'stats.sortGapLow': 'أصغر فجوة',
+  'notif.title': 'الإشعارات',
+  'notif.unread': 'إشعار واحد غير مقروء',
+  'notif.unreadPlural': '{n} إشعارات غير مقروءة',
+  'notif.allCaughtUp': 'لا إشعارات جديدة!',
+  'notif.markAllRead': 'تحديد الكل كمقروء',
+  'notif.empty': 'لا إشعارات بعد',
+  'notif.backToDash': '→ العودة إلى لوحة التحكم',
+  'common.done': 'مكتملة',
 };
 
 export default ar;

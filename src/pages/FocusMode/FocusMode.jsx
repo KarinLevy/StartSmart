@@ -5,6 +5,7 @@ import { useTasks } from '../../context/TasksContext';
 import { useAuth } from '../../context/AuthContext';
 import { insertTimeLog, insertBreakLog } from '../../services/timeLogsService';
 import Footer from '../../components/Footer/Footer';
+import { useLocale } from '../../i18n/LocaleContext';
 import './FocusMode.css';
 
 const pad     = (n) => String(n).padStart(2, '0');
@@ -67,6 +68,7 @@ function CancelDialog({ onConfirm, onKeepWorking }) {
 const FocusMode = () => {
   const { id }                           = useParams();
   const { tasks, finishFocus, updateTask } = useTasks();
+  const { t } = useLocale();
   const { user }                         = useAuth();
   const navigate                         = useNavigate();
 
@@ -243,9 +245,9 @@ const FocusMode = () => {
         <main id="main-content" className="focus-mode-main fm-center">
           <div className="fm-error-card">
             <span className="material-symbols-outlined fm-error-icon" aria-hidden="true">search_off</span>
-            <h2>Task not found</h2>
-            <p>This task may have been deleted.</p>
-            <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+            <h2>{t('focus.notFoundTitle')}</h2>
+            <p>{t('focus.notFoundMsg')}</p>
+            <Link to="/dashboard" className="btn btn-primary">{t('taskDetails.notFound.btn')}</Link>
           </div>
         </main>
         <Footer />
@@ -472,7 +474,7 @@ const FocusMode = () => {
         </div>
 
         <p className="fm-kbd-hint" aria-hidden="true">
-          <kbd>Space</kbd> to start / pause
+          <kbd>Space</kbd> {t('focus.kbdHint')}
         </p>
 
       </main>

@@ -61,20 +61,12 @@ const filterByPeriod = (tasks, period, customStart, customEnd) => {
 
 const PERIODS = ['All Time', 'This Week', 'Last 30 Days', 'Custom Range'];
 
-// ── Sort options ──────────────────────────────────────────────────────────────
-
-const SORT_OPTIONS = [
-  { value: 'newest',      label: 'Newest First' },
-  { value: 'oldest',      label: 'Oldest First' },
-  { value: 'az',          label: 'A → Z' },
-  { value: 'za',          label: 'Z → A' },
-  { value: 'est_high',    label: 'Highest Estimated' },
-  { value: 'est_low',     label: 'Lowest Estimated' },
-  { value: 'actual_high', label: 'Highest Actual' },
-  { value: 'actual_low',  label: 'Lowest Actual' },
-  { value: 'gap_high',    label: 'Largest Gap' },
-  { value: 'gap_low',     label: 'Smallest Gap' },
-];
+const PERIOD_KEYS = {
+  'All Time':     'stats.allTime',
+  'This Week':    'stats.thisWeek',
+  'Last 30 Days': 'stats.last30',
+  'Custom Range': 'stats.custom',
+};
 
 const sortTasks = (tasks, sortBy) => {
   const list = [...tasks];
@@ -142,6 +134,19 @@ const Statistics = () => {
 
   const sortedDone = useMemo(() => sortTasks(done, sortBy), [done, sortBy]);
 
+  const SORT_OPTIONS = [
+    { value: 'newest',      label: t('stats.sortNewest') },
+    { value: 'oldest',      label: t('stats.sortOldest') },
+    { value: 'az',          label: t('stats.sortAZ') },
+    { value: 'za',          label: t('stats.sortZA') },
+    { value: 'est_high',    label: t('stats.sortEstHigh') },
+    { value: 'est_low',     label: t('stats.sortEstLow') },
+    { value: 'actual_high', label: t('stats.sortActHigh') },
+    { value: 'actual_low',  label: t('stats.sortActLow') },
+    { value: 'gap_high',    label: t('stats.sortGapHigh') },
+    { value: 'gap_low',     label: t('stats.sortGapLow') },
+  ];
+
   const rangeLabel = getRangeLabel(period, customStart, customEnd);
 
   const handlePeriodChange = (p) => {
@@ -190,7 +195,7 @@ const Statistics = () => {
                   onClick={() => handlePeriodChange(p)}
                   aria-pressed={period === p}
                 >
-                  {p}
+                  {t(PERIOD_KEYS[p])}
                 </button>
               ))}
             </div>
@@ -198,7 +203,7 @@ const Statistics = () => {
             {/* Custom Range date picker — shown only when Custom Range is active */}
             {period === 'Custom Range' && (
               <div className="stat-custom-range" role="group" aria-label="Custom date range">
-                <label className="stat-date-label" htmlFor="stat-start">From</label>
+                <label className="stat-date-label" htmlFor="stat-start">{t('stats.from')}</label>
                 <input
                   id="stat-start"
                   type="date"
@@ -209,7 +214,7 @@ const Statistics = () => {
                   aria-label="Start date"
                 />
                 <span className="stat-date-sep" aria-hidden="true">—</span>
-                <label className="stat-date-label" htmlFor="stat-end">To</label>
+                <label className="stat-date-label" htmlFor="stat-end">{t('stats.to')}</label>
                 <input
                   id="stat-end"
                   type="date"
@@ -224,7 +229,7 @@ const Statistics = () => {
                   onClick={handleClearCustomRange}
                   aria-label="Clear custom date range"
                 >
-                  Clear
+                  {t('stats.clearRange')}
                 </button>
               </div>
             )}
@@ -232,14 +237,14 @@ const Statistics = () => {
 
           <Link to="/insights" className="btn-secondary stat-insights-link">
             <span className="material-symbols-outlined" aria-hidden="true">insights</span>
-            View All Insights
+            {t('stats.viewInsights')}
           </Link>
         </section>
 
         {/* Range summary banner */}
         <div className="stat-range-summary" aria-live="polite">
           <span className="material-symbols-outlined stat-range-icon" aria-hidden="true">calendar_today</span>
-          <span>Showing data for: <strong>{rangeLabel}</strong></span>
+          <span>{t('stats.showing')} <strong>{rangeLabel}</strong></span>
         </div>
 
         {/* Summary cards */}
@@ -267,11 +272,11 @@ const Statistics = () => {
             <div className="stat-bento-card analytics-table-card">
               <div className="analytics-table-header">
                 <div className="analytics-table-header-left">
-                  <h3 className="analytics-table-title">Task Breakdown</h3>
-                  <span className="analytics-table-badge">{sortedDone.length} completed</span>
+                  <h3 className="analytics-table-title">{t('stats.breakdown')}</h3>
+                  <span className="analytics-table-badge">{sortedDone.length} {t('common.done')}</span>
                 </div>
                 <div className="analytics-table-header-right">
-                  <label htmlFor="stat-sort" className="stat-sort-label">Sort</label>
+                  <label htmlFor="stat-sort" className="stat-sort-label">{t('stats.sortBy')}</label>
                   <select
                     id="stat-sort"
                     className="stat-sort-select"
@@ -289,10 +294,10 @@ const Statistics = () => {
                 <table className="analytics-table">
                   <thead>
                     <tr>
-                      <th>Task</th>
-                      <th>Estimated</th>
-                      <th>Actual</th>
-                      <th>Gap</th>
+                      <th>{t('common.task')}</th>
+                      <th>{t('history.estimated')}</th>
+                      <th>{t('history.actual')}</th>
+                      <th>{t('stats.gap')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -318,9 +323,9 @@ const Statistics = () => {
         ) : (
           <div className="stat-empty-state">
             <span className="material-symbols-outlined stat-empty-icon" aria-hidden="true">insert_chart</span>
-            <p>No completed tasks {period !== 'All Time' ? 'in this period' : 'yet'}.</p>
+            <p>{period !== 'All Time' ? t('stats.noData') : t('stats.noTasksYet')}</p>
             {period !== 'All Time' && (
-              <button className="btn-secondary" onClick={() => handlePeriodChange('All Time')}>Show all time</button>
+              <button className="btn-secondary" onClick={() => handlePeriodChange('All Time')}>{t('stats.showAllTime')}</button>
             )}
           </div>
         )}

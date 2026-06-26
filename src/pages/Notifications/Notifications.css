@@ -87,4 +87,25 @@
   justify-content: space-between;
 }
 
+/* Back link */
+.notif-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  color: var(--color-secondary);
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+  transition: gap 0.15s;
+}
+.notif-back-link:hover { gap: 0.5rem; }
+.notif-back-link .material-symbols-outlined { font-size: 1rem; }
+
 /* reuse shared notif classes from NotificationDropdown.css */
+
+@media (max-width: 640px) {
+  .notif-page { padding: 1.25rem 1rem; }
+  .notif-page-title { font-size: var(--font-size-headline-lg-mobile); }
+  .notif-page-header { align-items: flex-start; }
+}

@@ -2,10 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import { useNotifications } from '../../context/NotificationsContext';
+import { useLocale } from '../../i18n/LocaleContext';
 import './Notifications.css';
 
 const Notifications = () => {
   const { notifications, markRead, markAllRead, unreadCount } = useNotifications();
+  const { t } = useLocale();
+
+  const unreadLabel = unreadCount === 1
+    ? t('notif.unread').replace('{n}', unreadCount)
+    : t('notif.unreadPlural').replace('{n}', unreadCount);
 
   return (
     <div className="app-layout">
@@ -13,15 +19,19 @@ const Notifications = () => {
       <main id="main-content" className="page-content notif-page">
         <div className="notif-page-header">
           <div>
-            <h1 className="notif-page-title">Notifications</h1>
+            <Link to="/dashboard" className="notif-back-link">
+              <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              {t('notif.backToDash')}
+            </Link>
+            <h1 className="notif-page-title">{t('notif.title')}</h1>
             <p className="notif-page-sub">
-              {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}` : 'All caught up!'}
+              {unreadCount > 0 ? unreadLabel : t('notif.allCaughtUp')}
             </p>
           </div>
           {unreadCount > 0 && (
             <button className="btn-secondary" onClick={markAllRead}>
               <span className="material-symbols-outlined" aria-hidden="true">done_all</span>
-              Mark all read
+              {t('notif.markAllRead')}
             </button>
           )}
         </div>
@@ -29,7 +39,7 @@ const Notifications = () => {
         {notifications.length === 0 ? (
           <div className="notif-empty">
             <span className="material-symbols-outlined notif-empty-icon" aria-hidden="true">notifications_none</span>
-            <p>No notifications yet.</p>
+            <p>{t('notif.empty')}</p>
           </div>
         ) : (
           <ul className="notif-full-list" role="list">

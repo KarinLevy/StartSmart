@@ -79,6 +79,11 @@ const he = {
   'landing.cta.subheading': 'הצטרף למתכננים שכבר יודעים לאן הזמן שלהם באמת הולך.',
   'landing.cta.primary':    'הרשמה חינם',
   'landing.cta.secondary':  'כניסה',
+  'landing.card.activeTask':  'משימה פעילה',
+  'landing.card.inProgress':  'בתהליך',
+  'landing.card.planned':     'מתוכנן',
+  'landing.card.actual':      'בפועל',
+  'landing.card.insight':     'אתה עקבית מעריך פחות משימות של דוחות. נסה להוסיף מרווח בפעם הבאה.',
 
   'auth.backHome': 'חזרה ל-StartSmart',
 
@@ -712,6 +717,30 @@ const he = {
 
   // ── Profile streak badge ───────────────────────────────────────────────────
   'profile.streakBadgeDays': 'ימים',
+  'stats.breakdown': 'פירוט משימות',
+  'stats.sortBy': 'מיון',
+  'stats.noTasksYet': 'אין עדיין משימות שהושלמו.',
+  'stats.showAllTime': 'הצג הכל',
+  'stats.sortNewest': 'חדש ביותר',
+  'stats.sortOldest': 'ישן ביותר',
+  'stats.sortAZ': 'א → ת',
+  'stats.sortZA': 'ת → א',
+  'stats.sortEstHigh': 'הערכה גבוהה ביותר',
+  'stats.sortEstLow': 'הערכה נמוכה ביותר',
+  'stats.sortActHigh': 'בפועל גבוה ביותר',
+  'stats.sortActLow': 'בפועל נמוך ביותר',
+  'stats.sortGapHigh': 'פער גדול ביותר',
+  'stats.sortGapLow': 'פער קטן ביותר',
+  'notif.title': 'התראות',
+  'notif.unread': 'התראה אחת שלא נקראה',
+  'notif.unreadPlural': '{n} התראות שלא נקראו',
+  'notif.allCaughtUp': 'אין התראות חדשות!',
+  'notif.markAllRead': 'סמן הכל כנקרא',
+  'notif.empty': 'אין עדיין התראות',
+  'notif.backToDash': '→ חזרה ללוח הבקרה',
+  'common.done': 'הושלמו',
 };
 
 export default he;
+
+  // ── Late additions ─────────────────────────────────────────────────────────

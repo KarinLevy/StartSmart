@@ -99,3 +99,22 @@
 .fab-button:active {
   transform: scale(0.95);
 }
+
+/* Mobile improvements */
+@media (max-width: 640px) {
+  .dashboard-greeting {
+    font-size: var(--font-size-headline-lg-mobile);
+  }
+  .fab-button {
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-content {
+    padding: 0.75rem;
+  }
+}

@@ -919,3 +919,50 @@
 .col-right {
   text-align: right;
 }
+
+/* ── Mobile responsive ── */
+@media (max-width: 640px) {
+  .statistics-main { padding: 1rem; }
+
+  .statistics-time-toggle {
+    flex-wrap: wrap;
+    background: none;
+    gap: 0.25rem;
+    padding: 0;
+  }
+  .time-toggle-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: var(--font-size-label-sm);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--rounded-full);
+  }
+  .time-toggle-btn.active {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+  }
+
+  .stat-custom-range {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .stat-date-input { width: 100%; }
+
+  .statistics-header {
+    align-items: flex-start;
+  }
+
+  .analytics-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .analytics-table th { padding: 0.75rem 1rem; font-size: var(--font-size-label-xs); }
+  .analytics-table td { padding: 0.75rem 1rem; font-size: var(--font-size-label-sm); }
+
+  .summary-card-value { font-size: 1.75rem; }
+}
+
+@media (max-width: 480px) {
+  .stat-insights-link span:not(.material-symbols-outlined) { display: none; }
+  .stat-insights-link::after { content: attr(data-short); }
+}

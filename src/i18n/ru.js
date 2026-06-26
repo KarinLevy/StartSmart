@@ -79,6 +79,11 @@ const ru = {
   'landing.cta.subheading': 'Присоединяйся к планировщикам, которые уже знают, куда уходит их время.',
   'landing.cta.primary':    'Регистрация бесплатно',
   'landing.cta.secondary':  'Войти',
+  'landing.card.activeTask':  'Активная задача',
+  'landing.card.inProgress':  'В процессе',
+  'landing.card.planned':     'Запланировано',
+  'landing.card.actual':      'Фактически',
+  'landing.card.insight':     'Вы систематически недооцениваете отчёты. В следующий раз добавьте запас времени.',
 
   'auth.backHome': 'Вернуться в StartSmart',
 
@@ -704,6 +709,28 @@ const ru = {
 
   // ── Profile streak badge ───────────────────────────────────────────────────
   'profile.streakBadgeDays': 'дней',
+  'stats.breakdown': 'Разбивка задач',
+  'stats.sortBy': 'Сортировка',
+  'stats.noTasksYet': 'Завершённых задач ещё нет.',
+  'stats.showAllTime': 'Показать все',
+  'stats.sortNewest': 'Сначала новые',
+  'stats.sortOldest': 'Сначала старые',
+  'stats.sortAZ': 'А → Я',
+  'stats.sortZA': 'Я → А',
+  'stats.sortEstHigh': 'Наибольшая оценка',
+  'stats.sortEstLow': 'Наименьшая оценка',
+  'stats.sortActHigh': 'Наибольшее фактическое',
+  'stats.sortActLow': 'Наименьшее фактическое',
+  'stats.sortGapHigh': 'Наибольший разрыв',
+  'stats.sortGapLow': 'Наименьший разрыв',
+  'notif.title': 'Уведомления',
+  'notif.unread': '{n} непрочитанное уведомление',
+  'notif.unreadPlural': '{n} непрочитанных уведомлений',
+  'notif.allCaughtUp': 'Всё прочитано!',
+  'notif.markAllRead': 'Отметить все прочитанными',
+  'notif.empty': 'Уведомлений пока нет',
+  'notif.backToDash': '← Назад к панели',
+  'common.done': 'завершено',
 };
 
 export default ru;

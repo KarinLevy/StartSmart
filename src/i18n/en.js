@@ -42,6 +42,15 @@ const en = {
   'common.today':          'Today',
   'common.yesterday':      'Yesterday',
   'common.tomorrow':       'Tomorrow',
+  'common.task':           'Task',
+  'common.status':         'Status',
+  'common.action':         'Action',
+  'common.allTags':        'All tags',
+  'common.done':           'completed',
+  'focus.notFoundTitle':   'Task not found',
+  'focus.notFoundMsg':     'This task may have been deleted.',
+  'focus.kbdHint':         'Space to start / pause',
+  'form.hoursPlaceholder': 'Hours',
 
   // ── Landing ────────────────────────────────────────────────────────────────
   'landing.nav.features':    'Features',
@@ -82,6 +91,11 @@ const en = {
   'landing.cta.subheading':  'Join planners who already know where their time really goes.',
   'landing.cta.primary':     'Sign up free',
   'landing.cta.secondary':   'Log in',
+  'landing.card.activeTask':  'Active Task',
+  'landing.card.inProgress':  'In progress',
+  'landing.card.planned':     'Planned',
+  'landing.card.actual':      'Actual',
+  'landing.card.insight':     'You consistently underestimate reports. Try adding a buffer next time.',
 
   // ── Auth ───────────────────────────────────────────────────────────────────
   'auth.backHome': 'Back to StartSmart',
@@ -308,6 +322,29 @@ const en = {
   'stats.viewInsights': 'View all insights →',
   'stats.selectStart':  'Select a start and end date',
   'stats.fromDate':     'From {date}',
+  'stats.breakdown':    'Task Breakdown',
+  'stats.sortBy':       'Sort',
+  'stats.noTasksYet':   'No completed tasks yet.',
+  'stats.showAllTime':  'Show all time',
+  'stats.sortNewest':   'Newest First',
+  'stats.sortOldest':   'Oldest First',
+  'stats.sortAZ':       'A → Z',
+  'stats.sortZA':       'Z → A',
+  'stats.sortEstHigh':  'Highest Estimated',
+  'stats.sortEstLow':   'Lowest Estimated',
+  'stats.sortActHigh':  'Highest Actual',
+  'stats.sortActLow':   'Lowest Actual',
+  'stats.sortGapHigh':  'Largest Gap',
+  'stats.sortGapLow':   'Smallest Gap',
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  'notif.title':        'Notifications',
+  'notif.unread':       '{n} unread notification',
+  'notif.unreadPlural': '{n} unread notifications',
+  'notif.allCaughtUp':  'All caught up!',
+  'notif.markAllRead':  'Mark all read',
+  'notif.empty':        'No notifications yet',
+  'notif.backToDash':   '← Back to Dashboard',
 
   // ── Insights ───────────────────────────────────────────────────────────────
   'insights.backToStats':   'Back to Statistics',
