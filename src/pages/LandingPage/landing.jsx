@@ -56,9 +56,10 @@ function MarketingNav() {
 
         {/* Desktop actions */}
         <div className="lp-nav-actions">
-          <ThemeToggle />
           <Link to="/login" className="lp-btn-login">Log in</Link>
           <Link to="/register" className="lp-btn-primary">Sign up free</Link>
+          <div className="lp-nav-divider" aria-hidden="true" />
+          <ThemeToggle />
         </div>
 
         {/* Mobile hamburger */}

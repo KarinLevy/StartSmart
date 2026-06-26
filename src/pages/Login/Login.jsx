@@ -13,9 +13,9 @@ const Login = () => {
 
   return (
     <div className="auth-layout">
-      <Link to="/" className="auth-back-home" aria-label="Back to home page">
+      <Link to="/" className="auth-back-home" aria-label="Back to StartSmart">
         <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-        Back to home
+        Back to StartSmart
       </Link>
       <div className="auth-card">
         <Link to="/" className="auth-brand" aria-label="StartSmart home">
