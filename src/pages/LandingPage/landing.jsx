@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import Logo from '../../components/Logo/Logo';
 import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import Footer from '../../components/Footer/Footer';
 import './landing.css';
@@ -41,12 +42,7 @@ function MarketingNav() {
     <header className="lp-nav">
       <div className="lp-nav-inner">
         {/* Logo */}
-        <Link to="/" className="lp-nav-logo" aria-label="StartSmart home">
-          <div className="lp-nav-logo-icon" aria-hidden="true">
-            <span className="material-symbols-outlined">rocket_launch</span>
-          </div>
-          <span className="lp-nav-logo-text">StartSmart</span>
-        </Link>
+        <Logo to="/" />
 
         {/* Desktop links */}
         <nav className="lp-nav-links" aria-label="Site navigation">

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import Logo from '../Logo/Logo';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
 import { useNotifications } from '../../context/NotificationsContext';
@@ -27,12 +28,7 @@ const Navbar = () => {
     <header className="navbar">
       <div className="navbar-container">
         {/* Logo */}
-        <div className="navbar-logo">
-          <div className="navbar-logo-icon" aria-hidden="true">
-            <span className="material-symbols-outlined">rocket_launch</span>
-          </div>
-          <h1 className="navbar-logo-text">StartSmart</h1>
-        </div>
+        <Logo to="/dashboard" />
 
         {/* Hamburger */}
         <button

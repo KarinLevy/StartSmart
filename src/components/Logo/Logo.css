@@ -1,0 +1,76 @@
+/* ── StartSmart Logo — shared across all pages ────────────────────────── */
+
+.ss-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* Icon box — gradient, always identical */
+.ss-logo__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 2px 8px rgba(107, 56, 212, 0.30);
+  flex-shrink: 0;
+  border-radius: 0.625rem;
+}
+
+/* Text — always 800 weight, primary colour, tight tracking */
+.ss-logo__text {
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── Size variants ────────────────────────────────────────────────────── */
+
+/* sm — compact nav / footer-page headers */
+.ss-logo--sm .ss-logo__icon {
+  width: 1.875rem;
+  height: 1.875rem;
+  border-radius: 0.5rem;
+}
+.ss-logo--sm .ss-logo__icon .material-symbols-outlined { font-size: 0.95rem; }
+.ss-logo--sm .ss-logo__text { font-size: 1rem; }
+
+/* md — default: marketing nav, app Navbar */
+.ss-logo--md .ss-logo__icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+}
+.ss-logo--md .ss-logo__icon .material-symbols-outlined { font-size: 1.1rem; }
+.ss-logo--md .ss-logo__text { font-size: 1.15rem; }
+
+/* lg — auth card headers (Login, Register, ForgotPassword) */
+.ss-logo--lg .ss-logo__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+}
+.ss-logo--lg .ss-logo__icon .material-symbols-outlined { font-size: 1.3rem; }
+.ss-logo--lg .ss-logo__text { font-size: 1.35rem; }
+
+/* ── Hover — subtle lift on the icon ─────────────────────────────────── */
+.ss-logo:hover .ss-logo__icon {
+  box-shadow: 0 4px 14px rgba(107, 56, 212, 0.45);
+}
+.ss-logo:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 3px;
+  border-radius: 0.375rem;
+}
+
+/* ── Responsive: shrink slightly on narrow screens ───────────────────── */
+@media (max-width: 640px) {
+  .ss-logo--md .ss-logo__icon { width: 2rem; height: 2rem; border-radius: 0.5rem; }
+  .ss-logo--md .ss-logo__icon .material-symbols-outlined { font-size: 1rem; }
+  .ss-logo--md .ss-logo__text { font-size: 1rem; }
+}

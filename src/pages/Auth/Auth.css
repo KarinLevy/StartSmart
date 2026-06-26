@@ -59,33 +59,10 @@
   }
 }
 
-/* Brand */
-.auth-brand {
-  display: flex;
-  align-items: center;
+/* Logo centering inside auth cards — used with <Logo size="lg" className="auth-logo-center" /> */
+.auth-logo-center {
   justify-content: center;
-  gap: 0.75rem;
   margin-bottom: var(--spacing-card-gap);
-  text-decoration: none;
-}
-
-.auth-brand-icon {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: var(--rounded-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  flex-shrink: 0;
-}
-
-.auth-brand-text {
-  font-size: var(--font-size-title-md);
-  font-weight: 800;
-  color: var(--color-primary);
-  margin: 0;
 }
 
 /* Header */

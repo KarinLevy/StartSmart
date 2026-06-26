@@ -1,0 +1,75 @@
+/* ── FooterPageShell ── public info pages (About, FAQ, Privacy, Terms, Contact) */
+
+.fp-shell {
+  min-height: 100vh;
+  background: var(--color-background);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sticky header with logo + back link */
+.fp-shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(250, 248, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-outline-variant);
+  box-shadow: 0 1px 8px rgba(0, 35, 111, 0.05);
+}
+[data-theme="dark"] .fp-shell-header {
+  background: rgba(11, 28, 48, 0.92);
+}
+
+.fp-shell-header-inner {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 3.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Back link */
+.fp-shell-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+  text-decoration: none;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--rounded-full);
+  border: 1px solid var(--color-outline-variant);
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.fp-shell-back:hover {
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+  background: rgba(107, 56, 211, 0.05);
+}
+.fp-shell-back:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+.fp-shell-back .material-symbols-outlined { font-size: 1rem; }
+
+/* Main content area */
+.fp-shell-content {
+  flex: 1;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .fp-shell-header-inner { padding: 0 1rem; }
+  .fp-shell-content { padding: 2rem 1rem 3rem; }
+}

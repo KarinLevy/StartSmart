@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Logo from '../../components/Logo/Logo';
 import '../Auth/Auth.css';
 
 /*
@@ -157,12 +158,7 @@ const Login = () => {
       </Link>
 
       <div className="auth-card">
-        <Link to="/" className="auth-brand" aria-label="StartSmart home">
-          <div className="auth-brand-icon" aria-hidden="true">
-            <span className="material-symbols-outlined">rocket_launch</span>
-          </div>
-          <h1 className="auth-brand-text">StartSmart</h1>
-        </Link>
+        <Logo to="/" size="lg" className="auth-logo-center" />
 
         <div className="auth-header">
           <h2 className="auth-title">Welcome back</h2>

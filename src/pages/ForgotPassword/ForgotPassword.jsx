@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Logo from '../../components/Logo/Logo';
 import '../Auth/Auth.css';
 
 /*
@@ -68,12 +69,7 @@ const ForgotPassword = () => {
       </Link>
 
       <div className="auth-card">
-        <Link to="/" className="auth-brand" aria-label="StartSmart home">
-          <div className="auth-brand-icon" aria-hidden="true">
-            <span className="material-symbols-outlined">rocket_launch</span>
-          </div>
-          <h1 className="auth-brand-text">StartSmart</h1>
-        </Link>
+        <Logo to="/" size="lg" className="auth-logo-center" />
 
         <div className="auth-header">
           <h2 className="auth-title">Reset your password</h2>

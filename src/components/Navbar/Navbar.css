@@ -26,50 +26,6 @@
   }
 }
 
-.navbar-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.navbar-logo-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--rounded-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  background-color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-@media (max-width: 640px) {
-  .navbar-logo-icon {
-    width: 2rem;
-    height: 2rem;
-    border-radius: var(--rounded-default);
-  }
-  .navbar-logo-icon span {
-    font-size: var(--font-size-title-md);
-  }
-}
-
-.navbar-logo-text {
-  font-size: var(--font-size-title-md);
-  font-weight: 800;
-  color: var(--color-primary);
-  line-height: 1.25;
-  margin: 0;
-}
-
-@media (max-width: 640px) {
-  .navbar-logo-text {
-  .navbar-logo-text {
-    font-size: var(--font-size-body-md);
-  }
-  }
-}
 
 .navbar-links {
   flex: 1;

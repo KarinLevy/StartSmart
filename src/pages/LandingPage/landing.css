@@ -30,34 +30,8 @@
   gap: 1rem;
 }
 
-.lp-nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  text-decoration: none;
-  flex-shrink: 0;
-  margin-right: 1.5rem;
-}
-.lp-nav-logo-icon {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.625rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(107, 56, 212, 0.3);
-}
-.lp-nav-logo-icon .material-symbols-outlined { font-size: 1.1rem; }
-.lp-nav-logo-text {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--color-primary);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
+/* Logo spacing inside the marketing nav — Logo component handles all other styles */
+.lp-nav-inner .ss-logo { margin-right: 1.5rem; }
 
 .lp-nav-links {
   display: flex;
