@@ -234,8 +234,9 @@ StartSmart supports 6 languages with full RTL support for Hebrew and Arabic:
 | German | de | LTR |
 | Russian | ru | LTR |
 
-The language switcher is available on every page via the Navbar. Locale is persisted in `localStorage`. RTL layout is applied via `document.documentElement.dir = 'rtl'`.
-
+The application automatically adapts its layout for both Left-to-Right (LTR) and Right-to-Left (RTL) languages. Hebrew and Arabic use RTL layouts, while English, French, German, and Russian use LTR layouts.
+The selected language is stored in localStorage, allowing the application to remember the user’s preference across sessions.
+Most of the user interface has been fully localized. As part of the project’s future development, localization will continue to be refined, with the remaining interface text and language-specific layout improvements being completed across all supported languages. 
 ---
 
 ## Security
