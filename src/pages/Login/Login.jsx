@@ -15,10 +15,12 @@ import '../Auth/Auth.css';
  *     "user": { "id": "...", "name": "...", "email": "user@example.com" }
  *   }
  *
- * Error responses:
- *   401 – wrong password:    { "message": "Incorrect password." }
- *   404 – email not found:   { "message": "No account found with this email." }
- *   401 – generic:           { "message": "Invalid email or password" }
+ * Error responses — include a stable `code` field so the frontend can map
+ * errors without parsing human-readable message strings:
+ *
+ *   404: { "code": "EMAIL_NOT_FOUND",     "message": "No account found with this email." }
+ *   401: { "code": "INVALID_PASSWORD",    "message": "Incorrect password." }
+ *   401: { "code": "INVALID_CREDENTIALS", "message": "Invalid email or password." }
  *
  * The token is stored in localStorage under key "ss_auth_token".
  * The user object is stored under key "ss_auth_user".
@@ -28,16 +30,33 @@ import '../Auth/Auth.css';
  * Until this endpoint exists every login attempt will fail with a network error.
  */
 
-const API_BASE   = import.meta.env.VITE_API_BASE_URL ?? '';
-const EMAIL_RE   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* Map backend error messages to user-friendly copies */
-function mapBackendError(status, message = '') {
+/*
+ * Map a backend error response to { field, text }.
+ * Priority: stable `code` field → HTTP status → message text (last resort).
+ */
+function mapBackendError(status, code = '', message = '') {
+  // 1. Stable machine-readable code (preferred)
+  if (code === 'EMAIL_NOT_FOUND')
+    return { field: 'email',    text: 'No account was found with this email.' };
+  if (code === 'INVALID_PASSWORD')
+    return { field: 'password', text: 'Incorrect password. Please try again.' };
+  if (code === 'INVALID_CREDENTIALS')
+    return { field: 'form',     text: 'Invalid email or password.' };
+
+  // 2. HTTP status fallback (when backend sends no code)
+  if (status === 404)
+    return { field: 'email',    text: 'No account was found with this email.' };
+
+  // 3. Message text — last resort, tolerant substring check
   const m = message.toLowerCase();
-  if (m.includes('not found') || m.includes('no account') || status === 404)
-    return { field: 'email', text: 'No account was found with this email.' };
+  if (m.includes('not found') || m.includes('no account'))
+    return { field: 'email',    text: 'No account was found with this email.' };
   if (m.includes('incorrect password') || m.includes('wrong password'))
     return { field: 'password', text: 'Incorrect password. Please try again.' };
+
   return { field: 'form', text: 'Invalid email or password.' };
 }
 
@@ -117,7 +136,7 @@ const Login = () => {
         login(data.token, data.user);
         navigate(from, { replace: true });
       } else {
-        const { field, text } = mapBackendError(res.status, data.message);
+        const { field, text } = mapBackendError(res.status, data.code, data.message);
         setFieldErrors({ [field]: text });
         setStatus('error');
       }
