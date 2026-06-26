@@ -20,7 +20,7 @@ const Notifications = () => {
         <div className="notif-page-header">
           <div>
             <Link to="/dashboard" className="notif-back-link">
-              <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+              <span className="material-symbols-outlined flip-rtl" aria-hidden="true">arrow_back</span>
               {t('notif.backToDash')}
             </Link>
             <h1 className="notif-page-title">{t('notif.title')}</h1>
