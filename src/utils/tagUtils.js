@@ -22,80 +22,165 @@ export const TAG_PRESETS = [
   { color: '#a16207', label: 'Yellow', hint: 'Reminder'          },
   { color: '#be185d', label: 'Pink',   hint: 'Creative'          },
   { color: '#0e7490', label: 'Cyan',   hint: 'Technical'         },
-  { color: '#525f6b', label: 'Gray',   hint: 'General'           },
 ];
 
 // ── Keyword → color map ───────────────────────────────────────────────────────
-// Replace or augment this with a backend/AI call when ready.
+// Supports English and Hebrew. Ordered from most-specific to least-specific to
+// avoid false matches. Replace or augment with a backend/AI call when ready.
+//
+// Matching strategy:
+//   1. Exact match on the full trimmed input (highest priority)
+//   2. Token match — the keyword appears as a whitespace-separated word
+//   3. Substring match — keyword found anywhere (last resort, catches compounds)
 
 const KEYWORD_MAP = [
+  // ── Urgent / Red ──────────────────────────────────────────────────────────
   {
     color: '#b91c1c',
-    keywords: ['urgent', 'critical', 'asap', 'deadline', 'emergency', 'alert', 'rush', 'blocker'],
+    keywords: [
+      // English
+      'urgent', 'critical', 'asap', 'deadline', 'emergency', 'alert', 'rush', 'blocker',
+      'important', 'priority',
+      // Hebrew
+      'דחוף', 'בהול', 'חשוב', 'קריטי', 'דדליין', 'חירום',
+    ],
   },
+
+  // ── Technical / Cyan ──────────────────────────────────────────────────────
   {
     color: '#0e7490',
     keywords: [
+      // English
       'backend', 'frontend', 'react', 'javascript', 'typescript', 'nodejs', 'node',
-      'ai', 'ml', 'dev', 'development', 'programming', 'code', 'coding', 'api',
-      'database', 'css', 'html', 'vue', 'python', 'java', 'software', 'tech',
-      'bug', 'feature', 'pr', 'git', 'data', 'devops', 'cloud', 'docker',
+      'vue', 'angular', 'svelte', 'python', 'java', 'golang', 'rust', 'swift',
+      'kotlin', 'php', 'ruby', 'scala', 'cpp', 'csharp',
+      'ai', 'ml', 'llm', 'devops', 'docker', 'kubernetes', 'aws', 'gcp', 'azure',
+      'database', 'sql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'grpc',
+      'development', 'programming', 'coding', 'code', 'software', 'tech', 'git',
+      'github', 'testing', 'deployment', 'infrastructure', 'architecture',
+      'algorithm', 'debugging', 'refactor', 'migration', 'integration',
+      // Hebrew
+      'בקאנד', 'פרונטאנד', 'ריאקט', "ג'אווהסקריפט", 'טייפסקריפט', 'פייתון',
+      'פיתוח', 'תכנות', 'קוד', 'תוכנה', 'טכנולוגיה', 'בינה מלאכותית',
+      'מסד נתונים', 'ארכיטקטורה', 'דיפלוימנט',
     ],
   },
+
+  // ── Work / Blue ───────────────────────────────────────────────────────────
   {
     color: '#2563eb',
     keywords: [
+      // English
       'work', 'office', 'client', 'business', 'job', 'career', 'professional',
       'company', 'team', 'colleague', 'corporate', 'project', 'sprint',
+      'manager', 'report', 'presentation', 'proposal',
+      // Hebrew
+      'עבודה', 'משרד', 'לקוח', 'עסק', 'קריירה', 'חברה', 'צוות',
+      'פרויקט עבודה', 'פרזנטציה', 'דו"ח', 'הצעה',
     ],
   },
+
+  // ── Study / Purple ────────────────────────────────────────────────────────
   {
     color: '#6b38d4',
     keywords: [
+      // English
       'study', 'exam', 'homework', 'university', 'school', 'course', 'lecture',
-      'assignment', 'thesis', 'quiz', 'class', 'college', 'semester',
+      'assignment', 'thesis', 'quiz', 'class', 'college', 'semester', 'grade',
+      'academic', 'research', 'tutorial', 'lesson',
+      // Hebrew
+      'לימודים', 'מבחן', 'שיעורי בית', 'אוניברסיטה', 'בית ספר', 'קורס',
+      'הרצאה', 'עבודה אקדמית', 'תזה', 'בגרות', 'מכללה', 'סמסטר',
+      'מטלה', 'שיעור',
     ],
   },
+
+  // ── Planning / Orange ─────────────────────────────────────────────────────
   {
     color: '#c2610c',
     keywords: [
+      // English
       'meeting', 'calendar', 'planning', 'plan', 'schedule', 'event',
-      'standup', 'sync', 'agenda', 'kickoff', 'retro', 'sprint',
+      'standup', 'sync', 'agenda', 'kickoff', 'retro', 'appointment',
+      'conference', 'workshop', 'webinar',
+      // Hebrew
+      'פגישה', 'לוח זמנים', 'תכנון', 'יומן', 'אירוע', 'סדר יום',
+      'ועידה', 'סדנה', 'תיאום', 'וועידה',
     ],
   },
+
+  // ── Personal / Green ──────────────────────────────────────────────────────
   {
     color: '#16a34a',
     keywords: [
+      // English
       'personal', 'family', 'home', 'health', 'fitness', 'gym', 'sport',
-      'life', 'self', 'wellness', 'hobby', 'leisure',
+      'life', 'self', 'wellness', 'hobby', 'leisure', 'birthday', 'vacation',
+      'travel', 'relax', 'friend', 'social',
+      // Hebrew
+      'אישי', 'משפחה', 'בית', 'בריאות', 'כושר', 'ספורט', 'יום הולדת',
+      'חופשה', 'טיול', 'חבר', 'חברה', 'נופש', 'תחביב',
     ],
   },
+
+  // ── Reminder / Yellow ─────────────────────────────────────────────────────
   {
     color: '#a16207',
-    keywords: ['shopping', 'reminder', 'grocery', 'buy', 'list', 'shop', 'purchase', 'todo'],
+    keywords: [
+      // English
+      'reminder', 'shopping', 'grocery', 'buy', 'shop', 'purchase', 'todo',
+      'errand', 'remember', 'note to self',
+      // Hebrew
+      'תזכורת', 'קניות', 'לקנות', 'לזכור', 'מכולת', 'סופר', 'רשימת קניות',
+    ],
   },
+
+  // ── Creative / Pink ───────────────────────────────────────────────────────
   {
     color: '#be185d',
     keywords: [
-      'design', 'creative', 'ideas', 'art', 'illustration', 'ux', 'ui',
-      'figma', 'branding', 'logo', 'visual', 'graphic',
+      // English
+      'design', 'creative', 'idea', 'ideas', 'art', 'illustration', 'ux', 'ui',
+      'figma', 'branding', 'logo', 'visual', 'graphic', 'writing', 'content',
+      'photography', 'video', 'music', 'animation',
+      // Hebrew
+      'עיצוב', 'יצירתי', 'רעיון', 'רעיונות', 'אמנות', 'כתיבה', 'תוכן',
+      'צילום', 'וידאו', 'מוזיקה', 'ממשק',
     ],
-  },
-  {
-    color: '#525f6b',
-    keywords: ['general', 'misc', 'other', 'miscellaneous', 'note'],
   },
 ];
 
 /**
- * Suggest a color for a tag name based on keyword matching.
- * Returns DEFAULT_COLOR if no keyword matches.
+ * Normalize a tag name for matching: trim, collapse spaces, lowercase English.
+ * Preserves Hebrew characters as-is (Hebrew has no lowercase).
+ */
+function normalize(name) {
+  return name.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/**
+ * Suggest a color for a tag name using a three-tier match strategy:
+ *   1. Exact match on the full normalized input
+ *   2. Token match — keyword is a whole word within the input
+ *   3. Substring match — keyword appears anywhere (catches compounds)
+ * Returns DEFAULT_COLOR when no keyword matches.
  */
 export function suggestColor(name) {
   if (!name?.trim()) return DEFAULT_COLOR;
-  const lower = name.toLowerCase().trim();
+  const input = normalize(name);
+
   for (const { color, keywords } of KEYWORD_MAP) {
-    if (keywords.some((k) => lower === k || lower.includes(k))) return color;
+    // Tier 1: exact full-input match
+    if (keywords.some((k) => input === k)) return color;
+  }
+  for (const { color, keywords } of KEYWORD_MAP) {
+    // Tier 2: whole-word (token) match
+    const tokens = input.split(/\s+/);
+    if (keywords.some((k) => tokens.includes(k))) return color;
+  }
+  for (const { color, keywords } of KEYWORD_MAP) {
+    // Tier 3: substring match (for compound words like "לקוח עסקי", "backend-api")
+    if (keywords.some((k) => k.length >= 4 && input.includes(k))) return color;
   }
   return DEFAULT_COLOR;
 }
