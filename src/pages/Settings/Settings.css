@@ -1,5 +1,5 @@
 .set-section {
-  margin-bottom: var(--spacing-card-gap);
+  margin-bottom: 1.25rem;
 }
 
 .set-section-title {
@@ -107,6 +107,32 @@
   border-color: var(--color-secondary);
   box-shadow: 0 0 0 3px rgba(107, 56, 211, 0.18);
 }
+
+/* Row control wrapper */
+.set-row-control { display: flex; align-items: center; flex-shrink: 0; }
+
+/* Danger row */
+.set-row.danger .set-row-label { color: var(--color-error); }
+
+/* Action button */
+.set-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.875rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-md);
+  background: var(--color-surface-container);
+  color: var(--color-on-surface);
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.set-action-btn:hover { background: var(--color-surface-container-high); border-color: var(--color-outline); }
+.set-action-btn .material-symbols-outlined { font-size: 1rem; }
 
 /* Upgrade banner */
 .set-upgrade {
