@@ -48,35 +48,83 @@ const getTaskHour = (task) => {
 const statusCls = (s) => s === 'done' ? 'sc-done' : s === 'in_progress' ? 'sc-progress' : 'sc-pending';
 
 // ── Smart labels ───────────────────────────────────────────────────────────────
-const smartDayLabel = (d) => {
-  const todayKey = toKey(new Date());
-  const key = toKey(d);
-  const diff = Math.round((new Date(key) - new Date(todayKey)) / 86400000);
-  if (diff === 0) return 'Today';
-  if (diff === -1) return 'Yesterday';
-  if (diff === 1) return 'Tomorrow';
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-};
+// ── Centralised header label helper ──────────────────────────────────────────
+// Returns { title, subtitle } — title and subtitle are NEVER the same string.
+//
+// Daily:
+//   smart day  → { title: 'Today',     subtitle: 'Friday, June 26' }
+//   other day  → { title: 'Mon, Jun 30', subtitle: 'Daily view' }
+//
+// Weekly:
+//   smart week → { title: 'This Week', subtitle: 'Jun 22 – Jun 28' }
+//   other week → { title: 'Jun 22 – Jun 28', subtitle: 'Weekly view' }
+//
+// Monthly:
+//   smart month → { title: 'This Month', subtitle: 'June 2026' }
+//   other month → { title: 'June 2026',  subtitle: 'Monthly view' }
 
-const smartWeekLabel = (monday) => {
-  const thisMon = getMondayOf(new Date());
-  const diff = Math.round((monday - thisMon) / 86400000);
-  if (diff === 0) return 'This Week';
-  if (diff === -7) return 'Last Week';
-  if (diff === 7) return 'Next Week';
+const weekRange = (monday) => {
   const end = addDays(monday, 6);
   return `${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 };
 
-const smartMonthLabel = (year, month) => {
+const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }) => {
+  if (period === 'Daily') {
+    const todayKey = toKey(new Date());
+    const diff = Math.round(
+      (new Date(toKey(viewDate)) - new Date(todayKey)) / 86400000
+    );
+    const smartTitle =
+      diff === 0 ? 'Today' :
+      diff === -1 ? 'Yesterday' :
+      diff === 1 ? 'Tomorrow' : null;
+
+    if (smartTitle) {
+      const subtitle = viewDate.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric',
+      });
+      return { title: smartTitle, subtitle };
+    }
+    // Non-smart day: title = the date, subtitle = view name
+    return {
+      title: viewDate.toLocaleDateString('en-US', {
+        weekday: 'short', month: 'short', day: 'numeric',
+      }),
+      subtitle: 'Daily view',
+    };
+  }
+
+  if (period === 'Weekly') {
+    const thisMon = getMondayOf(new Date());
+    const diff = Math.round((monday - thisMon) / 86400000);
+    const smartTitle =
+      diff === 0 ? 'This Week' :
+      diff === -7 ? 'Last Week' :
+      diff === 7 ? 'Next Week' : null;
+
+    if (smartTitle) {
+      return { title: smartTitle, subtitle: weekRange(monday) };
+    }
+    // Non-smart week: title = range, subtitle = view name
+    return { title: weekRange(monday), subtitle: 'Weekly view' };
+  }
+
+  // Monthly
+  const { year, month } = monthYear;
   const n = new Date();
-  const y = n.getFullYear(), m = n.getMonth();
-  if (year === y && month === m) return 'This Month';
-  const prev = new Date(y, m - 1, 1);
-  if (year === prev.getFullYear() && month === prev.getMonth()) return 'Last Month';
-  const next = new Date(y, m + 1, 1);
-  if (year === next.getFullYear() && month === next.getMonth()) return 'Next Month';
-  return `${MONTHS[month]} ${year}`;
+  const ny = n.getFullYear(), nm = n.getMonth();
+  const fullMonthYear = `${MONTHS[month]} ${year}`;
+  const prev = new Date(ny, nm - 1, 1);
+  const next = new Date(ny, nm + 1, 1);
+  const smartTitle =
+    (year === ny && month === nm) ? 'This Month' :
+    (year === prev.getFullYear() && month === prev.getMonth()) ? 'Last Month' :
+    (year === next.getFullYear() && month === next.getMonth()) ? 'Next Month' : null;
+
+  if (smartTitle) {
+    return { title: smartTitle, subtitle: fullMonthYear };
+  }
+  return { title: fullMonthYear, subtitle: 'Monthly view' };
 };
 
 // ── DailyView ──────────────────────────────────────────────────────────────────
@@ -388,22 +436,10 @@ const Schedule = () => {
   };
 
   // ── Smart labels ────────────────────────────────────────────────────────────
-  const rangeLabel = useMemo(() => {
-    if (period === 'Daily') {
-      const primary   = smartDayLabel(viewDate);
-      const secondary = viewDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-      return { primary, secondary: primary !== secondary ? secondary : null };
-    }
-    if (period === 'Weekly') {
-      const primary = smartWeekLabel(monday);
-      const end = addDays(monday, 6);
-      const secondary = `${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-      return { primary, secondary };
-    }
-    const primary   = smartMonthLabel(monthYear.year, monthYear.month);
-    const secondary = `${MONTHS[monthYear.month]} ${monthYear.year}`;
-    return { primary, secondary: primary !== secondary ? secondary : null };
-  }, [period, viewDate, monday, monthYear]);
+  const rangeLabel = useMemo(
+    () => getScheduleHeaderLabel(period, { viewDate, monday, monthYear }),
+    [period, viewDate, monday, monthYear]
+  );
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -443,9 +479,9 @@ const Schedule = () => {
           </button>
 
           <div className="sc-range" aria-live="polite">
-            <span className="sc-range-primary">{rangeLabel.primary}</span>
-            {rangeLabel.secondary && (
-              <span className="sc-range-secondary">{rangeLabel.secondary}</span>
+            <span className="sc-range-primary">{rangeLabel.title}</span>
+            {rangeLabel.subtitle && (
+              <span className="sc-range-secondary">{rangeLabel.subtitle}</span>
             )}
           </div>
 
