@@ -15,8 +15,10 @@ import '../Auth/Auth.css';
  *     "user": { "id": "...", "name": "...", "email": "user@example.com" }
  *   }
  *
- * Error response (401 / 422):
- *   { "message": "Invalid email or password" }
+ * Error responses:
+ *   401 – wrong password:    { "message": "Incorrect password." }
+ *   404 – email not found:   { "message": "No account found with this email." }
+ *   401 – generic:           { "message": "Invalid email or password" }
  *
  * The token is stored in localStorage under key "ss_auth_token".
  * The user object is stored under key "ss_auth_user".
@@ -26,33 +28,88 @@ import '../Auth/Auth.css';
  * Until this endpoint exists every login attempt will fail with a network error.
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+const API_BASE   = import.meta.env.VITE_API_BASE_URL ?? '';
+const EMAIL_RE   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* Map backend error messages to user-friendly copies */
+function mapBackendError(status, message = '') {
+  const m = message.toLowerCase();
+  if (m.includes('not found') || m.includes('no account') || status === 404)
+    return { field: 'email', text: 'No account was found with this email.' };
+  if (m.includes('incorrect password') || m.includes('wrong password'))
+    return { field: 'password', text: 'Incorrect password. Please try again.' };
+  return { field: 'form', text: 'Invalid email or password.' };
+}
 
 const Login = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { login } = useAuth();
 
-  const [email,       setEmail]       = useState('');
-  const [password,    setPassword]    = useState('');
-  const [showPass,    setShowPass]    = useState(false);
-  const [remember,    setRemember]    = useState(false);
-  const [status,      setStatus]      = useState('idle'); // idle | loading | error
-  const [errorMsg,    setErrorMsg]    = useState('');
+  const [email,    setEmail]    = useState('');
+  const [password, setPassword] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [status,   setStatus]   = useState('idle'); // idle | loading | error
 
-  /* Redirect to the page the user originally tried to visit, or /dashboard */
+  /* Per-field errors: { email?: string, password?: string, form?: string } */
+  const [fieldErrors, setFieldErrors] = useState({});
+
   const from = location.state?.from?.pathname ?? '/dashboard';
+
+  /* Clear a specific field error as the user edits it */
+  const clearError = (field) => {
+    if (fieldErrors[field] || fieldErrors.form) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        delete next.form;
+        return next;
+      });
+    }
+    if (status === 'error') setStatus('idle');
+  };
+
+  /* Frontend validation — returns an error object or null */
+  function validate() {
+    const emailEmpty    = !email.trim();
+    const passwordEmpty = !password;
+    const errors        = {};
+
+    if (emailEmpty && passwordEmpty) {
+      errors.form = 'Please enter your email and password.';
+      return errors;
+    }
+    if (emailEmpty) {
+      errors.email = 'Please enter your email.';
+    } else if (!EMAIL_RE.test(email.trim())) {
+      errors.email = 'Please enter a valid email address.';
+    }
+    if (passwordEmpty) {
+      errors.password = 'Please enter your password.';
+    }
+    return Object.keys(errors).length ? errors : null;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    /* Run frontend validation first — never touch the backend if it fails */
+    const validationErrors = validate();
+    if (validationErrors) {
+      setFieldErrors(validationErrors);
+      setStatus('error');
+      return;
+    }
+
     setStatus('loading');
-    setErrorMsg('');
+    setFieldErrors({});
 
     try {
       const res  = await fetch(`${API_BASE}/api/auth/login`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
+        body:    JSON.stringify({ email: email.trim(), password }),
       });
       const data = await res.json().catch(() => ({}));
 
@@ -60,19 +117,18 @@ const Login = () => {
         login(data.token, data.user);
         navigate(from, { replace: true });
       } else {
+        const { field, text } = mapBackendError(res.status, data.message);
+        setFieldErrors({ [field]: text });
         setStatus('error');
-        setErrorMsg(
-          data.message ||
-          (res.status === 401 || res.status === 422
-            ? 'Incorrect email or password.'
-            : 'Something went wrong. Please try again.')
-        );
       }
     } catch {
+      setFieldErrors({ form: 'We could not log you in right now. Please try again.' });
       setStatus('error');
-      setErrorMsg('Unable to reach the server. Check your connection and try again.');
     }
   };
+
+  const emailHasError    = !!(fieldErrors.email);
+  const passwordHasError = !!(fieldErrors.password);
 
   return (
     <div className="auth-layout">
@@ -95,6 +151,8 @@ const Login = () => {
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
+
+          {/* Email */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="login-email">
               Email <span className="auth-label-required" aria-hidden="true">*</span>
@@ -102,19 +160,27 @@ const Login = () => {
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
               <input
-                className="auth-input"
+                className={`auth-input${emailHasError ? ' input-error' : ''}`}
                 id="login-email"
                 type="email"
                 placeholder="dana@example.com"
-                required
                 autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
                 disabled={status === 'loading'}
+                aria-invalid={emailHasError}
+                aria-describedby={emailHasError ? 'err-email' : undefined}
               />
             </div>
+            {emailHasError && (
+              <p id="err-email" className="auth-field-error" role="alert">
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">error</span>
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
+          {/* Password */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="login-password">
               Password <span className="auth-label-required" aria-hidden="true">*</span>
@@ -122,28 +188,34 @@ const Login = () => {
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">lock</span>
               <input
-                className="auth-input"
+                className={`auth-input${passwordHasError ? ' input-error' : ''}`}
                 id="login-password"
                 type={showPass ? 'text' : 'password'}
                 placeholder="••••••••"
-                required
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
                 disabled={status === 'loading'}
+                aria-invalid={passwordHasError}
+                aria-describedby={passwordHasError ? 'err-password' : undefined}
               />
               <button
                 type="button"
                 className="auth-toggle-visibility"
                 onClick={() => setShowPass((v) => !v)}
                 aria-label={showPass ? 'Hide password' : 'Show password'}
-                tabIndex={0}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
                   {showPass ? 'visibility_off' : 'visibility'}
                 </span>
               </button>
             </div>
+            {passwordHasError && (
+              <p id="err-password" className="auth-field-error" role="alert">
+                <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">error</span>
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
 
           <div className="auth-row-between">
@@ -158,10 +230,11 @@ const Login = () => {
             <Link to="/forgot-password" className="auth-inline-link">Forgot password?</Link>
           </div>
 
-          {status === 'error' && (
+          {/* Form-level error (both-empty, backend generic, network) */}
+          {fieldErrors.form && (
             <p className="auth-field-error" role="alert">
               <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">error</span>
-              {errorMsg}
+              {fieldErrors.form}
             </p>
           )}
 
