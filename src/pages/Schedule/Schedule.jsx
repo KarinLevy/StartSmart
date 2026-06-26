@@ -9,8 +9,8 @@ const DAY_NAMES_FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Fri
 const DAY_NAMES_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// Default timeline: 6 AM – 11 PM (23)
-const DAY_HOURS = Array.from({ length: 18 }, (_, i) => i + 6);
+// Full 24-hour timeline: 00 – 23, plus a closing 00 (midnight next day) represented as 24
+const DAY_HOURS = Array.from({ length: 25 }, (_, i) => i); // 0 … 24
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
 // Use local date components (not UTC) so midnight = same calendar day in any timezone
@@ -34,11 +34,8 @@ const fmtMin = (m) => {
   return m >= 60 ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}` : `${m}m`;
 };
 
-const fmtHour12 = (h) => {
-  const s = h >= 12 ? 'PM' : 'AM';
-  const d = h > 12 ? h - 12 : h === 0 ? 12 : h;
-  return `${d} ${s}`;
-};
+// 24-hour label: 0→"00:00", 13→"13:00", 24→"00:00" (closing midnight)
+const fmtHour24 = (h) => `${String(h === 24 ? 0 : h).padStart(2, '0')}:00`;
 
 const getTaskHour = (task) => {
   if (task.scheduledDate?.includes('T')) return parseInt(task.scheduledDate.slice(11, 13), 10);
@@ -139,9 +136,7 @@ const DailyView = ({ viewDate, tasks }) => {
   const dayTasks  = tasks.filter((t) => t.scheduledDate?.slice(0, 10) === key);
   const unslotted = dayTasks.filter((t) => !t.scheduledDate?.includes('T'));
 
-  // Expand timeline to include out-of-range task hours
-  const taskHours = new Set(dayTasks.filter((t) => getTaskHour(t) !== null).map((t) => getTaskHour(t)));
-  const hours = [...new Set([...DAY_HOURS, ...taskHours])].sort((a, b) => a - b);
+  const hours = DAY_HOURS; // 0–24 full day
 
   return (
     <div className="sc-daily">
@@ -150,7 +145,7 @@ const DailyView = ({ viewDate, tasks }) => {
         <div className="sc-now-ribbon" role="status" aria-label="Current time">
           <span className="sc-now-dot" aria-hidden="true" />
           <span className="sc-now-time">
-            {now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+            {`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`}
           </span>
           <span className="sc-now-label">now</span>
         </div>
@@ -166,7 +161,7 @@ const DailyView = ({ viewDate, tasks }) => {
           return (
             <div key={h} className={`sc-slot${isCurrent ? ' sc-slot-now' : ''}`}>
               <div className="sc-slot-label">
-                <span>{fmtHour12(h)}</span>
+                <span>{fmtHour24(h)}</span>
                 {isCurrent && <span className="sc-now-badge" aria-label="Current hour">Now</span>}
               </div>
               <div className="sc-slot-track" aria-hidden="true">
