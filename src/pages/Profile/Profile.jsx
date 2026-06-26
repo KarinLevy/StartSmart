@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
@@ -14,27 +15,48 @@ const fmtMin = (m) => {
 };
 
 const validatePhone = (ph) => {
-  if (!ph) return null; // optional
+  if (!ph) return null;
   const digits = ph.replace(/\D/g, '');
   if (digits.length < 7 || digits.length > 15) return 'Enter a valid phone number (7–15 digits).';
   return null;
 };
 
-const STATS_CONFIG = [
-  { icon: 'check_circle',    label: 'Tasks done',  key: 'done' },
-  { icon: 'pending_actions', label: 'In progress', key: 'in_progress' },
-  { icon: 'schedule',        label: 'Focus time',  key: 'focus' },
-  { icon: 'query_stats',     label: 'Avg. gap',    key: 'gap' },
-];
+// ── Stat Card ─────────────────────────────────────────────────────────────────
+
+const StatCard = ({ icon, value, label, sublabel, onClick, colorClass = '' }) => (
+  <button
+    type="button"
+    className={`pr-stat-card ${colorClass}`}
+    onClick={onClick}
+    aria-label={`${label}: ${value}. Click to view details.`}
+  >
+    <span className={`material-symbols-outlined pr-stat-card-icon ${colorClass}`} aria-hidden="true">{icon}</span>
+    <span className="pr-stat-card-value">{value}</span>
+    <span className="pr-stat-card-label">{label}</span>
+    {sublabel && <span className="pr-stat-card-sublabel">{sublabel}</span>}
+    <span className="material-symbols-outlined pr-stat-card-arrow" aria-hidden="true">arrow_forward</span>
+  </button>
+);
+
+// ── Achievement Card ──────────────────────────────────────────────────────────
+
+const AchievementCard = ({ icon, title, description, unlocked = false, value = null }) => (
+  <div className={`pr-achievement-card${unlocked ? ' unlocked' : ''}`} aria-label={`${title}${unlocked ? ', unlocked' : ', locked'}`}>
+    <div className="pr-achievement-icon" aria-hidden="true">{icon}</div>
+    {value !== null && <div className="pr-achievement-value">{value}</div>}
+    <div className="pr-achievement-title">{title}</div>
+    <div className="pr-achievement-desc">{description}</div>
+    {!unlocked && <span className="pr-achievement-lock material-symbols-outlined" aria-hidden="true">lock</span>}
+  </div>
+);
 
 // ── Change Password Modal ─────────────────────────────────────────────────────
 
 const ChangePasswordModal = ({ onClose }) => {
-  const [form, setForm]     = useState({ current: '', next: '', confirm: '' });
-  const [errors, setErrors] = useState({});
+  const [form, setForm]       = useState({ current: '', next: '', confirm: '' });
+  const [errors, setErrors]   = useState({});
   const [success, setSuccess] = useState(false);
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
@@ -43,15 +65,15 @@ const ChangePasswordModal = ({ onClose }) => {
 
   const set = (k) => (e) => {
     setForm((p) => ({ ...p, [k]: e.target.value }));
-    setErrors((p) => ({ ...p, [k]: null, form: null }));
+    setErrors((p) => ({ ...p, [k]: null }));
     setSuccess(false);
   };
 
   const validate = () => {
     const errs = {};
-    if (!form.current)          errs.current = 'Current password is required.';
-    if (form.next.length < 8)   errs.next    = 'New password must be at least 8 characters.';
-    if (form.next !== form.confirm) errs.confirm = 'Passwords do not match.';
+    if (!form.current)               errs.current = 'Current password is required.';
+    if (form.next.length < 8)        errs.next    = 'New password must be at least 8 characters.';
+    if (form.next !== form.confirm)  errs.confirm = 'Passwords do not match.';
     return errs;
   };
 
@@ -59,9 +81,7 @@ const ChangePasswordModal = ({ onClose }) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-
     // Backend integration point: POST /api/auth/change-password { currentPassword, newPassword }
-    // For now, simulate success
     setSuccess(true);
     setForm({ current: '', next: '', confirm: '' });
     setTimeout(onClose, 1500);
@@ -155,20 +175,29 @@ const ChangePasswordModal = ({ onClose }) => {
 
 // ── Profile page ──────────────────────────────────────────────────────────────
 
+// Backend integration point: replace with real achievements from GET /api/profile/achievements
+const ACHIEVEMENTS_CONFIG = [
+  { icon: '🏆', title: 'First Task',         description: 'Completed your first task',        key: 'first_task' },
+  { icon: '🔥', title: '7-Day Streak',        description: '7 consecutive productive days',    key: 'streak_7' },
+  { icon: '🎯', title: '90% Accuracy',        description: 'Estimation accuracy above 90%',   key: 'accuracy_90' },
+  { icon: '⭐', title: '100 Tasks',           description: 'Completed 100 tasks total',        key: 'tasks_100' },
+  { icon: '📚', title: 'Study Master',        description: 'Logged 10h of study focus time',  key: 'study_master' },
+  { icon: '💼', title: 'Work Champion',       description: 'Logged 10h of work focus time',   key: 'work_champion' },
+];
+
 const Profile = () => {
+  const navigate  = useNavigate();
   const { tasks } = useTasks();
   const { profile, setProfile, avatarSrc, setAvatarSrc } = useProfile();
 
-  // Local form mirrors context; edits don't propagate until Save
-  const [form, setFormState]   = useState({ ...profile });
+  const [form, setFormState]      = useState({ ...profile });
   const [phoneError, setPhoneError] = useState(null);
   const [saved, setSaved]           = useState(false);
-  const [uploadState, setUpload]    = useState('idle'); // idle | uploading | error
+  const [uploadState, setUpload]    = useState('idle');
   const [showPwModal, setShowPwModal] = useState(false);
 
   const fileRef = useRef(null);
 
-  // Keep local form in sync if profile changes elsewhere
   useEffect(() => { setFormState({ ...profile }); }, [profile]);
 
   const setField = (k) => (e) => {
@@ -204,36 +233,35 @@ const Profile = () => {
     setSaved(false);
   };
 
-  // Stats
+  // ── Derived stats ──────────────────────────────────────────────────────────
   const done       = tasks.filter((t) => t.status === 'done');
   const inProgress = tasks.filter((t) => t.status === 'in_progress');
   const focusMin   = done.reduce((s, t) => s + (t.actualMinutes || 0), 0);
   const avgGap     = done.length > 0
     ? Math.round(done.reduce((s, t) => s + (t.gap || 0), 0) / done.length)
     : null;
+  const avgGapLabel = avgGap !== null ? (avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`) : '—';
 
-  const statValues = {
-    done:        String(done.length),
-    in_progress: String(inProgress.length),
-    focus:       fmtMin(focusMin),
-    gap:         avgGap !== null ? (avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`) : '—',
-  };
+  // Backend integration point: GET /api/profile/streak
+  const streakDays = 0; // replace with real data
+
+  // Backend integration point: GET /api/profile/achievements
+  const unlockedKeys = new Set(
+    done.length >= 1  ? ['first_task']  : [],
+  );
+  if (done.length >= 100) unlockedKeys.add('tasks_100');
 
   const closePwModal = useCallback(() => setShowPwModal(false), []);
 
   return (
     <PageShell narrow title="Profile" subtitle="Manage your personal details and account info.">
 
-      {/* ── Banner: avatar + stats ── */}
+      {/* ── Banner ── */}
       <div className="pr-banner surface-card">
         <div className="pr-banner-left">
           <div className="pr-avatar-wrap">
             <Avatar size="xl" className="pr-banner-avatar" />
-            <label
-              htmlFor="pr-photo-input"
-              className="pr-avatar-overlay"
-              aria-label="Change profile photo"
-            >
+            <label htmlFor="pr-photo-input" className="pr-avatar-overlay" aria-label="Change profile photo">
               <span className="material-symbols-outlined" aria-hidden="true">photo_camera</span>
               <span className="pr-overlay-text">Change</span>
             </label>
@@ -253,14 +281,79 @@ const Profile = () => {
             {uploadState === 'error'     && <span className="pr-upload-status error">Invalid file — use an image under 5 MB.</span>}
           </div>
         </div>
+      </div>
 
-        <div className="pr-stats-row">
-          {STATS_CONFIG.map((s) => (
-            <div key={s.key} className="pr-stat">
-              <span className="material-symbols-outlined pr-stat-icon" aria-hidden="true">{s.icon}</span>
-              <span className="pr-stat-val">{statValues[s.key]}</span>
-              <span className="pr-stat-label">{s.label}</span>
-            </div>
+      {/* ── Stat Cards ── */}
+      <div className="pr-stat-cards" role="list" aria-label="Activity summary">
+        <StatCard
+          icon="check_circle"
+          value={done.length}
+          label="Tasks Completed"
+          sublabel="View in Task History"
+          colorClass="color-success"
+          onClick={() => navigate('/task-history')}
+        />
+        <StatCard
+          icon="pending_actions"
+          value={inProgress.length}
+          label="In Progress"
+          sublabel="View on Dashboard"
+          colorClass="color-warning"
+          onClick={() => navigate('/dashboard')}
+        />
+        <StatCard
+          icon="schedule"
+          value={fmtMin(focusMin)}
+          label="Focus Time"
+          sublabel="View Statistics"
+          colorClass="color-secondary"
+          onClick={() => navigate('/statistics')}
+        />
+        <StatCard
+          icon="query_stats"
+          value={avgGapLabel}
+          label="Avg. Gap"
+          sublabel="View Statistics"
+          colorClass={avgGap !== null && avgGap > 0 ? 'color-error' : 'color-success'}
+          onClick={() => navigate('/statistics')}
+        />
+      </div>
+
+      {/* ── Productivity Streak ── */}
+      <div className="surface-card pr-card pr-streak-card">
+        <div className="pr-streak-left">
+          <span className="pr-streak-flame" aria-hidden="true">🔥</span>
+          <div>
+            <div className="pr-streak-title">Current Streak</div>
+            {/* Backend integration point: replace streakDays with API data */}
+            {streakDays > 0
+              ? <div className="pr-streak-value">{streakDays} productive {streakDays === 1 ? 'day' : 'days'} in a row</div>
+              : <div className="pr-streak-value pr-streak-empty">No active streak yet — complete a task today to start one!</div>
+            }
+          </div>
+        </div>
+        <div className="pr-streak-badge" aria-label={`${streakDays} day streak`}>
+          <span className="pr-streak-badge-num">{streakDays}</span>
+          <span className="pr-streak-badge-label">days</span>
+        </div>
+      </div>
+
+      {/* ── Achievements ── */}
+      <div className="surface-card pr-card">
+        <h3 className="pr-section-title">
+          <span className="material-symbols-outlined" aria-hidden="true">emoji_events</span>
+          Achievements
+        </h3>
+        {/* Backend integration point: fetch achievements from GET /api/profile/achievements */}
+        <div className="pr-achievements-grid" role="list" aria-label="Achievements">
+          {ACHIEVEMENTS_CONFIG.map((a) => (
+            <AchievementCard
+              key={a.key}
+              icon={a.icon}
+              title={a.title}
+              description={a.description}
+              unlocked={unlockedKeys.has(a.key)}
+            />
           ))}
         </div>
       </div>
@@ -275,25 +368,11 @@ const Profile = () => {
           <div className="pr-grid">
             <div className="auth-field">
               <label className="auth-label" htmlFor="pr-first">First name</label>
-              <input
-                className="auth-input"
-                id="pr-first"
-                value={form.firstName}
-                onChange={setField('firstName')}
-                required
-                autoComplete="given-name"
-              />
+              <input className="auth-input" id="pr-first" value={form.firstName} onChange={setField('firstName')} required autoComplete="given-name" />
             </div>
             <div className="auth-field">
               <label className="auth-label" htmlFor="pr-last">Last name</label>
-              <input
-                className="auth-input"
-                id="pr-last"
-                value={form.lastName}
-                onChange={setField('lastName')}
-                required
-                autoComplete="family-name"
-              />
+              <input className="auth-input" id="pr-last" value={form.lastName} onChange={setField('lastName')} required autoComplete="family-name" />
             </div>
           </div>
 
@@ -301,13 +380,7 @@ const Profile = () => {
             <label className="auth-label" htmlFor="pr-username">Username</label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">alternate_email</span>
-              <input
-                className="auth-input"
-                id="pr-username"
-                value={form.username}
-                onChange={setField('username')}
-                autoComplete="username"
-              />
+              <input className="auth-input" id="pr-username" value={form.username} onChange={setField('username')} autoComplete="username" />
             </div>
           </div>
 
@@ -315,14 +388,7 @@ const Profile = () => {
             <label className="auth-label" htmlFor="pr-email">Email</label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
-              <input
-                className="auth-input"
-                id="pr-email"
-                type="email"
-                value={form.email}
-                onChange={setField('email')}
-                autoComplete="email"
-              />
+              <input className="auth-input" id="pr-email" type="email" value={form.email} onChange={setField('email')} autoComplete="email" />
             </div>
           </div>
 
@@ -366,9 +432,7 @@ const Profile = () => {
                 Changes saved
               </span>
             )}
-            <button type="button" className="btn btn-secondary" onClick={handleReset}>
-              Reset
-            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleReset}>Reset</button>
             <button type="submit" className="btn btn-primary">
               <span className="material-symbols-outlined" aria-hidden="true">check</span>
               Save changes
@@ -386,15 +450,9 @@ const Profile = () => {
         <div className="pr-security-row">
           <div className="pr-security-info">
             <span className="pr-security-label">Password</span>
-            <span className="pr-security-desc">
-              Keep your account secure with a strong, unique password.
-            </span>
+            <span className="pr-security-desc">Keep your account secure with a strong, unique password.</span>
           </div>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setShowPwModal(true)}
-          >
+          <button type="button" className="btn btn-secondary" onClick={() => setShowPwModal(true)}>
             <span className="material-symbols-outlined" aria-hidden="true">lock_reset</span>
             Change Password
           </button>
@@ -410,17 +468,13 @@ const Profile = () => {
         <div className="pr-danger-row">
           <div>
             <span className="pr-danger-label">Delete account</span>
-            <span className="pr-danger-desc">
-              Permanently delete your account and all associated data. This cannot be undone.
-            </span>
+            <span className="pr-danger-desc">Permanently delete your account and all associated data. This cannot be undone.</span>
           </div>
           <button type="button" className="pr-danger-btn">Delete account</button>
         </div>
       </div>
 
-      {/* Change Password modal */}
       {showPwModal && <ChangePasswordModal onClose={closePwModal} />}
-
     </PageShell>
   );
 };
