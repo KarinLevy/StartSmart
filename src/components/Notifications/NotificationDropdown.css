@@ -5,7 +5,7 @@
 .notif-dropdown {
   position: absolute;
   top: calc(100% + 0.75rem);
-  right: -0.5rem;
+  inset-inline-end: -0.5rem;
   width: 22rem;
   max-height: 80vh;
   overflow-y: auto;
@@ -21,7 +21,7 @@
 @media (max-width: 480px) {
   .notif-dropdown {
     width: calc(100vw - 2rem);
-    right: -1rem;
+    inset-inline-end: -1rem;
   }
 }
 
@@ -71,7 +71,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   transition: background 0.15s;
   position: relative;
 }
