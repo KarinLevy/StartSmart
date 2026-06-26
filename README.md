@@ -6,6 +6,9 @@ Most productivity apps help you organize what needs to be done. StartSmart also 
 
 The result is a tool that grows with you: the more you use it, the more useful the data becomes, and the more accurately you can plan your future work.
 
+In addition to helping users organize their work, StartSmart encourages long-term habit building through focus sessions, achievements, productivity insights, progress tracking, and continuous feedback. Rather than simply managing tasks, the application helps users reduce procrastination, improve planning accuracy, and stay motivated as they build better productivity habits over time.
+
+
 **Live Vercel:** [https://start-smart-livid.vercel.app](https://start-smart-livid.vercel.app)
 **GitHub:** [https://github.com/KarinLevy/StartSmart](https://github.com/KarinLevy/StartSmart)
 
@@ -13,21 +16,21 @@ The result is a tool that grows with you: the more you use it, the more useful t
 
 ## The Problem
 
-Most people don't fail at productivity because they forget their tasks. They fail because they consistently underestimate how long tasks take. A task you estimate at 30 minutes takes 90. A project you plan for a week runs two. Over time, this gap between intention and reality creates stress, missed deadlines, and a growing distrust of your own planning.
-
-Existing productivity tools — task managers, calendars, time trackers — solve pieces of this problem. But none of them close the loop. They don't show you how your estimates compared to reality, they don't help you spot patterns in your planning, and they don't get smarter the more you use them.
-
-StartSmart was built specifically to solve this. It treats every completed task as useful data. It measures the gap between estimated and actual time, tracks it over time, and turns it into insights that make future planning more accurate.
+Most people don’t struggle with productivity because they forget what they need to do. They struggle because they procrastinate, lose focus, and consistently underestimate how long tasks actually take.
+A task estimated at 30 minutes often takes 90. A project planned for one week stretches into two. Over time, this gap between intention and reality leads to stress, missed deadlines, reduced motivation, and a growing lack of confidence in one’s ability to plan effectively.
+Existing productivity tools help users organize tasks, schedule events, or track time, but they rarely address the complete productivity cycle. They do not explain why plans fail, how procrastination affects productivity, or how planning accuracy improves over time.
+StartSmart was built to solve exactly this challenge. Every completed task becomes meaningful data. The application measures the gap between estimated and actual time, identifies productivity patterns, encourages users to stay focused, and provides insights that help them build better planning habits while maintaining motivation.
 
 ---
 
 ## Target Audience
 
-- **Students** — organize coursework, track study sessions, and prepare for exams with realistic time estimates
-- **Employees** — manage daily workloads and build a clear picture of where working hours actually go
-- **Freelancers** — improve project estimation accuracy and reduce the risk of underquoting time on client work
-- **Managers** — gain better visibility into planning accuracy and understand where team time is being spent
-- **Anyone who struggles with procrastination** — use structured focus sessions to build momentum and improve time awareness session by session
+- **Students** — organize study sessions, assignments, and exam preparation while improving time estimation.
+- **Employees** — manage daily responsibilities, meetings, and workloads more effectively.
+- **Managers** — monitor planning accuracy and improve team productivity through better organization.
+- **Freelancers** — estimate project durations more accurately and track working time.
+- **Parents** — balance personal responsibilities, work, and family tasks using structured planning and focus sessions.
+- **Anyone who wants better focus and time management** — reduce procrastination, improve productivity, and build sustainable habits over time.
 
 ---
 
@@ -47,9 +50,10 @@ Each of these tools solves part of the problem. Todoist organizes tasks. Toggl t
 
 ## What Makes StartSmart Different
 
-The core idea is simple: every completed task is more than a checkbox. It is a data point. StartSmart records the gap between how long you planned to work and how long you actually worked, then aggregates those gaps into statistics, trends, and personalised recommendations.
-
-The goal is not just to manage your task list — it is to help you become a better planner. Over weeks and months, you start to see whether you consistently overestimate certain types of work, whether your accuracy improves on tasks you have done before, and what your most productive hours look like. That continuous feedback loop is what makes StartSmart different from any task manager or timer on its own.
+The core idea behind StartSmart is that every completed task is more than a checkbox — it becomes valuable data.
+The application records the gap between estimated and actual time, analyzes long-term productivity trends, and transforms them into meaningful statistics and personalized recommendations.
+Unlike traditional task managers, StartSmart encourages users to stay motivated throughout their productivity journey. Focus Sessions, achievements, productivity insights, progress tracking, and positive feedback help users build better habits instead of simply checking off completed tasks.
+The goal is not only to organize work, but to reduce procrastination, improve planning accuracy, strengthen focus, and increase motivation through continuous feedback and measurable progress.
 
 ---
 
@@ -312,3 +316,5 @@ StartSmart grew out of a personal problem. For years I struggled with procrastin
 I looked for a tool that would help me understand this pattern and improve over time, not just one that would show me a list of tasks. I couldn't find one, so I built it.
 
 The goal of StartSmart is not to turn users into productivity machines. It is to give people honest, useful feedback about how they actually spend their time — so they can gradually plan more realistically, feel less overwhelmed, and build habits that stick.
+
+**StartSmart was developed as a final project for the AI-Based Product Development course at Ono Academic College.**
