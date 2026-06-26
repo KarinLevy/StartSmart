@@ -200,7 +200,9 @@ const DailyView = ({ viewDate, tasks }) => {
             const startMin   = getTaskMinutes(t);
             const durationMin = t.estimatedMinutes || 30; // default 30 min when unset
             const topPx      = (startMin / 60) * HOUR_PX;
-            const heightPx   = Math.max((durationMin / 60) * HOUR_PX, 24); // min 24px
+            // minHeight = duration bar height; card grows beyond this if content needs more space.
+            // Never clip — the card is always tall enough to show time + title + est.
+            const minHeightPx = Math.max((durationMin / 60) * HOUR_PX, 24);
             const timeStr    = t.scheduledDate.slice(11, 16);
 
             return (
@@ -208,7 +210,7 @@ const DailyView = ({ viewDate, tasks }) => {
                 key={t.id}
                 to={`/task-details/${t.id}`}
                 className={`sc-task sc-task-abs ${statusCls(t.status)}`}
-                style={{ top: `${topPx}px`, height: `${heightPx}px` }}
+                style={{ top: `${topPx}px`, minHeight: `${minHeightPx}px` }}
               >
                 <span className="sc-task-time">{timeStr}</span>
                 <span className="sc-task-title">{t.title}</span>

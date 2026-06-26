@@ -410,15 +410,15 @@
   position: absolute;
   left: 0.5rem;
   right: 0.5rem;
-  min-height: 24px;
-  overflow: hidden;
+  /* minHeight is set inline (duration bar); card grows beyond it to fit content */
+  overflow: visible;
   pointer-events: auto;
-  /* flex layout for time + title + est */
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  padding: 0.25rem 0.5rem;
-  /* keep border-left from .sc-task */
+  padding: 0.3rem 0.6rem;
+  /* z-index so content renders above grid lines */
+  z-index: 1;
 }
 
 /* Unscheduled section */
