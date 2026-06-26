@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import './landing.css';
 
 /* ── Scroll-fade hook ── */
@@ -41,6 +42,7 @@ function MarketingNav() {
         </nav>
 
         <div className="lp-nav-actions">
+          <ThemeToggle />
           <Link to="/login" className="lp-btn-ghost">Log in</Link>
           <Link to="/register" className="lp-btn-primary">Start free</Link>
         </div>
@@ -60,6 +62,7 @@ function MarketingNav() {
         <a href="#features" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>Features</a>
         <a href="#how" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>How it works</a>
         <div className="lp-nav-mobile-actions">
+          <ThemeToggle />
           <Link to="/login" className="lp-btn-ghost" onClick={() => setOpen(false)}>Log in</Link>
           <Link to="/register" className="lp-btn-primary" onClick={() => setOpen(false)}>Start free</Link>
         </div>

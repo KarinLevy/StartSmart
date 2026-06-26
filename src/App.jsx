@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { TasksProvider } from './context/TasksContext';
+import { ThemeProvider } from './context/ThemeContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -17,6 +18,7 @@ import Settings from './pages/Settings/Settings';
 
 function App() {
   return (
+    <ThemeProvider>
     <TasksProvider>
     <Router>
       <Routes>
@@ -39,6 +41,7 @@ function App() {
       </Routes>
     </Router>
     </TasksProvider>
+    </ThemeProvider>
   );
 }
 

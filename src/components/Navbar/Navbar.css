@@ -246,3 +246,24 @@
     padding: 0 0.75rem;
   }
 }
+
+/* Dark mode overrides */
+[data-theme="dark"] .navbar {
+  background-color: rgba(10, 24, 38, 0.9);
+  border-bottom-color: rgba(46, 63, 87, 0.4);
+}
+[data-theme="dark"] .navbar-link {
+  color: var(--color-on-surface-variant);
+}
+[data-theme="dark"] .navbar-link:hover,
+[data-theme="dark"] .navbar-link.active {
+  color: var(--color-primary);
+  background-color: var(--color-surface-container);
+}
+[data-theme="dark"] .navbar-hamburger:hover {
+  background-color: var(--color-surface-container);
+}
+[data-theme="dark"] .navbar-links.mobile-open {
+  background: var(--color-surface-container-low);
+  border-top: 1px solid var(--color-outline-variant);
+}

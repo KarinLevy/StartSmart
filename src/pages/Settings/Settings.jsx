@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import PageShell from '../../components/PageShell/PageShell';
+import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
+import { useTheme } from '../../context/ThemeContext';
 import './Settings.css';
 
 const Toggle = ({ checked, onChange }) => (
@@ -15,6 +17,7 @@ const Toggle = ({ checked, onChange }) => (
 );
 
 const Settings = () => {
+  const { theme } = useTheme();
   const [prefs, setPrefs] = useState({
     taskReminders: true,
     timeGapAlerts: true,
@@ -33,11 +36,30 @@ const Settings = () => {
 
   return (
     <PageShell narrow title="Settings" subtitle="Tune StartSmart to fit how you work.">
+
+      {/* Appearance */}
+      <div className="surface-card set-section">
+        <h3 className="set-section-title">
+          <span className="material-symbols-outlined">palette</span>
+          Appearance
+        </h3>
+        <div className="set-row">
+          <div className="set-row-text">
+            <span className="set-row-label">Theme</span>
+            <span className="set-row-desc">
+              Currently using <strong>{theme === 'dark' ? 'dark' : 'light'}</strong> mode.
+              Your preference is saved automatically.
+            </span>
+          </div>
+          <ThemeToggle />
+        </div>
+      </div>
+
       {/* Notifications & preferences */}
       <div className="surface-card set-section">
         <h3 className="set-section-title">
           <span className="material-symbols-outlined">notifications</span>
-          Notifications & preferences
+          Notifications &amp; preferences
         </h3>
         <div className="set-rows">
           {rows.map((row) => (

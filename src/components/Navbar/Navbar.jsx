@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -73,8 +74,9 @@ const Navbar = () => {
           </NavLink>
         </nav>
 
-        {/* Right: Notifications & Profile */}
+        {/* Right: Theme toggle + Notifications + Profile */}
         <div className="navbar-right">
+          <ThemeToggle />
           <button className="navbar-notification">
             <span className="material-symbols-outlined">notifications</span>
             <span className="navbar-notification-dot"></span>
