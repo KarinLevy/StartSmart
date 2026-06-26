@@ -5,32 +5,102 @@ import { useTasks } from '../../context/TasksContext';
 import Footer from '../../components/Footer/Footer';
 import './FocusMode.css';
 
-const pad = (n) => String(n).padStart(2, '0');
+const pad     = (n) => String(n).padStart(2, '0');
 const fmtSecs = (s) => `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
-const fmtMin  = (m) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}` : `${m}m`);
+const fmtMin  = (m) => m >= 60 ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}` : `${m}m`;
+const nowISO  = () => new Date().toISOString();
 
+/*
+ * TODO (Backend): On handleFinish, POST /api/sessions with sessionData ref contents:
+ * {
+ *   taskId, estimatedMinutes, actualMinutes, gap,
+ *   startedAt, finishedAt,
+ *   events: [{ type: 'start'|'pause'|'resume'|'finish', timestamp }]
+ * }
+ */
+
+// ── Confirmation dialog ───────────────────────────────────────────────────────
+function CancelDialog({ onConfirm, onKeepWorking }) {
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onKeepWorking(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onKeepWorking]);
+
+  return (
+    <div className="fm-dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="fm-dialog-title">
+      <div className="fm-dialog-card">
+        <div className="fm-dialog-icon" aria-hidden="true">
+          <span className="material-symbols-outlined">timer_off</span>
+        </div>
+        <h2 id="fm-dialog-title" className="fm-dialog-title">Cancel this session?</h2>
+        <p className="fm-dialog-body">
+          Your progress will not be saved. The task will be restored to its previous status.
+        </p>
+        <div className="fm-dialog-actions">
+          <button
+            type="button"
+            className="fm-btn fm-btn-discard"
+            onClick={onConfirm}
+            autoFocus
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            Cancel Session
+          </button>
+          <button
+            type="button"
+            className="fm-btn fm-btn-keep"
+            onClick={onKeepWorking}
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+            Keep Working
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── FocusMode ─────────────────────────────────────────────────────────────────
 const FocusMode = () => {
-  const { id }       = useParams();
+  const { id }                           = useParams();
   const { tasks, finishFocus, updateTask } = useTasks();
-  const navigate     = useNavigate();
+  const navigate                         = useNavigate();
 
   const task = tasks.find((t) => t.id === id);
 
-  const [running,  setRunning]  = useState(false);
-  const [elapsed,  setElapsed]  = useState(0);
-  const [finished, setFinished] = useState(false);
-  const [actualMin, setActualMin] = useState(0);
+  // Capture the task's status BEFORE the mount effect changes it,
+  // so Cancel can restore it.
+  const prevStatusRef = useRef(task?.status ?? 'pending');
+
+  // Backend-ready session log (refs — no re-render needed)
+  const sessionData = useRef({
+    taskId:            id,
+    estimatedMinutes:  task?.estimatedMinutes ?? 0,
+    startedAt:         null,
+    finishedAt:        null,
+    actualMinutes:     null,
+    gap:               null,
+    events:            [],
+  });
+
+  const [running,     setRunning]     = useState(false);
+  const [elapsed,     setElapsed]     = useState(0);
+  const [finished,    setFinished]    = useState(false);
+  const [actualMin,   setActualMin]   = useState(0);
+  const [showCancel,  setShowCancel]  = useState(false);
   const intervalRef = useRef(null);
 
-  // Start task in_progress on mount
+  // Mark task in_progress on mount (if still pending)
   useEffect(() => {
     if (task && task.status === 'pending') {
       updateTask(id, { status: 'in_progress' });
     }
     return () => clearInterval(intervalRef.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Tick
   useEffect(() => {
     if (running) {
       intervalRef.current = setInterval(() => setElapsed((s) => s + 1), 1000);
@@ -40,20 +110,81 @@ const FocusMode = () => {
     return () => clearInterval(intervalRef.current);
   }, [running]);
 
-  // Spacebar shortcut to start/pause
+  // Warn before leaving with an active session
+  useEffect(() => {
+    const handler = (e) => {
+      if ((running || elapsed > 0) && !finished) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [running, elapsed, finished]);
+
+  // Space = start / pause
   const handleKeyDown = useCallback((e) => {
-    if (e.code === 'Space' && e.target === document.body) {
+    if (e.code === 'Space' && e.target === document.body && !showCancel) {
       e.preventDefault();
-      if (!finished) setRunning((r) => !r);
+      if (!finished) toggleRunning();
     }
-  }, [finished]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, showCancel, running]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  // Not found
+  // ── Actions ───────────────────────────────────────────────────────────────
+
+  const logEvent = (type) => {
+    sessionData.current.events.push({ type, timestamp: nowISO() });
+  };
+
+  const toggleRunning = () => {
+    if (finished || showCancel) return;
+    if (!running) {
+      if (elapsed === 0) {
+        // First start
+        sessionData.current.startedAt = nowISO();
+        logEvent('start');
+        updateTask(id, { status: 'in_progress' });
+      } else {
+        logEvent('resume');
+      }
+    } else {
+      logEvent('pause');
+    }
+    setRunning((r) => !r);
+  };
+
+  const handleFinish = () => {
+    clearInterval(intervalRef.current);
+    setRunning(false);
+    const mins = Math.max(1, Math.round(elapsed / 60));
+    sessionData.current.finishedAt    = nowISO();
+    sessionData.current.actualMinutes = mins;
+    sessionData.current.gap           = mins - (task?.estimatedMinutes ?? 0);
+    logEvent('finish');
+
+    setActualMin(mins);
+    finishFocus(id, mins);
+    setFinished(true);
+
+    // TODO (Backend): POST sessionData.current to /api/sessions here
+  };
+
+  const handleCancelConfirm = () => {
+    clearInterval(intervalRef.current);
+    setRunning(false);
+    setShowCancel(false);
+    // Restore previous status (session never happened)
+    updateTask(id, { status: prevStatusRef.current });
+    navigate('/dashboard');
+  };
+
+  // ── Not found ─────────────────────────────────────────────────────────────
   if (!task) {
     return (
       <div className="focus-mode-layout">
@@ -75,28 +206,20 @@ const FocusMode = () => {
   const progress      = Math.min(elapsed / estimatedSecs, 1);
   const remaining     = Math.max(estimatedSecs - elapsed, 0);
   const isOver        = elapsed > estimatedSecs;
-  const overSecs      = elapsed - estimatedSecs;
+  const overSecs      = Math.max(elapsed - estimatedSecs, 0);
+  const overMins      = Math.round(overSecs / 60);
 
-  // SVG circle
+  // SVG ring
   const R    = 90;
   const circ = 2 * Math.PI * R;
   const dashOffset = circ * (1 - progress);
 
-  const handleFinish = () => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-    const mins = Math.max(1, Math.round(elapsed / 60));
-    setActualMin(mins);
-    finishFocus(id, mins);
-    setFinished(true);
-  };
-
-  // ── Summary screen ─────────────────────────────────────────────────────────
+  // ── Summary ───────────────────────────────────────────────────────────────
   if (finished) {
     const gap = actualMin - task.estimatedMinutes;
     const insight =
       gap === 0 ? 'Perfect estimate — you nailed it!' :
-      gap > 0   ? `You went over by ${gap} minute${gap !== 1 ? 's' : ''}. Consider adding a buffer next time.` :
+      gap > 0   ? `You went over by ${gap} minute${gap !== 1 ? 's' : ''}. Consider adding a small buffer next time.` :
                   `You finished ${Math.abs(gap)} minute${Math.abs(gap) !== 1 ? 's' : ''} early — great pacing!`;
 
     return (
@@ -148,7 +271,7 @@ const FocusMode = () => {
     );
   }
 
-  // ── Active session ──────────────────────────────────────────────────────────
+  // ── Active session ─────────────────────────────────────────────────────────
   return (
     <div className="focus-mode-layout">
       <Navbar />
@@ -175,7 +298,7 @@ const FocusMode = () => {
           </div>
         </div>
 
-        {/* Timer */}
+        {/* Timer ring */}
         <div className="fm-timer-wrap">
           <svg
             className="fm-timer-svg"
@@ -183,17 +306,16 @@ const FocusMode = () => {
             aria-label={`Focus timer: ${fmtSecs(elapsed)} elapsed`}
             role="img"
           >
-            {/* Track */}
             <circle cx="100" cy="100" r={R} fill="none" stroke="var(--color-surface-container)" strokeWidth="10" />
-            {/* Progress */}
             <circle
               cx="100" cy="100" r={R}
               fill="none"
-              stroke={isOver ? 'var(--color-error)' : 'url(#timerGrad)'}
+              stroke={isOver ? 'var(--fm-over-color, #c2610c)' : 'url(#timerGrad)'}
               strokeWidth="10"
               strokeDasharray={circ}
-              strokeDashoffset={dashOffset}
+              strokeDashoffset={isOver ? 0 : dashOffset}
               strokeLinecap="round"
+              className={isOver ? 'fm-ring-over' : ''}
               style={{ transform: 'rotate(-90deg)', transformOrigin: '100px 100px', transition: 'stroke-dashoffset 0.5s linear' }}
             />
             <defs>
@@ -205,62 +327,97 @@ const FocusMode = () => {
           </svg>
 
           <div className="fm-timer-inner">
-            <span className={`fm-elapsed${isOver ? ' over' : ''}`}>{fmtSecs(elapsed)}</span>
+            <span className={`fm-elapsed${isOver ? ' over' : ''}`} aria-live="off">
+              {fmtSecs(elapsed)}
+            </span>
             <span className="fm-timer-status">
               {running ? 'Focusing…' : elapsed === 0 ? 'Ready' : 'Paused'}
             </span>
-            <span className="fm-remaining">
-              {isOver
-                ? `+${fmtSecs(overSecs)} over`
-                : `${fmtSecs(remaining)} left`}
+            <span className="fm-remaining" aria-live="off">
+              {isOver ? `${fmtSecs(remaining)} elapsed` : `${fmtSecs(remaining)} left`}
             </span>
           </div>
         </div>
 
-        {/* Live gap bar (visible once running) */}
+        {/* Over-estimate banner — shown only when over */}
+        {isOver && (
+          <div className="fm-over-banner" role="status" aria-live="polite">
+            <span className="material-symbols-outlined" aria-hidden="true">trending_up</span>
+            <span>
+              <strong>+{overMins > 0 ? `${overMins} min` : 'less than 1 min'}</strong> over your estimate — keep going, you're almost there!
+            </span>
+          </div>
+        )}
+
+        {/* Progress bar (shown once started) */}
         {elapsed > 0 && (
           <div className="fm-gap-bar-wrap">
-            <span className="fm-gap-bar-label">Progress toward estimate</span>
-            <div className="fm-gap-bar-track" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
+            <span className="fm-gap-bar-label">
+              {isOver ? 'Over estimate' : 'Progress toward estimate'}
+            </span>
+            <div
+              className="fm-gap-bar-track"
+              role="progressbar"
+              aria-valuenow={Math.round(progress * 100)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Progress toward estimated time"
+            >
               <div
                 className={`fm-gap-bar-fill${isOver ? ' over' : ''}`}
                 style={{ width: `${Math.min(progress * 100, 100)}%` }}
               />
             </div>
-            <span className="fm-gap-bar-pct">{Math.min(Math.round(progress * 100), 100)}%</span>
+            <span className="fm-gap-bar-pct" aria-hidden="true">
+              {Math.min(Math.round(progress * 100), 100)}%
+            </span>
           </div>
         )}
 
         {/* Controls */}
         <div className="fm-controls">
-          {!running ? (
+          <div className="fm-controls-primary">
+            {!running ? (
+              <button
+                className="fm-btn fm-btn-start"
+                onClick={toggleRunning}
+                aria-label={elapsed === 0 ? 'Start timer' : 'Resume timer'}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
+                {elapsed === 0 ? 'Start' : 'Resume'}
+              </button>
+            ) : (
+              <button
+                className="fm-btn fm-btn-pause"
+                onClick={toggleRunning}
+                aria-label="Pause timer"
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">pause</span>
+                Pause
+              </button>
+            )}
             <button
-              className="fm-btn fm-btn-start"
-              onClick={() => setRunning(true)}
-              aria-label={elapsed === 0 ? 'Start timer' : 'Resume timer'}
+              className="fm-btn fm-btn-finish"
+              onClick={handleFinish}
+              disabled={elapsed === 0}
+              aria-label="Finish session and save progress"
             >
-              <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
-              {elapsed === 0 ? 'Start' : 'Resume'}
+              <span className="material-symbols-outlined" aria-hidden="true">check</span>
+              Finish
             </button>
-          ) : (
+          </div>
+
+          {elapsed > 0 && (
             <button
-              className="fm-btn fm-btn-pause"
-              onClick={() => setRunning(false)}
-              aria-label="Pause timer"
+              className="fm-btn-cancel-link"
+              type="button"
+              onClick={() => { setRunning(false); setShowCancel(true); }}
+              aria-label="Cancel and discard this focus session"
             >
-              <span className="material-symbols-outlined" aria-hidden="true">pause</span>
-              Pause
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+              Discard session
             </button>
           )}
-          <button
-            className="fm-btn fm-btn-finish"
-            onClick={handleFinish}
-            disabled={elapsed === 0}
-            aria-label="Finish session"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">check</span>
-            Finish
-          </button>
         </div>
 
         <p className="fm-kbd-hint" aria-hidden="true">
@@ -269,6 +426,14 @@ const FocusMode = () => {
 
       </main>
       <Footer />
+
+      {/* Cancel confirmation dialog */}
+      {showCancel && (
+        <CancelDialog
+          onConfirm={handleCancelConfirm}
+          onKeepWorking={() => setShowCancel(false)}
+        />
+      )}
     </div>
   );
 };

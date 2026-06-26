@@ -397,3 +397,148 @@
   opacity: 0.6;
 }
 .fp-task-row:hover .fp-task-arrow { opacity: 1; }
+
+/* ── Over-estimate ring (amber pulse instead of alarming red) ─── */
+:root { --fm-over-color: #c2610c; }
+[data-theme="dark"] { --fm-over-color: #fb923c; }
+
+.fm-elapsed.over { color: var(--fm-over-color); }
+.fm-gap-bar-fill.over { background: var(--fm-over-color); }
+
+@keyframes fm-ring-pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.65; }
+}
+.fm-ring-over { animation: fm-ring-pulse 2s ease-in-out infinite; }
+
+/* ── Over-estimate banner ───────────────────────────────────────── */
+.fm-over-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--rounded-xl);
+  background: rgba(194, 97, 12, 0.1);
+  border: 1px solid rgba(194, 97, 12, 0.25);
+  color: var(--fm-over-color);
+  font-size: var(--font-size-body-sm);
+  line-height: 1.45;
+}
+.fm-over-banner .material-symbols-outlined { font-size: 1.15rem; flex-shrink: 0; }
+
+/* ── Redesigned controls ────────────────────────────────────────── */
+.fm-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.fm-controls-primary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Discard session link-style button */
+.fm-btn-cancel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  color: var(--color-outline);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--rounded-md);
+  transition: color 0.15s;
+}
+.fm-btn-cancel-link:hover { color: var(--color-error); }
+.fm-btn-cancel-link .material-symbols-outlined { font-size: 1rem; }
+
+/* ── Cancel / Discard dialog ────────────────────────────────────── */
+.fm-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  backdrop-filter: blur(4px);
+  animation: fm-overlay-in 0.15s ease;
+}
+@keyframes fm-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fm-dialog-card {
+  background: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-2xl, 20px);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem 2rem 2rem;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  animation: fm-dialog-in 0.18s ease;
+}
+@keyframes fm-dialog-in {
+  from { transform: translateY(12px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+.fm-dialog-icon {
+  width: 4rem; height: 4rem;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(186,26,26,0.1);
+  color: var(--color-error);
+}
+.fm-dialog-icon .material-symbols-outlined { font-size: 2rem; }
+.fm-dialog-title {
+  font-size: var(--font-size-title-lg);
+  font-weight: 800;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+.fm-dialog-body {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 30ch;
+}
+.fm-dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+.fm-btn-discard {
+  background: var(--color-error, #b91c1c);
+  box-shadow: 0 4px 14px rgba(186,26,26,0.25);
+  width: 100%;
+  justify-content: center;
+}
+.fm-btn-discard:hover { box-shadow: 0 6px 20px rgba(186,26,26,0.35); }
+.fm-btn-keep {
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  border: 1px solid var(--color-outline-variant);
+  width: 100%;
+  justify-content: center;
+}
+.fm-btn-keep:hover { background: var(--color-surface-container); }
+
+@media (max-width: 480px) {
+  .fm-dialog-card { padding: 2rem 1.25rem 1.5rem; }
+}
