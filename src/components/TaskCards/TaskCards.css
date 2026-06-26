@@ -113,7 +113,7 @@
 
 .workflow-header {
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-surface-container);
+  border-bottom: 1px solid var(--color-outline-variant);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -165,11 +165,11 @@
 }
 
 .workflow-table th {
-  background-color: rgba(244, 243, 250, 0.5); /* surface-container-low/50 */
+  background-color: var(--color-surface-container-low);
   padding: 1rem 1.5rem;
   font-size: var(--font-size-label-sm);
   font-weight: 700;
-  color: var(--color-outline);
+  color: var(--color-on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -192,7 +192,7 @@
 }
 
 .workflow-row:hover {
-  background-color: rgba(239, 237, 244, 0.3); /* surface-container/30 */
+  background-color: var(--color-surface-container-low);
 }
 
 .workflow-table td {
@@ -301,7 +301,8 @@
 
 .workflow-footer {
   padding: 1rem;
-  background-color: rgba(244, 243, 250, 0.3); /* surface-container-low/30 */
+  background-color: var(--color-surface-container-low);
+  border-top: 1px solid var(--color-outline-variant);
   text-align: center;
 }
 
@@ -456,7 +457,7 @@
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-.action-btn:hover { background: rgba(0,35,111,0.06); }
+.action-btn:hover { background: var(--color-surface-container-low); }
 
 /* Filter toolbar */
 .wf-filter-bar {

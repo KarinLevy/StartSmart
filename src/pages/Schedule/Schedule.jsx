@@ -3,7 +3,17 @@ import { Link } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { getTagDisplayColor } from '../../utils/tagUtils';
 import './Schedule.css';
+
+const DEFAULT_ACCENT = '#6b38d4'; // StartSmart purple
+
+// Return the first tag's display color, or the default purple
+const taskAccentColor = (task) => {
+  const tags = task.tags || [];
+  if (tags.length > 0) return getTagDisplayColor(tags[0]);
+  return DEFAULT_ACCENT;
+};
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const DAY_NAMES_FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -204,12 +214,18 @@ const DailyView = ({ viewDate, tasks }) => {
             const minHeightPx = Math.max((durationMin / 60) * HOUR_PX, 24);
             const timeStr    = t.scheduledDate.slice(11, 16);
 
+            const accent = taskAccentColor(t);
             return (
               <Link
                 key={t.id}
                 to={`/task-details/${t.id}`}
                 className={`sc-task sc-task-abs ${statusCls(t.status)}`}
-                style={{ top: `${topPx}px`, minHeight: `${minHeightPx}px` }}
+                style={{
+                  top: `${topPx}px`,
+                  minHeight: `${minHeightPx}px`,
+                  borderLeftColor: accent,
+                  background: `${accent}12`,
+                }}
               >
                 <span className="sc-task-time">{timeStr}</span>
                 <span className="sc-task-title">{t.title}</span>
@@ -228,12 +244,20 @@ const DailyView = ({ viewDate, tasks }) => {
             Unscheduled
           </div>
           <div className="sc-unslotted-tasks">
-            {unslotted.map((t) => (
-              <Link key={t.id} to={`/task-details/${t.id}`} className={`sc-task ${statusCls(t.status)}`}>
-                <span className="sc-task-title">{t.title}</span>
-                {t.estimatedMinutes && <span className="sc-task-est">{fmtMin(t.estimatedMinutes)}</span>}
-              </Link>
-            ))}
+            {unslotted.map((t) => {
+              const accent = taskAccentColor(t);
+              return (
+                <Link
+                  key={t.id}
+                  to={`/task-details/${t.id}`}
+                  className={`sc-task ${statusCls(t.status)}`}
+                  style={{ borderLeftColor: accent, background: `${accent}12` }}
+                >
+                  <span className="sc-task-title">{t.title}</span>
+                  {t.estimatedMinutes && <span className="sc-task-est">{fmtMin(t.estimatedMinutes)}</span>}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
@@ -299,14 +323,21 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
                 {dayTasks.length === 0 ? (
                   <span className="sc-day-empty">No tasks</span>
                 ) : (
-                  dayTasks.map((t) => (
-                    <span key={t.id} className={`sc-week-task ${statusCls(t.status)}`}>
-                      {t.scheduledDate?.includes('T') && (
-                        <span className="sc-task-time">{t.scheduledDate.slice(11, 16)}</span>
-                      )}
-                      <span className="sc-task-title">{t.title}</span>
-                    </span>
-                  ))
+                  dayTasks.map((t) => {
+                    const accent = taskAccentColor(t);
+                    return (
+                      <span
+                        key={t.id}
+                        className={`sc-week-task ${statusCls(t.status)}`}
+                        style={{ borderLeftColor: accent, background: `${accent}12` }}
+                      >
+                        {t.scheduledDate?.includes('T') && (
+                          <span className="sc-task-time">{t.scheduledDate.slice(11, 16)}</span>
+                        )}
+                        <span className="sc-task-title">{t.title}</span>
+                      </span>
+                    );
+                  })
                 )}
               </div>
               {dayTasks.length > 0 && (
@@ -381,11 +412,18 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
               aria-pressed={isSelected || isToday}
             >
               <div className={`sc-month-day-num${isToday ? ' today-dot' : ''}`}>{d.getDate()}</div>
-              {dayTasks.slice(0, MAX).map((t) => (
-                <span key={t.id} className={`sc-month-task ${statusCls(t.status)}`}>
-                  {t.title}
-                </span>
-              ))}
+              {dayTasks.slice(0, MAX).map((t) => {
+                const accent = taskAccentColor(t);
+                return (
+                  <span
+                    key={t.id}
+                    className={`sc-month-task ${statusCls(t.status)}`}
+                    style={{ borderLeftColor: accent, background: `${accent}12` }}
+                  >
+                    {t.title}
+                  </span>
+                );
+              })}
               {dayTasks.length > MAX && (
                 <span className="sc-month-more">+{dayTasks.length - MAX} more</span>
               )}

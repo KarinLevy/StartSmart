@@ -649,17 +649,18 @@
 .sc-month-task {
   font-size: 0.68rem;
   font-weight: 600;
-  padding: 0.15rem 0.4rem;
+  padding: 0.15rem 0.4rem 0.15rem 0.5rem;
   border-radius: 3px;
+  border-left: 2px solid var(--color-outline-variant);
   color: var(--color-on-surface);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
 }
-.sc-month-task.sc-done     { background: rgba(22,163,74,0.12); color: #15803d; }
-.sc-month-task.sc-progress { background: rgba(107,56,212,0.1); color: var(--color-secondary); }
-.sc-month-task.sc-pending  { background: var(--color-surface-container-high); }
+.sc-month-task.sc-done     { color: var(--color-success-on); }
+.sc-month-task.sc-progress { color: var(--color-secondary); }
+.sc-month-task.sc-pending  { color: var(--color-on-surface-variant); }
 
 .sc-month-more {
   font-size: 0.65rem;
