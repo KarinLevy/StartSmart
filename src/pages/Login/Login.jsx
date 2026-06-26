@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/Logo/Logo';
+import { useLocale } from '../../i18n/LocaleContext';
 import '../Auth/Auth.css';
 
 /*
@@ -65,6 +66,7 @@ const Login = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const { login } = useAuth();
+  const { t } = useLocale();
 
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
@@ -97,16 +99,16 @@ const Login = () => {
     const errors        = {};
 
     if (emailEmpty && passwordEmpty) {
-      errors.form = 'Please enter your email and password.';
+      errors.form = t('login.err.bothEmpty');
       return errors;
     }
     if (emailEmpty) {
-      errors.email = 'Please enter your email.';
+      errors.email = t('login.err.emailEmpty');
     } else if (!EMAIL_RE.test(email.trim())) {
-      errors.email = 'Please enter a valid email address.';
+      errors.email = t('login.err.invalidEmail');
     }
     if (passwordEmpty) {
-      errors.password = 'Please enter your password.';
+      errors.password = t('login.err.passwordEmpty');
     }
     return Object.keys(errors).length ? errors : null;
   }
@@ -142,7 +144,7 @@ const Login = () => {
         setStatus('error');
       }
     } catch {
-      setFieldErrors({ form: 'We could not log you in right now. Please try again.' });
+      setFieldErrors({ form: t('login.err.network') });
       setStatus('error');
     }
   };
@@ -152,17 +154,17 @@ const Login = () => {
 
   return (
     <div className="auth-layout">
-      <Link to="/" className="auth-back-home" aria-label="Back to StartSmart">
+      <Link to="/" className="auth-back-home" aria-label={t('auth.backHome')}>
         <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-        Back to StartSmart
+        {t('auth.backHome')}
       </Link>
 
       <div className="auth-card">
         <Logo to="/" size="lg" className="auth-logo-center" />
 
         <div className="auth-header">
-          <h2 className="auth-title">Welcome back</h2>
-          <p className="auth-subtitle">Log in to pick up where you left off.</p>
+          <h2 className="auth-title">{t('login.title')}</h2>
+          <p className="auth-subtitle">{t('login.subtitle')}</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -170,7 +172,7 @@ const Login = () => {
           {/* Email */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="login-email">
-              Email <span className="auth-label-required" aria-hidden="true">*</span>
+              {t('login.email')} <span className="auth-label-required" aria-hidden="true">*</span>
             </label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
@@ -178,7 +180,7 @@ const Login = () => {
                 className={`auth-input${emailHasError ? ' input-error' : ''}`}
                 id="login-email"
                 type="email"
-                placeholder="dana@example.com"
+                placeholder={t('login.emailPlaceholder')}
                 autoComplete="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
@@ -198,7 +200,7 @@ const Login = () => {
           {/* Password */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="login-password">
-              Password <span className="auth-label-required" aria-hidden="true">*</span>
+              {t('login.password')} <span className="auth-label-required" aria-hidden="true">*</span>
             </label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">lock</span>
@@ -240,9 +242,9 @@ const Login = () => {
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
               />
-              <span>Remember me</span>
+              <span>{t('login.rememberMe')}</span>
             </label>
-            <Link to="/forgot-password" className="auth-inline-link">Forgot password?</Link>
+            <Link to="/forgot-password" className="auth-inline-link">{t('login.forgotPassword')}</Link>
           </div>
 
           {/* Form-level error (both-empty, backend generic, network) */}
@@ -266,9 +268,9 @@ const Login = () => {
                   style={{ fontSize: '18px', animation: 'spin 1s linear infinite' }}
                   aria-hidden="true"
                 >progress_activity</span>
-                Logging in…
+                {t('login.submitting')}
               </span>
-            ) : 'Log in'}
+            ) : t('login.submit')}
           </button>
 
           {/* ── DEV BYPASS ─────────────────────────────────────────────────────
@@ -294,7 +296,7 @@ const Login = () => {
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">
                   code
                 </span>
-                Continue in Dev Mode
+                {t('login.devMode')}
               </button>
             </>
           )}
@@ -302,7 +304,7 @@ const Login = () => {
         </form>
 
         <p className="auth-foot">
-          New to StartSmart? <Link to="/register">Create an account</Link>
+          {t('login.noAccount')} <Link to="/register">{t('login.createAccount')}</Link>
         </p>
       </div>
     </div>

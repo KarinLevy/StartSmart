@@ -4,6 +4,7 @@ import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
 import Avatar from '../../components/Avatar/Avatar';
+import { useLocale } from '../../i18n/LocaleContext';
 import {
   updateProfile,
   uploadAvatar,
@@ -20,15 +21,15 @@ const fmtMin = (m) => {
   return `${m}m`;
 };
 
-const validateProfile = ({ firstName, lastName, email, phone }) => {
+const validateProfile = ({ firstName, lastName, email, phone }, t) => {
   const errs = {};
-  if (!firstName.trim()) errs.firstName = 'First name is required.';
-  if (!lastName.trim())  errs.lastName  = 'Last name is required.';
-  if (!email.trim())     errs.email     = 'Email is required.';
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Enter a valid email address.';
+  if (!firstName.trim()) errs.firstName = t('register.err.firstNameReq');
+  if (!lastName.trim())  errs.lastName  = t('register.err.lastNameReq');
+  if (!email.trim())     errs.email     = t('register.err.emailReq');
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = t('register.err.invalidEmail');
   if (phone) {
     const digits = phone.replace(/\D/g, '');
-    if (digits.length < 7 || digits.length > 15) errs.phone = 'Enter a valid phone number (7–15 digits).';
+    if (digits.length < 7 || digits.length > 15) errs.phone = t('register.err.invalidPhone');
   }
   return errs;
 };
@@ -75,6 +76,7 @@ const ChangePasswordModal = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const { t } = useLocale();
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
@@ -90,9 +92,9 @@ const ChangePasswordModal = ({ onClose }) => {
 
   const validate = () => {
     const errs = {};
-    if (!form.current)               errs.current = 'Current password is required.';
-    if (form.next.length < 8)        errs.next    = 'New password must be at least 8 characters.';
-    if (form.next !== form.confirm)  errs.confirm = 'Passwords do not match.';
+    if (!form.current)               errs.current = t('pwModal.err.currentReq');
+    if (form.next.length < 8)        errs.next    = t('pwModal.err.newMin');
+    if (form.next !== form.confirm)  errs.confirm = t('pwModal.err.noMatch');
     return errs;
   };
 
@@ -130,15 +132,15 @@ const ChangePasswordModal = ({ onClose }) => {
             <span className="material-symbols-outlined">lock</span>
           </div>
           <div>
-            <h2 className="pr-modal-title">Change Password</h2>
-            <p className="pr-modal-subtitle">Choose a new secure password for your account.</p>
+            <h2 className="pr-modal-title">{t('pwModal.title')}</h2>
+            <p className="pr-modal-subtitle">{t('pwModal.subtitle')}</p>
           </div>
         </div>
 
         {success ? (
           <div className="pr-modal-success">
             <span className="material-symbols-outlined">check_circle</span>
-            Password changed successfully!
+            {t('pwModal.success')}
           </div>
         ) : (
           <form className="pr-modal-form" onSubmit={handleSubmit} noValidate>
@@ -150,7 +152,7 @@ const ChangePasswordModal = ({ onClose }) => {
             )}
 
             <div className="auth-field">
-              <label className="auth-label" htmlFor="pw-current">Current Password</label>
+              <label className="auth-label" htmlFor="pw-current">{t('pwModal.current')}</label>
               <input
                 id="pw-current"
                 type="password"
@@ -158,14 +160,14 @@ const ChangePasswordModal = ({ onClose }) => {
                 value={form.current}
                 onChange={set('current')}
                 autoComplete="current-password"
-                placeholder="Enter your current password"
+                placeholder={t('pwModal.currentPh')}
                 disabled={loading}
               />
               {errors.current && <p className="pr-field-error">{errors.current}</p>}
             </div>
 
             <div className="auth-field">
-              <label className="auth-label" htmlFor="pw-next">New Password</label>
+              <label className="auth-label" htmlFor="pw-next">{t('pwModal.new')}</label>
               <input
                 id="pw-next"
                 type="password"
@@ -173,14 +175,14 @@ const ChangePasswordModal = ({ onClose }) => {
                 value={form.next}
                 onChange={set('next')}
                 autoComplete="new-password"
-                placeholder="At least 8 characters"
+                placeholder={t('pwModal.newPh')}
                 disabled={loading}
               />
               {errors.next && <p className="pr-field-error">{errors.next}</p>}
             </div>
 
             <div className="auth-field">
-              <label className="auth-label" htmlFor="pw-confirm">Confirm New Password</label>
+              <label className="auth-label" htmlFor="pw-confirm">{t('pwModal.confirm')}</label>
               <input
                 id="pw-confirm"
                 type="password"
@@ -188,17 +190,17 @@ const ChangePasswordModal = ({ onClose }) => {
                 value={form.confirm}
                 onChange={set('confirm')}
                 autoComplete="new-password"
-                placeholder="Repeat new password"
+                placeholder={t('pwModal.confirmPh')}
                 disabled={loading}
               />
               {errors.confirm && <p className="pr-field-error">{errors.confirm}</p>}
             </div>
 
             <div className="pr-modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
+              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>{t('common.cancel')}</button>
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? <Spinner /> : <span className="material-symbols-outlined" aria-hidden="true">lock_reset</span>}
-                {loading ? 'Updating…' : 'Update Password'}
+                {loading ? t('pwModal.updating') : t('pwModal.submit')}
               </button>
             </div>
           </form>
@@ -217,6 +219,7 @@ const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const inputRef = useRef(null);
+  const { t } = useLocale();
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -261,18 +264,18 @@ const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
             <span className="material-symbols-outlined">warning</span>
           </div>
           <div>
-            <h2 className="pr-modal-title">Delete Account</h2>
-            <p className="pr-modal-subtitle">This action is permanent and cannot be undone.</p>
+            <h2 className="pr-modal-title">{t('delModal.title')}</h2>
+            <p className="pr-modal-subtitle">{t('delModal.subtitle')}</p>
           </div>
         </div>
 
         <div className="pr-delete-warning">
-          <p>Deleting your account will permanently remove:</p>
+          <p>{t('delModal.warning')}</p>
           <ul>
-            <li>Your profile and personal information</li>
-            <li>All tasks and history</li>
-            <li>Focus time records and statistics</li>
-            <li>All achievements and streaks</li>
+            <li>{t('delModal.item1')}</li>
+            <li>{t('delModal.item2')}</li>
+            <li>{t('delModal.item3')}</li>
+            <li>{t('delModal.item4')}</li>
           </ul>
         </div>
 
@@ -286,7 +289,7 @@ const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
 
           <div className="auth-field">
             <label className="auth-label" htmlFor="del-confirm">
-              Type <strong>{DELETE_CONFIRMATION}</strong> to confirm
+              {t('delModal.typeHint', { word: DELETE_CONFIRMATION })}
             </label>
             <input
               id="del-confirm"
@@ -301,13 +304,13 @@ const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
               aria-describedby="del-confirm-hint"
             />
             <p id="del-confirm-hint" className="pr-field-hint">
-              This confirmation is case-sensitive.
+              {t('delModal.caseSensitive')}
             </p>
           </div>
 
           <div className="pr-modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -316,7 +319,7 @@ const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
               aria-disabled={!confirmed || loading}
             >
               {loading ? <Spinner /> : <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>}
-              {loading ? 'Deleting…' : 'Delete My Account'}
+              {loading ? t('delModal.deleting') : t('delModal.submit')}
             </button>
           </div>
         </form>
@@ -343,6 +346,7 @@ const Profile = () => {
   const navigate  = useNavigate();
   const { tasks } = useTasks();
   const { profile, setProfile, avatarSrc, setAvatarSrc } = useProfile();
+  const { t } = useLocale();
 
   const [form, setFormState]      = useState({ ...profile });
   const [fieldErrors, setFieldErrors] = useState({});
@@ -384,7 +388,7 @@ const Profile = () => {
   // ── Save profile ─────────────────────────────────────────────────────────
   const handleSave = async (e) => {
     e.preventDefault();
-    const errs = validateProfile(form);
+    const errs = validateProfile(form, t);
     if (Object.keys(errs).length > 0) { setFieldErrors(errs); return; }
 
     setSaving(true);
@@ -432,7 +436,7 @@ const Profile = () => {
   const closeDelModal = useCallback(() => setShowDelModal(false), []);
 
   return (
-    <PageShell narrow title="Profile" subtitle="Manage your personal details and account info.">
+    <PageShell narrow title={t('profile.title')} subtitle={t('profile.subtitle')}>
 
       {/* ── Banner ── */}
       <div className="pr-banner surface-card">
@@ -443,7 +447,7 @@ const Profile = () => {
               {uploadState === 'uploading'
                 ? <Spinner />
                 : <span className="material-symbols-outlined" aria-hidden="true">photo_camera</span>}
-              <span className="pr-overlay-text">{uploadState === 'uploading' ? 'Uploading' : 'Change'}</span>
+              <span className="pr-overlay-text">{uploadState === 'uploading' ? t('profile.uploading') : t('profile.changePhoto')}</span>
             </label>
             <input
               id="pr-photo-input"
@@ -459,7 +463,7 @@ const Profile = () => {
             <h2 className="pr-full-name">{profile.firstName} {profile.lastName}</h2>
             <span className="pr-username">@{profile.username}</span>
             {uploadState === 'error' && (
-              <span className="pr-upload-status error">Invalid file — use an image under 5 MB.</span>
+              <span className="pr-upload-status error">{t('profile.uploadError')}</span>
             )}
           </div>
         </div>
@@ -470,32 +474,32 @@ const Profile = () => {
         <StatCard
           icon="check_circle"
           value={done.length}
-          label="Tasks Completed"
-          sublabel="View in Task History"
+          label={t('profile.tasksCompleted')}
+          sublabel={t('profile.viewHistory')}
           colorClass="color-success"
           onClick={() => navigate('/task-history')}
         />
         <StatCard
           icon="pending_actions"
           value={inProgress.length}
-          label="In Progress"
-          sublabel="View on Dashboard"
+          label={t('profile.inProgress')}
+          sublabel={t('profile.viewDashboard')}
           colorClass="color-warning"
           onClick={() => navigate('/dashboard')}
         />
         <StatCard
           icon="schedule"
           value={fmtMin(focusMin)}
-          label="Focus Time"
-          sublabel="View Statistics"
+          label={t('profile.focusTime')}
+          sublabel={t('profile.viewStats')}
           colorClass="color-secondary"
           onClick={() => navigate('/statistics')}
         />
         <StatCard
           icon="query_stats"
           value={avgGapLabel}
-          label="Avg. Gap"
-          sublabel="View Statistics"
+          label={t('profile.avgGap')}
+          sublabel={t('profile.viewStats')}
           colorClass={avgGap !== null && avgGap > 0 ? 'color-error' : 'color-success'}
           onClick={() => navigate('/statistics')}
         />
@@ -506,11 +510,10 @@ const Profile = () => {
         <div className="pr-streak-left">
           <span className="pr-streak-flame" aria-hidden="true">🔥</span>
           <div>
-            <div className="pr-streak-title">Current Streak</div>
-            {/* Backend integration point: replace with API data */}
+            <div className="pr-streak-title">{t('profile.streak')}</div>
             {streakDays > 0
-              ? <div className="pr-streak-value">{streakDays} productive {streakDays === 1 ? 'day' : 'days'} in a row</div>
-              : <div className="pr-streak-value pr-streak-empty">No active streak yet — complete a task today to start one!</div>
+              ? <div className="pr-streak-value">{t('profile.streakValue', { n: streakDays, unit: streakDays === 1 ? t('profile.streakUnit1') : t('profile.streakUnitN') })}</div>
+              : <div className="pr-streak-value pr-streak-empty">{t('profile.noStreak')}</div>
             }
           </div>
         </div>
@@ -524,7 +527,7 @@ const Profile = () => {
       <div className="surface-card pr-card">
         <h3 className="pr-section-title">
           <span className="material-symbols-outlined" aria-hidden="true">emoji_events</span>
-          Achievements
+          {t('profile.achievements')}
         </h3>
         {/* Backend integration point: fetch from GET /api/user/achievements */}
         <div className="pr-achievements-grid" role="list" aria-label="Achievements">
@@ -544,12 +547,12 @@ const Profile = () => {
       <div className="surface-card pr-card">
         <h3 className="pr-section-title">
           <span className="material-symbols-outlined" aria-hidden="true">edit</span>
-          Personal Information
+          {t('profile.personalInfo')}
         </h3>
         <form className="pr-form" onSubmit={handleSave} noValidate>
           <div className="pr-grid">
             <div className="auth-field">
-              <label className="auth-label" htmlFor="pr-first">First name</label>
+              <label className="auth-label" htmlFor="pr-first">{t('profile.firstName')}</label>
               <input
                 className={`auth-input${fieldErrors.firstName ? ' input-error' : ''}`}
                 id="pr-first"
@@ -561,7 +564,7 @@ const Profile = () => {
               {fieldErrors.firstName && <p className="pr-field-error">{fieldErrors.firstName}</p>}
             </div>
             <div className="auth-field">
-              <label className="auth-label" htmlFor="pr-last">Last name</label>
+              <label className="auth-label" htmlFor="pr-last">{t('profile.lastName')}</label>
               <input
                 className={`auth-input${fieldErrors.lastName ? ' input-error' : ''}`}
                 id="pr-last"
@@ -575,7 +578,7 @@ const Profile = () => {
           </div>
 
           <div className="auth-field">
-            <label className="auth-label" htmlFor="pr-username">Username</label>
+            <label className="auth-label" htmlFor="pr-username">{t('profile.username')}</label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">alternate_email</span>
               <input className="auth-input" id="pr-username" value={form.username} onChange={setField('username')} autoComplete="username" disabled={saving} />
@@ -583,7 +586,7 @@ const Profile = () => {
           </div>
 
           <div className="auth-field">
-            <label className="auth-label" htmlFor="pr-email">Email</label>
+            <label className="auth-label" htmlFor="pr-email">{t('profile.email')}</label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
               <input
@@ -601,7 +604,7 @@ const Profile = () => {
 
           <div className="auth-field">
             <label className="auth-label" htmlFor="pr-phone">
-              Phone number <span className="pr-optional">(optional)</span>
+              {t('profile.phone')} <span className="pr-optional">({t('common.optional')})</span>
             </label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">phone</span>
@@ -612,7 +615,7 @@ const Profile = () => {
                 value={form.phone}
                 onChange={setField('phone')}
                 autoComplete="tel"
-                placeholder="+1 (555) 000-0000"
+                placeholder={t('profile.phonePh')}
                 disabled={saving}
               />
             </div>
@@ -621,13 +624,13 @@ const Profile = () => {
 
           <div className="auth-field">
             <label className="auth-label" htmlFor="pr-bio">
-              Bio <span className="pr-optional">(optional)</span>
+              {t('profile.bio')} <span className="pr-optional">({t('common.optional')})</span>
             </label>
             <textarea
               className="auth-input pr-bio-input"
               id="pr-bio"
               rows={3}
-              placeholder="A short bio about yourself…"
+              placeholder={t('profile.bioPh')}
               value={form.bio}
               onChange={setField('bio')}
               disabled={saving}
@@ -638,7 +641,7 @@ const Profile = () => {
             {saveResult === 'success' && (
               <span className="pr-saved-msg" role="status">
                 <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
-                Changes saved
+                {t('profile.savedMsg')}
               </span>
             )}
             {saveResult && saveResult !== 'success' && (
@@ -648,11 +651,11 @@ const Profile = () => {
               </span>
             )}
             <button type="button" className="btn btn-secondary" onClick={handleReset} disabled={saving}>
-              Reset
+              {t('common.reset')}
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
               {saving ? <Spinner /> : <span className="material-symbols-outlined" aria-hidden="true">check</span>}
-              {saving ? 'Saving…' : 'Save changes'}
+              {saving ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </form>
@@ -662,16 +665,16 @@ const Profile = () => {
       <div className="surface-card pr-card">
         <h3 className="pr-section-title">
           <span className="material-symbols-outlined" aria-hidden="true">shield</span>
-          Security
+          {t('profile.security')}
         </h3>
         <div className="pr-security-row">
           <div className="pr-security-info">
-            <span className="pr-security-label">Password</span>
-            <span className="pr-security-desc">Keep your account secure with a strong, unique password.</span>
+            <span className="pr-security-label">{t('profile.password')}</span>
+            <span className="pr-security-desc">{t('profile.passwordDesc')}</span>
           </div>
           <button type="button" className="btn btn-secondary" onClick={() => setShowPwModal(true)}>
             <span className="material-symbols-outlined" aria-hidden="true">lock_reset</span>
-            Change Password
+            {t('profile.changePassword')}
           </button>
         </div>
       </div>
@@ -680,18 +683,16 @@ const Profile = () => {
       <div className="surface-card pr-card pr-danger-card">
         <h3 className="pr-section-title danger">
           <span className="material-symbols-outlined" aria-hidden="true">warning</span>
-          Danger zone
+          {t('profile.dangerZone')}
         </h3>
         <div className="pr-danger-row">
           <div>
-            <span className="pr-danger-label">Delete account</span>
-            <span className="pr-danger-desc">
-              Permanently delete your account and all associated data. This cannot be undone.
-            </span>
+            <span className="pr-danger-label">{t('profile.deleteAccount')}</span>
+            <span className="pr-danger-desc">{t('profile.deleteDesc')}</span>
           </div>
           <button type="button" className="pr-danger-btn" onClick={() => setShowDelModal(true)}>
             <span className="material-symbols-outlined" aria-hidden="true">delete_forever</span>
-            Delete account
+            {t('profile.deleteAccount')}
           </button>
         </div>
       </div>

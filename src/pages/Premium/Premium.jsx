@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
+import { useLocale } from '../../i18n/LocaleContext';
 import './Premium.css';
 
 const FEATURES = [
@@ -33,6 +34,7 @@ const CheckIcon = ({ on }) => (
 
 const Premium = () => {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const [billing, setBilling] = useState('monthly'); // monthly | yearly
   const monthlyPrice = 9;
   const yearlyPrice  = Math.round(monthlyPrice * 12 * 0.75);
@@ -49,7 +51,7 @@ const Premium = () => {
         <div className="prem-back-wrap">
           <button className="prem-back-btn" onClick={() => navigate('/settings')}>
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-            Back to Settings
+            {t('premium.backToSettings')}
           </button>
         </div>
 

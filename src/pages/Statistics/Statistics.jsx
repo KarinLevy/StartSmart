@@ -6,6 +6,7 @@ import ProductivityChart from '../../components/Statistics/ProductivityChart';
 import InsightCard from '../../components/Statistics/InsightCard';
 import Footer from '../../components/Footer/Footer';
 import { useTasks } from '../../context/TasksContext';
+import { useLocale } from '../../i18n/LocaleContext';
 import '../../components/Statistics/Statistics.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -118,6 +119,7 @@ const getRangeLabel = (period, customStart, customEnd) => {
 
 const Statistics = () => {
   const { tasks } = useTasks();
+  const { t } = useLocale();
 
   const [period,      setPeriod]      = useState('All Time');
   const [prevPeriod,  setPrevPeriod]  = useState('All Time');
@@ -224,11 +226,11 @@ const Statistics = () => {
 
         {/* Summary cards */}
         <section className="summary-cards-grid" aria-label="Summary metrics">
-          <StatisticsCard title="Tasks Completed"  value={String(done.length)}    icon="check_circle"    colorClass="summary-completed" />
-          <StatisticsCard title="Tasks Pending"    value={String(pending.length)} icon="pending_actions" colorClass="summary-pending" />
-          <StatisticsCard title="Total Focus Time" value={fmtMin(totalWorked)}    icon="schedule"        colorClass="summary-time" />
+          <StatisticsCard title={t('stats.totalTasks')}  value={String(done.length)}    icon="check_circle"    colorClass="summary-completed" />
+          <StatisticsCard title={t('stats.productivity')} value={String(pending.length)} icon="pending_actions" colorClass="summary-pending" />
+          <StatisticsCard title={t('stats.totalFocus')}   value={fmtMin(totalWorked)}    icon="schedule"        colorClass="summary-time" />
           <StatisticsCard
-            title="Avg. Gap"
+            title={t('stats.avgGap')}
             value={avgGap !== null ? fmtGap(avgGap) : '—'}
             icon="query_stats"
             colorClass={avgGap !== null && avgGap > 0 ? 'summary-pending' : 'summary-completed'}

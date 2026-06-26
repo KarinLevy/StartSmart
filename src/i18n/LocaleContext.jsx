@@ -1,14 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import en from './translations/en';
-import he from './translations/he';
-import ru from './translations/ru';
-import ar from './translations/ar';
-import fr from './translations/fr';
-import de from './translations/de';
+import en from './en';
+import he from './he';
+import ru from './ru';
+import ar from './ar';
+import fr from './fr';
+import de from './de';
 
 const TRANSLATIONS = { en, he, ru, ar, fr, de };
 
-// Languages that use right-to-left text direction
 const RTL_LOCALES = new Set(['he', 'ar']);
 
 export const LANGUAGES = [
@@ -38,7 +37,6 @@ function applyDirection(locale) {
 export function LocaleProvider({ children }) {
   const [locale, setLocaleState] = useState(loadLocale);
 
-  // Apply direction on first render and on change
   useEffect(() => { applyDirection(locale); }, [locale]);
 
   const setLocale = useCallback((code) => {
@@ -47,7 +45,21 @@ export function LocaleProvider({ children }) {
     setLocaleState(code);
   }, []);
 
-  const t = TRANSLATIONS[locale] ?? en;
+  /**
+   * t(key, vars?)
+   * Looks up `key` in current locale, falls back to EN, then returns the key itself.
+   * Supports {placeholder} interpolation via vars object.
+   */
+  const t = useCallback((key, vars = {}) => {
+    const dict   = TRANSLATIONS[locale] ?? {};
+    const fallback = TRANSLATIONS.en ?? {};
+    let str = dict[key] ?? fallback[key] ?? key;
+    if (vars && typeof str === 'string') {
+      str = str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? vars[k] : `{${k}}`));
+    }
+    return str;
+  }, [locale]);
+
   const isRTL = RTL_LOCALES.has(locale);
 
   return (

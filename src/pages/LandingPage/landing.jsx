@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Logo from '../../components/Logo/Logo';
 import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import Footer from '../../components/Footer/Footer';
+import LanguageSwitcher from '../../components/LanguageSwitcher/LanguageSwitcher';
+import { useLocale } from '../../i18n/LocaleContext';
 import './landing.css';
 
 /* ── Scroll-fade hook ── */
@@ -28,6 +30,7 @@ function FadeSection({ children, className = '' }) {
 /* ── Marketing Nav ── */
 function MarketingNav() {
   const [open, setOpen] = useState(false);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!open) return;
@@ -41,24 +44,21 @@ function MarketingNav() {
   return (
     <header className="lp-nav">
       <div className="lp-nav-inner">
-        {/* Logo */}
         <Logo to="/" />
 
-        {/* Desktop links */}
         <nav className="lp-nav-links" aria-label="Site navigation">
-          <a href="#features" className="lp-nav-link">Features</a>
-          <a href="#how" className="lp-nav-link">How it works</a>
+          <a href="#features" className="lp-nav-link">{t('landing.nav.features')}</a>
+          <a href="#how" className="lp-nav-link">{t('landing.nav.howItWorks')}</a>
         </nav>
 
-        {/* Desktop actions */}
         <div className="lp-nav-actions">
-          <Link to="/login" className="lp-btn-login">Log in</Link>
-          <Link to="/register" className="lp-btn-primary">Sign up free</Link>
+          <Link to="/login" className="lp-btn-login">{t('landing.nav.logIn')}</Link>
+          <Link to="/register" className="lp-btn-primary">{t('landing.nav.signUpFree')}</Link>
           <div className="lp-nav-divider" aria-hidden="true" />
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
 
-        {/* Mobile hamburger */}
         <div className="lp-nav-mobile-right">
           <ThemeToggle />
           <button
@@ -75,18 +75,17 @@ function MarketingNav() {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
       <div
         id="lp-mobile-menu"
         className={`lp-nav-mobile-menu${open ? ' open' : ''}`}
         aria-hidden={!open}
       >
-        <a href="#features" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>Features</a>
-        <a href="#how" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>How it works</a>
+        <a href="#features" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>{t('landing.nav.features')}</a>
+        <a href="#how" className="lp-nav-mobile-link" onClick={() => setOpen(false)}>{t('landing.nav.howItWorks')}</a>
         <div className="lp-nav-mobile-divider" />
         <div className="lp-nav-mobile-actions">
-          <Link to="/login" className="lp-btn-login" style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>Log in</Link>
-          <Link to="/register" className="lp-btn-primary" style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>Sign up</Link>
+          <Link to="/login" className="lp-btn-login" style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>{t('landing.nav.logIn')}</Link>
+          <Link to="/register" className="lp-btn-primary" style={{ flex: 1, textAlign: 'center', justifyContent: 'center' }} onClick={() => setOpen(false)}>{t('landing.nav.signUpFree')}</Link>
         </div>
       </div>
     </header>
@@ -139,144 +138,147 @@ function GapCard() {
 }
 
 /* ── Main Landing Page ── */
-const LandingPage = () => (
-  <div className="lp-wrapper">
-    <MarketingNav />
+const LandingPage = () => {
+  const { t } = useLocale();
 
-    {/* ── Hero ── */}
-    <section className="lp-hero" aria-labelledby="hero-headline">
-      <div className="lp-hero-inner">
-        <div className="lp-hero-left">
-          <span className="lp-eyebrow" aria-hidden="true">
-            <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>bolt</span>
-            Smart &amp; Futuristic Productivity
-          </span>
-          <h1 className="lp-headline" id="hero-headline">
-            Stop guessing how long{' '}
-            <span className="gradient-text">tasks actually take.</span>
-          </h1>
-          <p className="lp-subhead">
-            StartSmart tracks the gap between your estimate and reality — so every session
-            makes you a sharper planner. Estimate first, focus fully, learn constantly.
-          </p>
-          <div className="lp-cta-row">
-            <Link to="/register" className="lp-btn-hero-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">rocket_launch</span>
-              Sign up free
-            </Link>
-            <Link to="/login" className="lp-btn-hero-secondary">
-              Log in
-            </Link>
+  const FEATURES = [
+    { icon: 'touch_app',   title: t('landing.features.f1title'), desc: t('landing.features.f1desc') },
+    { icon: 'edit_note',   title: t('landing.features.f2title'), desc: t('landing.features.f2desc') },
+    { icon: 'timer',       title: t('landing.features.f3title'), desc: t('landing.features.f3desc') },
+    { icon: 'query_stats', title: t('landing.features.f4title'), desc: t('landing.features.f4desc') },
+  ];
+
+  const HOW_STEPS = [
+    { n: '1', title: t('landing.howItWorks.s1title'), desc: t('landing.howItWorks.s1desc') },
+    { n: '2', title: t('landing.howItWorks.s2title'), desc: t('landing.howItWorks.s2desc') },
+    { n: '3', title: t('landing.howItWorks.s3title'), desc: t('landing.howItWorks.s3desc') },
+  ];
+
+  return (
+    <div className="lp-wrapper">
+      <MarketingNav />
+
+      {/* ── Hero ── */}
+      <section className="lp-hero" aria-labelledby="hero-headline">
+        <div className="lp-hero-inner">
+          <div className="lp-hero-left">
+            <span className="lp-eyebrow" aria-hidden="true">
+              <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>bolt</span>
+              {t('landing.hero.eyebrow')}
+            </span>
+            <h1 className="lp-headline" id="hero-headline">
+              {t('landing.hero.headline1')}{' '}
+              <span className="gradient-text">{t('landing.hero.headline2')}</span>
+            </h1>
+            <p className="lp-subhead">{t('landing.hero.subheading')}</p>
+            <div className="lp-cta-row">
+              <Link to="/register" className="lp-btn-hero-primary">
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">rocket_launch</span>
+                {t('landing.hero.ctaPrimary')}
+              </Link>
+              <Link to="/login" className="lp-btn-hero-secondary">
+                {t('landing.hero.ctaSecondary')}
+              </Link>
+            </div>
           </div>
+          <GapCard />
         </div>
-        <GapCard />
-      </div>
-    </section>
+      </section>
 
-    {/* ── Problem ── */}
-    <section className="lp-section" aria-labelledby="problem-heading">
-      <FadeSection>
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">Sound familiar?</span>
-          <h2 className="lp-headline" id="problem-heading" style={{ textAlign: 'center', maxWidth: '520px' }}>
-            We all lie to ourselves about time
-          </h2>
-        </div>
-      </FadeSection>
-      <div className="lp-problem-grid">
+      {/* ── Problem ── */}
+      <section className="lp-section" aria-labelledby="problem-heading">
         <FadeSection>
-          <div className="lp-problem-card">
-            <div className="lp-problem-emoji" aria-hidden="true">😅</div>
-            <p className="lp-problem-quote">"I'll just start it later…"</p>
-            <p className="lp-problem-sub">Tasks expand to fill whatever time you didn't plan for them.</p>
+          <div className="lp-section-header">
+            <span className="lp-eyebrow">{t('landing.problem.eyebrow')}</span>
+            <h2 className="lp-headline" id="problem-heading" style={{ textAlign: 'center', maxWidth: '520px' }}>
+              {t('landing.problem.heading')}
+            </h2>
           </div>
         </FadeSection>
-        <FadeSection>
-          <div className="lp-problem-card">
-            <div className="lp-problem-emoji" aria-hidden="true">⏳</div>
-            <p className="lp-problem-quote">"This'll take twenty minutes."</p>
-            <p className="lp-problem-sub">Three hours later, you're still at it — wondering where the day went.</p>
-          </div>
-        </FadeSection>
-      </div>
-    </section>
-
-    {/* ── Features ── */}
-    <section id="features" className="lp-section lp-features-section" aria-labelledby="features-heading">
-      <FadeSection>
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">What you get</span>
-          <h2 className="lp-headline" id="features-heading" style={{ textAlign: 'center' }}>
-            Everything you need to close the gap
-          </h2>
-        </div>
-      </FadeSection>
-      <div className="lp-features-grid">
-        {[
-          { icon: 'touch_app',   title: 'One-tap start',  desc: 'Hit start and the timer rolls — zero friction between intention and action.' },
-          { icon: 'edit_note',   title: 'Estimate first', desc: 'Set a time estimate before you begin, so every task starts with a real commitment.' },
-          { icon: 'timer',       title: 'Focus Mode',     desc: 'Full-screen timer with DND. Nothing distracts you from the work.' },
-          { icon: 'query_stats', title: 'See the gap',    desc: 'After each session, see how your estimate compared to reality — and trend over time.' },
-        ].map((f) => (
-          <FadeSection key={f.title}>
-            <div className="lp-feature-card">
-              <div className="lp-feature-icon" aria-hidden="true">
-                <span className="material-symbols-outlined">{f.icon}</span>
-              </div>
-              <p className="lp-feature-title">{f.title}</p>
-              <p className="lp-feature-desc">{f.desc}</p>
+        <div className="lp-problem-grid">
+          <FadeSection>
+            <div className="lp-problem-card">
+              <div className="lp-problem-emoji" aria-hidden="true">😅</div>
+              <p className="lp-problem-quote">{t('landing.problem.card1Quote')}</p>
+              <p className="lp-problem-sub">{t('landing.problem.card1Sub')}</p>
             </div>
           </FadeSection>
-        ))}
-      </div>
-    </section>
-
-    {/* ── How it works ── */}
-    <section id="how" className="lp-section" aria-labelledby="how-heading">
-      <FadeSection>
-        <div className="lp-section-header">
-          <span className="lp-eyebrow">How it works</span>
-          <h2 className="lp-headline" id="how-heading" style={{ textAlign: 'center' }}>
-            Three steps to smarter days
-          </h2>
-        </div>
-      </FadeSection>
-      <ol className="lp-how-grid" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-        {[
-          { n: '1', title: 'Plan',  desc: "Create your task and set an honest time estimate. No vague 'I'll handle it' — commit to a number." },
-          { n: '2', title: 'Focus', desc: "Enter Focus Mode. The timer runs, notifications sleep, and you work. Just you and the task." },
-          { n: '3', title: 'Learn', desc: "Finish and see the gap. Over time those gaps shrink — and your planning gets sharper every week." },
-        ].map((s) => (
-          <FadeSection key={s.n}>
-            <li className="lp-how-step">
-              <div className="lp-how-number" aria-hidden="true">{s.n}</div>
-              <p className="lp-how-step-title">{s.title}</p>
-              <p className="lp-how-step-desc">{s.desc}</p>
-            </li>
+          <FadeSection>
+            <div className="lp-problem-card">
+              <div className="lp-problem-emoji" aria-hidden="true">⏳</div>
+              <p className="lp-problem-quote">{t('landing.problem.card2Quote')}</p>
+              <p className="lp-problem-sub">{t('landing.problem.card2Sub')}</p>
+            </div>
           </FadeSection>
-        ))}
-      </ol>
-    </section>
-
-    {/* ── Final CTA ── */}
-    <section className="lp-cta-banner" aria-labelledby="cta-heading">
-      <div className="lp-cta-banner-inner">
-        <h2 className="lp-cta-banner-title" id="cta-heading">Ready to close your gap?</h2>
-        <p className="lp-cta-banner-sub">
-          Join planners who already know where their time really goes.
-        </p>
-        <div className="lp-cta-banner-actions">
-          <Link to="/register" className="lp-btn-banner-primary">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">rocket_launch</span>
-            Sign up free
-          </Link>
-          <Link to="/login" className="lp-btn-banner-ghost">Log in</Link>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <Footer />
-  </div>
-);
+      {/* ── Features ── */}
+      <section id="features" className="lp-section lp-features-section" aria-labelledby="features-heading">
+        <FadeSection>
+          <div className="lp-section-header">
+            <span className="lp-eyebrow">{t('landing.features.eyebrow')}</span>
+            <h2 className="lp-headline" id="features-heading" style={{ textAlign: 'center' }}>
+              {t('landing.features.heading')}
+            </h2>
+          </div>
+        </FadeSection>
+        <div className="lp-features-grid">
+          {FEATURES.map((f) => (
+            <FadeSection key={f.title}>
+              <div className="lp-feature-card">
+                <div className="lp-feature-icon" aria-hidden="true">
+                  <span className="material-symbols-outlined">{f.icon}</span>
+                </div>
+                <p className="lp-feature-title">{f.title}</p>
+                <p className="lp-feature-desc">{f.desc}</p>
+              </div>
+            </FadeSection>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section id="how" className="lp-section" aria-labelledby="how-heading">
+        <FadeSection>
+          <div className="lp-section-header">
+            <span className="lp-eyebrow">{t('landing.howItWorks.eyebrow')}</span>
+            <h2 className="lp-headline" id="how-heading" style={{ textAlign: 'center' }}>
+              {t('landing.howItWorks.heading')}
+            </h2>
+          </div>
+        </FadeSection>
+        <ol className="lp-how-grid" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {HOW_STEPS.map((s) => (
+            <FadeSection key={s.n}>
+              <li className="lp-how-step">
+                <div className="lp-how-number" aria-hidden="true">{s.n}</div>
+                <p className="lp-how-step-title">{s.title}</p>
+                <p className="lp-how-step-desc">{s.desc}</p>
+              </li>
+            </FadeSection>
+          ))}
+        </ol>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="lp-cta-banner" aria-labelledby="cta-heading">
+        <div className="lp-cta-banner-inner">
+          <h2 className="lp-cta-banner-title" id="cta-heading">{t('landing.cta.heading')}</h2>
+          <p className="lp-cta-banner-sub">{t('landing.cta.subheading')}</p>
+          <div className="lp-cta-banner-actions">
+            <Link to="/register" className="lp-btn-banner-primary">
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">rocket_launch</span>
+              {t('landing.cta.primary')}
+            </Link>
+            <Link to="/login" className="lp-btn-banner-ghost">{t('landing.cta.secondary')}</Link>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
 
 export default LandingPage;

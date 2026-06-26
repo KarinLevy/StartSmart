@@ -173,25 +173,28 @@ const Settings = () => {
     if (!error) navigate('/contact');
   };
 
-  const exportLabel = exportState === 'loading'
-    ? t.settings.privacy.exporting
-    : exportState === 'success'
-    ? t.settings.privacy.exportSuccess
-    : t.settings.privacy.exportData;
+  const HOUR_OPTIONS = [
+    ['1', t('settings.h1')], ['2', t('settings.h2')], ['3', t('settings.h3')],
+    ['4', t('settings.h4')], ['6', t('settings.h6')], ['8', t('settings.h8')],
+  ];
+  const MIN_OPTIONS = [
+    ['15', t('settings.m15')], ['30', t('settings.m30')], ['45', t('settings.m45')],
+    ['60', t('settings.m60')], ['90', t('settings.m90')],
+  ];
 
   return (
-    <PageShell narrow title={t.settings.title} subtitle={t.settings.subtitle}>
+    <PageShell narrow title={t('settings.title')} subtitle={t('settings.subtitle')}>
 
       {/* ── Appearance ── */}
-      <Section icon="palette" title={t.settings.appearance.title}>
+      <Section icon="palette" title={t('settings.appearance')}>
         <Row
-          label={t.settings.appearance.theme}
-          desc={t.settings.appearance.themeDesc(theme)}
+          label={t('settings.theme')}
+          desc={theme === 'dark' ? t('settings.themeDescDark') : t('settings.themeDescLight')}
           control={<ThemeToggle />}
         />
         <Row
-          label={t.settings.appearance.language}
-          desc={t.settings.appearance.languageDesc}
+          label={t('settings.language')}
+          desc={t('settings.languageDesc')}
           control={
             <div className="set-lang-wrap">
               <span className="set-lang-flag" aria-hidden="true">
@@ -201,7 +204,7 @@ const Settings = () => {
                 className="set-select"
                 value={locale}
                 onChange={handleLanguageChange}
-                aria-label={t.settings.appearance.language}
+                aria-label={t('settings.language')}
               >
                 {LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code}>
@@ -215,50 +218,50 @@ const Settings = () => {
       </Section>
 
       {/* ── Focus & Planning ── */}
-      <Section icon="timer" title={t.settings.focus.title}>
+      <Section icon="timer" title={t('settings.focusPlanning')}>
         <Row
-          label={t.settings.focus.dailyGoal}
-          desc={t.settings.focus.dailyGoalDesc}
+          label={t('settings.dailyGoal')}
+          desc={t('settings.dailyGoalDesc')}
           control={
-            <select className="set-select" value={goal} onChange={(e) => patch('goal', e.target.value)} aria-label={t.settings.focus.dailyGoal}>
-              {Object.entries(t.settings.hours).map(([v, label]) => (
+            <select className="set-select" value={goal} onChange={(e) => patch('goal', e.target.value)} aria-label={t('settings.dailyGoal')}>
+              {HOUR_OPTIONS.map(([v, label]) => (
                 <option key={v} value={v}>{label}</option>
               ))}
             </select>
           }
         />
         <Row
-          label={t.settings.focus.defaultEst}
-          desc={t.settings.focus.defaultEstDesc}
+          label={t('settings.defaultEst')}
+          desc={t('settings.defaultEstDesc')}
           control={
-            <select className="set-select" value={defaultEst} onChange={(e) => patch('defaultEst', e.target.value)} aria-label={t.settings.focus.defaultEst}>
-              {Object.entries(t.settings.minutes).map(([v, label]) => (
+            <select className="set-select" value={defaultEst} onChange={(e) => patch('defaultEst', e.target.value)} aria-label={t('settings.defaultEst')}>
+              {MIN_OPTIONS.map(([v, label]) => (
                 <option key={v} value={v}>{label}</option>
               ))}
             </select>
           }
         />
-        <Row label={t.settings.focus.showGapLive}   desc={t.settings.focus.showGapLiveDesc}   control={<Toggle id="showGapLive"   checked={focus.showGapLive}   onChange={() => toggleF('showGapLive')}   label={t.settings.focus.showGapLive} />} />
-        <Row label={t.settings.focus.autoBreak}     desc={t.settings.focus.autoBreakDesc}     control={<Toggle id="autoStartBreak" checked={focus.autoStartBreak} onChange={() => toggleF('autoStartBreak')} label={t.settings.focus.autoBreak} />} />
-        <Row label={t.settings.focus.confirmFinish} desc={t.settings.focus.confirmFinishDesc} control={<Toggle id="confirmFinish"  checked={focus.confirmFinish}  onChange={() => toggleF('confirmFinish')}  label={t.settings.focus.confirmFinish} />} />
+        <Row label={t('settings.showGapLive')}   desc={t('settings.showGapLiveDesc')}   control={<Toggle id="showGapLive"    checked={focus.showGapLive}    onChange={() => toggleF('showGapLive')}    label={t('settings.showGapLive')} />} />
+        <Row label={t('settings.autoBreak')}      desc={t('settings.autoBreakDesc')}     control={<Toggle id="autoStartBreak" checked={focus.autoStartBreak}  onChange={() => toggleF('autoStartBreak')} label={t('settings.autoBreak')} />} />
+        <Row label={t('settings.confirmFinish')}  desc={t('settings.confirmFinishDesc')} control={<Toggle id="confirmFinish"  checked={focus.confirmFinish}   onChange={() => toggleF('confirmFinish')}  label={t('settings.confirmFinish')} />} />
       </Section>
 
       {/* ── Notifications ── */}
-      <Section icon="notifications" title={t.settings.notifications.title}>
-        <Row label={t.settings.notifications.taskReminders}  desc={t.settings.notifications.taskRemindersDesc}  control={<Toggle id="taskReminders" checked={notifs.taskReminders} onChange={() => toggleN('taskReminders')} label={t.settings.notifications.taskReminders} />} />
-        <Row label={t.settings.notifications.timeGapAlerts}  desc={t.settings.notifications.timeGapAlertsDesc}  control={<Toggle id="timeGapAlerts" checked={notifs.timeGapAlerts} onChange={() => toggleN('timeGapAlerts')} label={t.settings.notifications.timeGapAlerts} />} />
-        <Row label={t.settings.notifications.focusEndAlert}  desc={t.settings.notifications.focusEndAlertDesc}  control={<Toggle id="focusEndAlert"  checked={notifs.focusEndAlert}  onChange={() => toggleN('focusEndAlert')}  label={t.settings.notifications.focusEndAlert} />} />
-        <Row label={t.settings.notifications.weeklySummary}  desc={t.settings.notifications.weeklySummaryDesc}  control={<Toggle id="weeklySummary"  checked={notifs.weeklySummary}  onChange={() => toggleN('weeklySummary')}  label={t.settings.notifications.weeklySummary} />} />
-        <Row label={t.settings.notifications.focusSounds}    desc={t.settings.notifications.focusSoundsDesc}    control={<Toggle id="soundEffects"   checked={notifs.soundEffects}   onChange={() => toggleN('soundEffects')}   label={t.settings.notifications.focusSounds} />} />
+      <Section icon="notifications" title={t('settings.notifications')}>
+        <Row label={t('settings.taskReminders')}  desc={t('settings.taskRemindersDesc')}  control={<Toggle id="taskReminders" checked={notifs.taskReminders} onChange={() => toggleN('taskReminders')} label={t('settings.taskReminders')} />} />
+        <Row label={t('settings.timeGapAlerts')}  desc={t('settings.timeGapAlertsDesc')}  control={<Toggle id="timeGapAlerts" checked={notifs.timeGapAlerts} onChange={() => toggleN('timeGapAlerts')} label={t('settings.timeGapAlerts')} />} />
+        <Row label={t('settings.focusEndAlert')}  desc={t('settings.focusEndAlertDesc')}  control={<Toggle id="focusEndAlert"  checked={notifs.focusEndAlert}  onChange={() => toggleN('focusEndAlert')}  label={t('settings.focusEndAlert')} />} />
+        <Row label={t('settings.weeklySummary')}  desc={t('settings.weeklySummaryDesc')}  control={<Toggle id="weeklySummary"  checked={notifs.weeklySummary}  onChange={() => toggleN('weeklySummary')}  label={t('settings.weeklySummary')} />} />
+        <Row label={t('settings.focusSounds')}    desc={t('settings.focusSoundsDesc')}    control={<Toggle id="soundEffects"   checked={notifs.soundEffects}   onChange={() => toggleN('soundEffects')}   label={t('settings.focusSounds')} />} />
       </Section>
 
       {/* ── Privacy ── */}
-      <Section icon="lock" title={t.settings.privacy.title}>
-        <Row label={t.settings.privacy.publicProfile} desc={t.settings.privacy.publicProfileDesc} control={<Toggle id="publicProfile" checked={privacy.publicProfile} onChange={() => toggleP('publicProfile')} label={t.settings.privacy.publicProfile} />} />
-        <Row label={t.settings.privacy.shareStats}    desc={t.settings.privacy.shareStatsDesc}    control={<Toggle id="shareStats"    checked={privacy.shareStats}    onChange={() => toggleP('shareStats')}    label={t.settings.privacy.shareStats} />} />
+      <Section icon="lock" title={t('settings.privacy')}>
+        <Row label={t('settings.publicProfile')} desc={t('settings.publicProfileDesc')} control={<Toggle id="publicProfile" checked={privacy.publicProfile} onChange={() => toggleP('publicProfile')} label={t('settings.publicProfile')} />} />
+        <Row label={t('settings.shareStats')}    desc={t('settings.shareStatsDesc')}    control={<Toggle id="shareStats"    checked={privacy.shareStats}    onChange={() => toggleP('shareStats')}    label={t('settings.shareStats')} />} />
         <Row
-          label={t.settings.privacy.exportData}
-          desc={t.settings.privacy.exportDataDesc}
+          label={t('settings.exportData')}
+          desc={t('settings.exportDataDesc')}
           control={
             <button
               className={`set-action-btn${exportState === 'success' ? ' success' : exportState === 'error' ? ' error' : ''}`}
@@ -267,12 +270,12 @@ const Settings = () => {
               aria-live="polite"
             >
               {exportState === 'loading'
-                ? <><Spinner />{t.settings.privacy.exporting}</>
+                ? <><Spinner />{t('settings.exporting')}</>
                 : exportState === 'success'
-                ? <><span className="material-symbols-outlined" aria-hidden="true">check_circle</span>{t.settings.privacy.exportSuccess}</>
+                ? <><span className="material-symbols-outlined" aria-hidden="true">check_circle</span>{t('settings.exportSuccess')}</>
                 : exportState === 'error'
                 ? <><span className="material-symbols-outlined" aria-hidden="true">error</span>Error</>
-                : <><span className="material-symbols-outlined" aria-hidden="true">download</span>Export</>
+                : <><span className="material-symbols-outlined" aria-hidden="true">download</span>{t('settings.exportData')}</>
               }
             </button>
           }
@@ -280,66 +283,65 @@ const Settings = () => {
       </Section>
 
       {/* ── Account ── */}
-      <Section icon="manage_accounts" title={t.settings.account.title}>
+      <Section icon="manage_accounts" title={t('settings.account')}>
         <Row
-          label={t.settings.account.profileSettings}
-          desc={t.settings.account.profileSettingsDesc}
+          label={t('settings.profileSettings')}
+          desc={t('settings.profileSettingsDesc')}
           control={
             <Link to="/profile" className="set-action-btn">
               <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-              {t.common.open}
+              {t('common.open')}
             </Link>
           }
         />
         <Row
-          label={t.settings.account.signOut}
-          desc={t.settings.account.signOutDesc}
+          label={t('common.signOut')}
+          desc={t('settings.signOutDesc')}
           danger
           control={
             <button className="set-action-btn set-signout-btn" onClick={handleLogout}>
               <span className="material-symbols-outlined" aria-hidden="true">logout</span>
-              {t.common.signOut}
+              {t('common.signOut')}
             </button>
           }
         />
       </Section>
 
       {/* ── Help & Support ── */}
-      <Section icon="help" title={t.settings.help.title}>
+      <Section icon="help" title={t('settings.help')}>
         <Row
-          label={t.settings.help.helpCenter}
-          desc={t.settings.help.helpCenterDesc}
+          label={t('settings.helpCenter')}
+          desc={t('settings.helpCenterDesc')}
           control={
-            /* Backend integration point: replace href with real help docs URL */
             <button className="set-action-btn" onClick={() => alert('Help Center coming soon — documentation is being prepared.')}>
               <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
-              {t.common.open}
+              {t('common.open')}
             </button>
           }
         />
         <Row
-          label={t.settings.help.faq}
-          desc={t.settings.help.faqDesc}
+          label={t('settings.faq')}
+          desc={t('settings.faqDesc')}
           control={
             <Link to="/faq" className="set-action-btn">
               <span className="material-symbols-outlined" aria-hidden="true">quiz</span>
-              {t.common.open}
+              {t('common.open')}
             </Link>
           }
         />
         <Row
-          label={t.settings.help.contactSupport}
-          desc={t.settings.help.contactSupportDesc}
+          label={t('settings.contactSupport')}
+          desc={t('settings.contactSupportDesc')}
           control={
             <Link to="/contact" className="set-action-btn">
               <span className="material-symbols-outlined" aria-hidden="true">mail</span>
-              {t.common.open}
+              {t('common.open')}
             </Link>
           }
         />
         <Row
-          label={t.settings.help.reportProblem}
-          desc={t.settings.help.reportProblemDesc}
+          label={t('settings.reportProblem')}
+          desc={t('settings.reportProblemDesc')}
           control={
             <button
               className={`set-action-btn${reportState === 'success' ? ' success' : reportState === 'error' ? ' error' : ''}`}
@@ -349,10 +351,10 @@ const Settings = () => {
               {reportState === 'loading'
                 ? <Spinner />
                 : <span className="material-symbols-outlined" aria-hidden="true">bug_report</span>}
-              {reportState === 'loading' ? t.common.loading
+              {reportState === 'loading' ? t('common.loading')
                 : reportState === 'success' ? 'Sent!'
                 : reportState === 'error'   ? 'Error'
-                : t.common.open}
+                : t('common.open')}
             </button>
           }
         />
@@ -362,14 +364,12 @@ const Settings = () => {
       <div className="set-upgrade">
         <div className="set-upgrade-text">
           <span className="chip set-upgrade-chip">Pro</span>
-          <h3 className="set-upgrade-title">Unlock smart recommendations</h3>
-          <p className="set-upgrade-desc">
-            Upgrade to StartSmart Pro for AI-powered time insights, advanced analytics, and calendar sync.
-          </p>
+          <h3 className="set-upgrade-title">{t('settings.upgradeTitle')}</h3>
+          <p className="set-upgrade-desc">{t('settings.upgradeDesc')}</p>
         </div>
         <Link to="/premium" className="btn set-upgrade-btn">
           <span className="material-symbols-outlined" aria-hidden="true">bolt</span>
-          {t.common.upgrade}
+          {t('common.upgrade')}
         </Link>
       </div>
 

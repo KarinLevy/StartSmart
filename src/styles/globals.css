@@ -333,3 +333,52 @@ html {
   border-color: var(--color-secondary);
   background: var(--color-surface-container);
 }
+
+/* ── RTL global adjustments ── */
+[dir="rtl"] {
+  text-align: right;
+}
+[dir="rtl"] .auth-layout,
+[dir="rtl"] .auth-form,
+[dir="rtl"] .auth-field {
+  text-align: right;
+}
+[dir="rtl"] .auth-input-icon-wrap {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .auth-input {
+  padding-left: 0.875rem;
+  padding-right: 2.75rem;
+}
+[dir="rtl"] .auth-input-icon {
+  left: auto;
+  right: 0.75rem;
+}
+[dir="rtl"] .auth-back-home,
+[dir="rtl"] .auth-back-link {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .navbar-links {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .navbar-right {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .page-shell-narrow,
+[dir="rtl"] .page-shell {
+  text-align: right;
+}
+[dir="rtl"] .pr-section-title,
+[dir="rtl"] .pr-security-row,
+[dir="rtl"] .pr-danger-row {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .pr-stat-cards {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .pr-banner-left {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .pr-actions {
+  flex-direction: row-reverse;
+}

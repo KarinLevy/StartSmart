@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import { useTasks } from '../../context/TasksContext';
+import { useLocale } from '../../i18n/LocaleContext';
 import './Insights.css';
 import '../../components/Statistics/Statistics.css';
 
@@ -106,7 +107,8 @@ const TrendItem = ({ icon, text, badge = null, positive = null }) => (
 
 const Insights = () => {
   const { tasks } = useTasks();
-  const done = tasks.filter((t) => t.status === 'done' && t.estimatedMinutes && t.actualMinutes);
+  const { t } = useLocale();
+  const done = tasks.filter((tk) => tk.status === 'done' && tk.estimatedMinutes && tk.actualMinutes);
 
   // ── Derived metrics ──
   const totalEst  = done.reduce((s, t) => s + t.estimatedMinutes, 0);
@@ -216,19 +218,19 @@ const Insights = () => {
           <div>
             <Link to="/statistics" className="ins-back">
               <span className="material-symbols-outlined">arrow_back</span>
-              Back to Statistics
+              {t('insights.backToStats')}
             </Link>
-            <h1 className="ins-title">All Insights</h1>
-            <p className="ins-subtitle">Deep-dive into your productivity patterns and estimation accuracy.</p>
+            <h1 className="ins-title">{t('insights.title')}</h1>
+            <p className="ins-subtitle">{t('insights.subtitle')}</p>
           </div>
         </div>
 
         {done.length === 0 ? (
           <div className="ins-empty">
             <span className="material-symbols-outlined ins-empty-icon" aria-hidden="true">insights</span>
-            <h3>No data yet</h3>
-            <p>Complete tasks using Focus Mode to unlock personalised insights.</p>
-            <Link to="/create-task" className="btn btn-primary">Create a Task</Link>
+            <h3>{t('insights.emptyTitle')}</h3>
+            <p>{t('insights.emptyMsg')}</p>
+            <Link to="/create-task" className="btn btn-primary">{t('insights.emptyBtn')}</Link>
           </div>
         ) : (
           <div className="ins-grid">

@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/Logo/Logo';
+import { useLocale } from '../../i18n/LocaleContext';
 import '../Auth/Auth.css';
 
 /*
@@ -48,6 +49,7 @@ const Register = () => {
   const navigate  = useNavigate();
   const { login } = useAuth();
   const fileRef   = useRef(null);
+  const { t } = useLocale();
 
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -76,14 +78,14 @@ const Register = () => {
       ...fields,
     };
     const e = {};
-    if (!f.firstName.trim())  e.firstName = 'First name is required.';
-    if (!f.lastName.trim())   e.lastName  = 'Last name is required.';
-    if (!f.username.trim())   e.username  = 'Username is required.';
-    if (!f.email.trim())      e.email     = 'Email is required.';
-    else if (!EMAIL_RE.test(f.email)) e.email = 'Enter a valid email address.';
-    if (!f.password)          e.password  = 'Password is required.';
-    else if (f.password.length < 8) e.password = 'Password must be at least 8 characters.';
-    if (f.phone && !PHONE_RE.test(f.phone)) e.phone = 'Enter a valid phone number.';
+    if (!f.firstName.trim())  e.firstName = t('register.err.firstNameReq');
+    if (!f.lastName.trim())   e.lastName  = t('register.err.lastNameReq');
+    if (!f.username.trim())   e.username  = t('register.err.usernameReq');
+    if (!f.email.trim())      e.email     = t('register.err.emailReq');
+    else if (!EMAIL_RE.test(f.email)) e.email = t('register.err.invalidEmail');
+    if (!f.password)          e.password  = t('register.err.passwordReq');
+    else if (f.password.length < 8) e.password = t('register.err.passwordMin');
+    if (f.phone && !PHONE_RE.test(f.phone)) e.phone = t('register.err.invalidPhone');
     return e;
   }
 
@@ -138,14 +140,12 @@ const Register = () => {
       } else {
         setServerError(
           data.message ||
-          (res.status === 409
-            ? 'An account with this email or username already exists.'
-            : 'Registration failed. Please try again.')
+          (res.status === 409 ? t('register.err.emailExists') : t('common.error'))
         );
         setSubmitting(false);
       }
     } catch {
-      setServerError('Unable to reach the server. Check your connection and try again.');
+      setServerError(t('register.err.network'));
       setSubmitting(false);
     }
   };
@@ -157,16 +157,16 @@ const Register = () => {
 
   return (
     <div className="auth-layout">
-      <Link to="/" className="auth-back-home" aria-label="Back to StartSmart">
+      <Link to="/" className="auth-back-home" aria-label={t('auth.backHome')}>
         <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-        Back to StartSmart
+        {t('auth.backHome')}
       </Link>
       <div className="auth-card">
         <Logo to="/" size="lg" className="auth-logo-center" />
 
         <div className="auth-header">
-          <h2 className="auth-title">Create your account</h2>
-          <p className="auth-subtitle">Start building better time habits today.</p>
+          <h2 className="auth-title">{t('register.title')}</h2>
+          <p className="auth-subtitle">{t('register.subtitle')}</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -175,7 +175,7 @@ const Register = () => {
           <div className="auth-grid-2">
             <div className="auth-field">
               <label className="auth-label" htmlFor="first-name">
-                First name <span className="auth-label-required" aria-hidden="true">*</span>
+                {t('register.firstName')} <span className="auth-label-required" aria-hidden="true">*</span>
               </label>
               <input
                 className={`auth-input${touched.firstName && errors.firstName ? ' input-error' : ''}`}
@@ -194,7 +194,7 @@ const Register = () => {
             </div>
             <div className="auth-field">
               <label className="auth-label" htmlFor="last-name">
-                Last name <span className="auth-label-required" aria-hidden="true">*</span>
+                {t('register.lastName')} <span className="auth-label-required" aria-hidden="true">*</span>
               </label>
               <input
                 className={`auth-input${touched.lastName && errors.lastName ? ' input-error' : ''}`}
@@ -215,7 +215,7 @@ const Register = () => {
           {/* Username */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="username">
-              Username <span className="auth-label-required" aria-hidden="true">*</span>
+              {t('register.username')} <span className="auth-label-required" aria-hidden="true">*</span>
             </label>
             <input
               className={`auth-input${touched.username && errors.username ? ' input-error' : ''}`}
@@ -235,7 +235,7 @@ const Register = () => {
           {/* Email */}
           <div className="auth-field">
             <label className="auth-label" htmlFor="reg-email">
-              Email <span className="auth-label-required" aria-hidden="true">*</span>
+              {t('register.email')} <span className="auth-label-required" aria-hidden="true">*</span>
             </label>
             <div className="auth-input-icon-wrap">
               <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">mail</span>
@@ -258,14 +258,14 @@ const Register = () => {
           {/* Phone + Password */}
           <div className="auth-grid-2">
             <div className="auth-field">
-              <label className="auth-label" htmlFor="phone">Phone</label>
+              <label className="auth-label" htmlFor="phone">{t('register.phone')}</label>
               <div className="auth-input-icon-wrap">
                 <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">call</span>
                 <input
                   className={`auth-input${touched.phone && errors.phone ? ' input-error' : ''}`}
                   id="phone"
                   type="tel"
-                  placeholder="050-000-0000"
+                  placeholder={t('register.phonePh')}
                   autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -277,7 +277,7 @@ const Register = () => {
             </div>
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-password">
-                Password <span className="auth-label-required" aria-hidden="true">*</span>
+                {t('register.password')} <span className="auth-label-required" aria-hidden="true">*</span>
               </label>
               <div className="auth-input-icon-wrap">
                 <span className="material-symbols-outlined auth-input-icon" aria-hidden="true">lock</span>
@@ -306,14 +306,14 @@ const Register = () => {
                   </span>
                 </button>
               </div>
-              {!errors.password && <p id="password-hint" className="auth-avatar-hint">At least 8 characters.</p>}
+              {!errors.password && <p id="password-hint" className="auth-avatar-hint">{t('register.passwordHint')}</p>}
               <FieldError field="password" />
             </div>
           </div>
 
           {/* Avatar upload */}
           <div className="auth-field">
-            <label className="auth-label" id="avatar-label">Profile picture (optional)</label>
+            <label className="auth-label" id="avatar-label">{t('register.avatarLabel')}</label>
             <div className="auth-avatar-row" aria-labelledby="avatar-label">
               {/* Preview */}
               <div
@@ -343,15 +343,15 @@ const Register = () => {
                 <label htmlFor="avatar-upload" className="auth-avatar-btn" tabIndex={0}
                   onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}>
                   {uploadState === 'uploading' ? (
-                    <><span className="material-symbols-outlined" style={{ fontSize: '16px', animation: 'spin 1s linear infinite' }}>progress_activity</span> Uploading…</>
+                    <><span className="material-symbols-outlined" style={{ fontSize: '16px', animation: 'spin 1s linear infinite' }}>progress_activity</span> {t('register.uploading')}</>
                   ) : (
-                    <><span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload</span> Upload photo</>
+                    <><span className="material-symbols-outlined" style={{ fontSize: '16px' }}>upload</span> {t('register.uploadPhoto')}</>
                   )}
                 </label>
                 {avatarSrc && (
-                  <button type="button" className="auth-avatar-remove" onClick={removeAvatar} aria-label="Remove uploaded photo">
+                  <button type="button" className="auth-avatar-remove" onClick={removeAvatar} aria-label={t('register.removePhoto')}>
                     <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
-                    Remove
+                    {t('common.clear')}
                   </button>
                 )}
               </div>
@@ -359,11 +359,11 @@ const Register = () => {
             {uploadState === 'error' && (
               <p className="auth-field-error" role="alert">
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>error</span>
-                Please upload a valid image file under 5 MB.
+                {t('register.imageError')}
               </p>
             )}
             {!avatarSrc && hasName && (
-              <p className="auth-avatar-hint">No photo? We'll use your initials automatically.</p>
+              <p className="auth-avatar-hint">{t('register.noPhotoHint')}</p>
             )}
           </div>
 
@@ -378,14 +378,14 @@ const Register = () => {
             {submitting ? (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '18px', animation: 'spin 1s linear infinite' }} aria-hidden="true">progress_activity</span>
-                Creating account…
+                {t('register.submitting')}
               </span>
-            ) : 'Create account'}
+            ) : t('register.submit')}
           </button>
         </form>
 
         <p className="auth-foot">
-          Already have an account? <Link to="/login">Log in</Link>
+          {t('register.haveAccount')} <Link to="/login">{t('register.logIn')}</Link>
         </p>
       </div>
     </div>

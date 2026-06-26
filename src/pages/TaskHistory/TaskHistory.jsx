@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { getTagDisplayColor } from '../../utils/tagUtils';
+import { useLocale } from '../../i18n/LocaleContext';
 import './TaskHistory.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -291,6 +292,7 @@ const TaskHistoryCard = ({ task, onView }) => {
 const TaskHistory = () => {
   const { tasks } = useTasks();
   const navigate  = useNavigate();
+  const { t } = useLocale();
 
   const done = useMemo(() => tasks.filter((t) => t.status === 'done'), [tasks]);
 
@@ -394,7 +396,7 @@ const TaskHistory = () => {
   }, [navigate]);
 
   return (
-    <PageShell title="Task History" subtitle="A read-only record of every completed task.">
+    <PageShell title={t('history.title')} subtitle={t('history.subtitle')}>
 
       {/* Summary strip */}
       <div className="th-summary" role="region" aria-label="Overall statistics">

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
+import { useLocale } from '../../i18n/LocaleContext';
 import './Schedule.css';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -70,16 +71,16 @@ const weekRange = (monday) => {
   return `${monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 };
 
-const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }) => {
+const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
   if (period === 'Daily') {
     const todayKey = toKey(new Date());
     const diff = Math.round(
       (new Date(toKey(viewDate)) - new Date(todayKey)) / 86400000
     );
     const smartTitle =
-      diff === 0 ? 'Today' :
-      diff === -1 ? 'Yesterday' :
-      diff === 1 ? 'Tomorrow' : null;
+      diff === 0 ? t('schedule.today') :
+      diff === -1 ? t('schedule.yesterday') :
+      diff === 1 ? t('schedule.tomorrow') : null;
 
     if (smartTitle) {
       const subtitle = viewDate.toLocaleDateString('en-US', {
@@ -87,12 +88,11 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }) => {
       });
       return { title: smartTitle, subtitle };
     }
-    // Non-smart day: title = the date, subtitle = view name
     return {
       title: viewDate.toLocaleDateString('en-US', {
         weekday: 'short', month: 'short', day: 'numeric',
       }),
-      subtitle: 'Daily view',
+      subtitle: t('schedule.daily'),
     };
   }
 
@@ -100,15 +100,14 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }) => {
     const thisMon = getMondayOf(new Date());
     const diff = Math.round((monday - thisMon) / 86400000);
     const smartTitle =
-      diff === 0 ? 'This Week' :
-      diff === -7 ? 'Last Week' :
-      diff === 7 ? 'Next Week' : null;
+      diff === 0 ? t('schedule.thisWeek') :
+      diff === -7 ? t('schedule.lastWeek') :
+      diff === 7 ? t('schedule.nextWeek') : null;
 
     if (smartTitle) {
       return { title: smartTitle, subtitle: weekRange(monday) };
     }
-    // Non-smart week: title = range, subtitle = view name
-    return { title: weekRange(monday), subtitle: 'Weekly view' };
+    return { title: weekRange(monday), subtitle: t('schedule.weekly') };
   }
 
   // Monthly
@@ -119,14 +118,14 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }) => {
   const prev = new Date(ny, nm - 1, 1);
   const next = new Date(ny, nm + 1, 1);
   const smartTitle =
-    (year === ny && month === nm) ? 'This Month' :
-    (year === prev.getFullYear() && month === prev.getMonth()) ? 'Last Month' :
-    (year === next.getFullYear() && month === next.getMonth()) ? 'Next Month' : null;
+    (year === ny && month === nm) ? t('schedule.thisMonth') :
+    (year === prev.getFullYear() && month === prev.getMonth()) ? t('schedule.lastMonth') :
+    (year === next.getFullYear() && month === next.getMonth()) ? t('schedule.nextMonth') : null;
 
   if (smartTitle) {
     return { title: smartTitle, subtitle: fullMonthYear };
   }
-  return { title: fullMonthYear, subtitle: 'Monthly view' };
+  return { title: fullMonthYear, subtitle: t('schedule.monthly') };
 };
 
 // ── DailyView ──────────────────────────────────────────────────────────────────
@@ -401,6 +400,7 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
 // ── Schedule (main) ────────────────────────────────────────────────────────────
 const Schedule = () => {
   const { tasks } = useTasks();
+  const { t } = useLocale();
 
   // Period & pivot state
   const [period, setPeriod] = useState('Weekly');
@@ -465,15 +465,15 @@ const Schedule = () => {
 
   // ── Smart labels ────────────────────────────────────────────────────────────
   const rangeLabel = useMemo(
-    () => getScheduleHeaderLabel(period, { viewDate, monday, monthYear }),
-    [period, viewDate, monday, monthYear]
+    () => getScheduleHeaderLabel(period, { viewDate, monday, monthYear }, t),
+    [period, viewDate, monday, monthYear, t]
   );
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <PageShell
-      title="Schedule"
-      subtitle="Your tasks laid out across time."
+      title={t('schedule.title')}
+      subtitle={t('schedule.subtitle')}
       actions={
         <Link to="/create-task" className="btn btn-primary">
           <span className="material-symbols-outlined" aria-hidden="true">add</span>

@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import Logo from '../Logo/Logo';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
+import LanguageSwitcher from '../LanguageSwitcher/LanguageSwitcher';
 import { useNotifications } from '../../context/NotificationsContext';
 import { useProfile } from '../../context/ProfileContext';
 import { useLocale } from '../../i18n/LocaleContext';
@@ -17,14 +18,14 @@ const Navbar = () => {
   const { t } = useLocale();
 
   const NAV_LINKS = [
-    { to: '/dashboard',    icon: 'dashboard',       label: t.nav.dashboard },
-    { to: '/create-task',  icon: 'add_task',         label: t.nav.createTask },
-    { to: '/focus-mode',   icon: 'timer',            label: t.nav.focusMode },
-    { to: '/schedule',     icon: 'calendar_today',   label: t.nav.schedule },
-    { to: '/task-history', icon: 'history',          label: t.nav.taskHistory },
-    { to: '/statistics',   icon: 'insights',         label: t.nav.statistics },
-    { to: '/profile',      icon: 'person',           label: t.nav.profile },
-    { to: '/settings',     icon: 'settings',         label: t.nav.settings },
+    { to: '/dashboard',    icon: 'dashboard',       label: t('nav.dashboard') },
+    { to: '/create-task',  icon: 'add_task',         label: t('nav.createTask') },
+    { to: '/focus-mode',   icon: 'timer',            label: t('nav.focusMode') },
+    { to: '/schedule',     icon: 'calendar_today',   label: t('nav.schedule') },
+    { to: '/task-history', icon: 'history',          label: t('nav.taskHistory') },
+    { to: '/statistics',   icon: 'insights',         label: t('nav.statistics') },
+    { to: '/profile',      icon: 'person',           label: t('nav.profile') },
+    { to: '/settings',     icon: 'settings',         label: t('nav.settings') },
   ];
 
   const closeMenu = () => setMenuOpen(false);
@@ -32,10 +33,8 @@ const Navbar = () => {
   return (
     <header className="navbar">
       <div className="navbar-container">
-        {/* Logo */}
         <Logo to="/dashboard" />
 
-        {/* Hamburger */}
         <button
           className="navbar-hamburger"
           onClick={() => setMenuOpen((v) => !v)}
@@ -48,7 +47,6 @@ const Navbar = () => {
           </span>
         </button>
 
-        {/* Nav links */}
         <nav
           id="navbar-links"
           className={`navbar-links${menuOpen ? ' mobile-open' : ''}`}
@@ -68,11 +66,10 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Right section */}
         <div className="navbar-right">
+          <LanguageSwitcher />
           <ThemeToggle />
 
-          {/* Notifications bell */}
           <div className="notif-bell-wrap">
             <button
               className="navbar-notification"
@@ -91,7 +88,6 @@ const Navbar = () => {
             {notifOpen && <NotificationDropdown onClose={() => setNotifOpen(false)} />}
           </div>
 
-          {/* Profile */}
           <div className="navbar-profile">
             <div className="navbar-profile-info">
               <span className="navbar-profile-name">{profile.firstName} {profile.lastName}</span>

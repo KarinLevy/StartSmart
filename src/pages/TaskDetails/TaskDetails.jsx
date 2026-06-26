@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { getTagDisplayColor } from '../../utils/tagUtils';
+import { useLocale } from '../../i18n/LocaleContext';
 import './TaskDetails.css';
 
 const fmtMin = (m) => {
@@ -23,8 +24,9 @@ const TaskDetails = () => {
   const { id } = useParams();
   const { tasks, updateTask, deleteTask } = useTasks();
   const navigate = useNavigate();
+  const { t } = useLocale();
 
-  const task = tasks.find((t) => t.id === id);
+  const task = tasks.find((tk) => tk.id === id);
 
   const [editing, setEditing]       = useState(false);
   const [editTitle, setEditTitle]   = useState('');
@@ -37,12 +39,12 @@ const TaskDetails = () => {
 
   if (!task) {
     return (
-      <PageShell narrow title="Task not found">
+      <PageShell narrow title={t('taskDetails.title')}>
         <div className="td-not-found">
           <span className="material-symbols-outlined td-not-found-icon" aria-hidden="true">search_off</span>
-          <h3>This task doesn&apos;t exist.</h3>
-          <p>It may have been deleted, or the link might be wrong.</p>
-          <Link to="/dashboard" className="btn btn-primary">Go to Dashboard</Link>
+          <h3>{t('taskDetails.notFound.title')}</h3>
+          <p>{t('taskDetails.notFound.msg')}</p>
+          <Link to="/dashboard" className="btn btn-primary">{t('taskDetails.notFound.btn')}</Link>
         </div>
       </PageShell>
     );
@@ -90,27 +92,27 @@ const TaskDetails = () => {
   return (
     <PageShell
       narrow
-      title="Task Details"
-      subtitle="Review, edit, or start a focus session on this task."
+      title={t('taskDetails.title')}
+      subtitle={t('taskDetails.subtitle')}
       actions={
         <div className="td-header-actions">
           {!editing ? (
             <>
               <button className="btn btn-secondary" onClick={startEdit}>
                 <span className="material-symbols-outlined" aria-hidden="true">edit</span>
-                Edit
+                {t('taskDetails.edit')}
               </button>
               <button className="btn btn-danger" onClick={() => setShowDel(true)}>
                 <span className="material-symbols-outlined" aria-hidden="true">delete</span>
-                Delete
+                {t('taskDetails.delete')}
               </button>
             </>
           ) : (
             <>
-              <button className="btn btn-secondary" onClick={cancelEdit}>Cancel</button>
+              <button className="btn btn-secondary" onClick={cancelEdit}>{t('common.cancel')}</button>
               <button className="btn btn-primary" onClick={saveEdit}>
                 <span className="material-symbols-outlined" aria-hidden="true">save</span>
-                Save
+                {t('taskDetails.save')}
               </button>
             </>
           )}
@@ -123,11 +125,11 @@ const TaskDetails = () => {
         <div className="td-confirm-overlay" role="dialog" aria-modal="true" aria-label="Delete task confirmation">
           <div className="td-confirm-box">
             <span className="material-symbols-outlined td-confirm-icon" aria-hidden="true">warning</span>
-            <h3 className="td-confirm-title">Delete this task?</h3>
-            <p className="td-confirm-text">This action cannot be undone.</p>
+            <h3 className="td-confirm-title">{t('taskDetails.deleteTitle')}</h3>
+            <p className="td-confirm-text">{t('taskDetails.deleteMsg')}</p>
             <div className="td-confirm-actions">
-              <button className="btn btn-secondary" onClick={() => setShowDel(false)}>Cancel</button>
-              <button className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+              <button className="btn btn-secondary" onClick={() => setShowDel(false)}>{t('common.cancel')}</button>
+              <button className="btn btn-danger" onClick={confirmDelete}>{t('taskDetails.delete')}</button>
             </div>
           </div>
         </div>
@@ -197,7 +199,7 @@ const TaskDetails = () => {
             />
           ) : (
             <p className="td-field-value">
-              {task.description || <em style={{ color: 'var(--color-outline)' }}>No description</em>}
+              {task.description || <em style={{ color: 'var(--color-outline)' }}>{t('taskDetails.noDesc')}</em>}
             </p>
           )}
         </div>
@@ -208,7 +210,7 @@ const TaskDetails = () => {
           <div className="td-meta">
             <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">calendar_month</span>
             <div>
-              <span className="td-meta-label">Scheduled</span>
+              <span className="td-meta-label">{t('taskDetails.scheduled')}</span>
               {editing ? (
                 <input
                   type="datetime-local"
@@ -227,7 +229,7 @@ const TaskDetails = () => {
           <div className="td-meta">
             <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">hourglass_top</span>
             <div>
-              <span className="td-meta-label">Estimated</span>
+              <span className="td-meta-label">{t('taskDetails.estimated')}</span>
               {editing ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <input
@@ -252,7 +254,7 @@ const TaskDetails = () => {
             <div className="td-meta">
               <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">timer</span>
               <div>
-                <span className="td-meta-label">Actual time</span>
+                <span className="td-meta-label">{t('taskDetails.actual')}</span>
                 <span className="td-meta-value">{fmtMin(task.actualMinutes)}</span>
               </div>
             </div>
@@ -263,11 +265,11 @@ const TaskDetails = () => {
             <div className="td-meta">
               <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">query_stats</span>
               <div>
-                <span className="td-meta-label">Gap</span>
+                <span className="td-meta-label">{t('taskDetails.gap')}</span>
                 <span className={`td-meta-value ${gap > 0 ? 'gap-over' : 'gap-under'}`}>
                   {gap > 0 ? `+${gap}m` : `${gap}m`}
                   <span className="td-gap-badge">
-                    {gap === 0 ? 'On target' : gap > 0 ? 'Over' : 'Early'}
+                    {gap === 0 ? t('taskDetails.onTarget') : gap > 0 ? t('taskDetails.over') : t('taskDetails.early')}
                   </span>
                 </span>
               </div>
@@ -293,7 +295,7 @@ const TaskDetails = () => {
         {/* Tags */}
         {!editing && task.tags?.length > 0 && (
           <div className="td-field">
-            <span className="td-field-label">Tags</span>
+            <span className="td-field-label">{t('taskDetails.tags')}</span>
             <div className="td-tags">
               {task.tags.map((tag) => {
                 const c = getTagDisplayColor(tag);
@@ -315,12 +317,12 @@ const TaskDetails = () => {
         <div className="td-actions">
           <Link to="/dashboard" className="btn btn-secondary">
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-            Dashboard
+            {t('nav.dashboard')}
           </Link>
           {task.status !== 'done' && (
             <Link to={`/focus-mode/${task.id}`} className="btn btn-primary">
               <span className="material-symbols-outlined" aria-hidden="true">play_arrow</span>
-              Start focus
+              {t('taskDetails.startFocus')}
             </Link>
           )}
         </div>
