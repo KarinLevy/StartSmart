@@ -142,3 +142,8 @@
   padding-top: var(--spacing-card-gap);
   border-top: 1px solid var(--color-surface-container);
 }
+
+.chip-pending { background: var(--color-surface-container-high); color: var(--color-on-surface-variant); }
+.chip-done { background: var(--color-success-container); color: var(--color-success-on); }
+.gap-over { color: var(--color-error); font-weight: 700; }
+.gap-under { color: var(--color-success); font-weight: 700; }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { TasksProvider } from './context/TasksContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -16,6 +17,7 @@ import Settings from './pages/Settings/Settings';
 
 function App() {
   return (
+    <TasksProvider>
     <Router>
       <Routes>
         {/* Public */}
@@ -27,8 +29,8 @@ function App() {
         {/* App */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create-task" element={<CreateTask />} />
-        <Route path="/task-details" element={<TaskDetails />} />
-        <Route path="/focus-mode" element={<FocusMode />} />
+        <Route path="/task-details/:id" element={<TaskDetails />} />
+        <Route path="/focus-mode/:id" element={<FocusMode />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/task-history" element={<TaskHistory />} />
         <Route path="/statistics" element={<Statistics />} />
@@ -36,6 +38,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
+    </TasksProvider>
   );
 }
 

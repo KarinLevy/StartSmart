@@ -1,74 +1,92 @@
 import React from 'react';
 import PageShell from '../../components/PageShell/PageShell';
+import { useTasks } from '../../context/TasksContext';
 import './TaskHistory.css';
 
-// Placeholder/dummy history rows — replaced by real data once the backend is connected.
-const history = [
-  { id: 1, name: 'UI Audit: Dashboard Shell', date: 'Oct 23', estimated: '1h 20m', actual: '1h 25m', gap: 5, status: 'Done' },
-  { id: 2, name: 'Client Feedback Loop', date: 'Oct 22', estimated: '45m', actual: '38m', gap: -7, status: 'Done' },
-  { id: 3, name: 'Database Migration Check', date: 'Oct 22', estimated: '30m', actual: '28m', gap: -2, status: 'Done' },
-  { id: 4, name: 'Write Sprint Summary', date: 'Oct 21', estimated: '1h', actual: '1h 18m', gap: 18, status: 'Done' },
-  { id: 5, name: 'Refactor Timer Component', date: 'Oct 20', estimated: '2h', actual: '1h 40m', gap: -20, status: 'Done' },
-];
-
+const fmtMin = (m) => {
+  if (m == null) return '--';
+  if (m >= 60) return `${Math.floor(m / 60)}h ${m % 60 > 0 ? m % 60 + 'm' : ''}`.trim();
+  return `${m}m`;
+};
 const fmtGap = (g) => (g > 0 ? `+${g}m` : `${g}m`);
 
 const TaskHistory = () => {
+  const { tasks } = useTasks();
+  const done = tasks.filter((t) => t.status === 'done');
+
+  const totalMin = done.reduce((s, t) => s + (t.actualMinutes || 0), 0);
+  const totalFmt = fmtMin(totalMin);
+
+  const avgGap = done.length > 0
+    ? (done.reduce((s, t) => s + (t.gap || 0), 0) / done.length).toFixed(1)
+    : 0;
+
   return (
-    <PageShell
-      title="Task History"
-      subtitle="Every completed task, with how your estimate compared to reality."
-    >
+    <PageShell title="Task History" subtitle="Every completed task, with how your estimate compared to reality.">
       <div className="th-summary">
         <div className="th-summary-card">
-          <span className="th-summary-value">{history.length}</span>
+          <span className="th-summary-value">{done.length}</span>
           <span className="th-summary-label">Tasks completed</span>
         </div>
         <div className="th-summary-card">
-          <span className="th-summary-value">5h 29m</span>
+          <span className="th-summary-value">{totalFmt}</span>
           <span className="th-summary-label">Total time worked</span>
         </div>
         <div className="th-summary-card">
-          <span className="th-summary-value gap-over">+0.8m</span>
+          <span className={`th-summary-value ${Number(avgGap) > 0 ? 'gap-over' : 'gap-under'}`}>
+            {Number(avgGap) > 0 ? `+${avgGap}m` : `${avgGap}m`}
+          </span>
           <span className="th-summary-label">Avg gap per task</span>
         </div>
       </div>
 
-      <div className="surface-card th-table-card">
-        <div className="th-table-scroll">
-          <table className="th-table">
-            <thead>
-              <tr>
-                <th>Task name</th>
-                <th>Date</th>
-                <th>Estimated</th>
-                <th>Actual</th>
-                <th>Gap</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((row) => (
-                <tr key={row.id}>
-                  <td data-label="Task name" className="th-name">{row.name}</td>
-                  <td data-label="Date">{row.date}</td>
-                  <td data-label="Estimated">{row.estimated}</td>
-                  <td data-label="Actual">{row.actual}</td>
-                  <td data-label="Gap" className={row.gap > 0 ? 'gap-over' : 'gap-under'}>
-                    {fmtGap(row.gap)}
-                  </td>
-                  <td data-label="Status">
-                    <span className="chip chip-done">
-                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
-                      {row.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {done.length === 0 ? (
+        <div className="surface-card th-empty">
+          <span className="material-symbols-outlined">history</span>
+          <p>No completed tasks yet. Finish a focus session and it will appear here.</p>
         </div>
-      </div>
+      ) : (
+        <div className="surface-card th-table-card">
+          <div className="th-table-scroll">
+            <table className="th-table">
+              <thead>
+                <tr>
+                  <th>Task name</th>
+                  <th>Scheduled</th>
+                  <th>Estimated</th>
+                  <th>Actual</th>
+                  <th>Gap</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {done.map((task) => {
+                  const dateStr = task.scheduledDate
+                    ? new Date(task.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : '—';
+                  return (
+                    <tr key={task.id}>
+                      <td data-label="Task name" className="th-name">{task.title}</td>
+                      <td data-label="Date">{dateStr}</td>
+                      <td data-label="Estimated">{fmtMin(task.estimatedMinutes)}</td>
+                      <td data-label="Actual">{fmtMin(task.actualMinutes)}</td>
+                      <td data-label="Gap" className={task.gap > 0 ? 'gap-over' : 'gap-under'}>
+                        {task.gap != null ? fmtGap(task.gap) : '--'}
+                      </td>
+                      <td data-label="Status">
+                        <span className="chip chip-done">
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
+                          Done
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </PageShell>
   );
 };

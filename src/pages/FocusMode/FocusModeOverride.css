@@ -1,0 +1,110 @@
+/* Additional styles for interactive FocusMode */
+
+.focus-ctrl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-body-lg);
+  font-weight: 600;
+  padding: 0.85rem 2rem;
+  border-radius: var(--rounded-full);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.focus-ctrl-btn:hover:not(:disabled) { transform: translateY(-2px); opacity: 0.9; }
+.focus-ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.focus-ctrl-stop {
+  background: var(--color-on-surface-variant);
+}
+.focus-ctrl-finish {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.3);
+}
+
+.focus-task-desc {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0.5rem 0 1rem;
+  line-height: 1.6;
+}
+.focus-task-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.focus-task-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface-variant);
+}
+.focus-task-meta-item .material-symbols-outlined { font-size: 16px; }
+
+/* Summary screen */
+.focus-summary-card {
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding: 2.5rem 2rem;
+}
+.focus-summary-icon {
+  font-size: 3.5rem;
+  color: var(--color-success);
+}
+.focus-summary-title {
+  font-size: var(--font-size-headline-lg);
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+.focus-summary-task {
+  font-size: var(--font-size-body-lg);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+.focus-summary-stats {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  background: var(--color-surface-container-low);
+  border-radius: var(--rounded-xl);
+  padding: 1.25rem 2rem;
+  width: 100%;
+}
+.focus-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+.focus-stat-label {
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.focus-stat-value {
+  font-size: var(--font-size-headline-lg-mobile);
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+.gap-over { color: var(--color-error) !important; }
+.gap-under { color: var(--color-success) !important; }
+.focus-summary-insight {
+  font-size: var(--font-size-body-md);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 36ch;
+}
+.focus-summary-btn {
+  margin-top: 0.5rem;
+}

@@ -348,3 +348,15 @@
     font-size: var(--font-size-label-xxs);
   }
 }
+
+.workflow-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-on-surface-variant);
+}
+.workflow-empty .material-symbols-outlined { font-size: 2rem; opacity: 0.4; }
+.workflow-empty p { margin: 0; font-size: var(--font-size-body-md); }
