@@ -6,7 +6,7 @@ Most productivity apps help you organize what needs to be done. StartSmart also 
 
 The result is a tool that grows with you: the more you use it, the more useful the data becomes, and the more accurately you can plan your future work.
 
-**Live Vercel:** [https://start-smart-app.vercel.app](https://start-smart-livid.vercel.app)
+**Live Vercel:** [https://start-smart-livid.vercel.app](https://start-smart-livid.vercel.app)
 **GitHub:** [https://github.com/KarinLevy/StartSmart](https://github.com/KarinLevy/StartSmart)
 
 ---
@@ -55,7 +55,7 @@ The goal is not just to manage your task list — it is to help you become a bet
 
 ## Live vercel
 
-**URL:** [https://start-smart-app.vercel.app](https://start-smart-livid.vercel.app)
+**URL:** [https://start-smart-livid.vercel.app](https://start-smart-livid.vercel.app)
 
 ### Demo Account
 
@@ -234,9 +234,9 @@ StartSmart supports 6 languages with full RTL support for Hebrew and Arabic:
 | German | de | LTR |
 | Russian | ru | LTR |
 
-The application automatically adapts its layout for both Left-to-Right (LTR) and Right-to-Left (RTL) languages. Hebrew and Arabic use RTL layouts, while English, French, German, and Russian use LTR layouts.
-The selected language is stored in localStorage, allowing the application to remember the user’s preference across sessions.
-Most of the user interface has been fully localized. As part of the project’s future development, localization will continue to be refined, with the remaining interface text and language-specific layout improvements being completed across all supported languages. 
+The application supports both Left-to-Right (LTR) and Right-to-Left (RTL) layouts, automatically adapting the interface based on the selected language. Hebrew and Arabic are displayed in RTL, while English, French, German, and Russian use LTR layouts.
+The selected language is stored in localStorage, allowing the application to remember the user’s preference across future visits.
+StartSmart currently supports six languages, with most of the interface fully localized. As part of the project’s ongoing development, localization will continue to be refined by completing the remaining interface translations and improving language-specific layouts and user experience across all supported languages.
 ---
 
 ## Security
