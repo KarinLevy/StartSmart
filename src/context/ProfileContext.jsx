@@ -21,18 +21,19 @@ export const ProfileProvider = ({ children }) => {
     const load = async (userId, email) => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('first_name, last_name, username, phone, profile_image')
+        .select('first_name, last_name, username, phone, profile_image, notifications_enabled')
         .eq('id', userId)
         .single();
 
       if (!error && data) {
         setProfileState({
-          firstName: data.first_name  ?? '',
-          lastName:  data.last_name   ?? '',
-          username:  data.username    ?? '',
-          email:     email            ?? '',
-          phone:     data.phone       ?? '',
-          bio:       '',
+          firstName:            data.first_name           ?? '',
+          lastName:             data.last_name            ?? '',
+          username:             data.username             ?? '',
+          email:                email                     ?? '',
+          phone:                data.phone                ?? '',
+          bio:                  '',
+          notificationsEnabled: data.notifications_enabled ?? true,
         });
         if (data.profile_image) setAvatarSrc(data.profile_image);
       }

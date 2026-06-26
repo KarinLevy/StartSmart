@@ -8,6 +8,7 @@ import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
 import { useLocale, LANGUAGES } from '../../i18n/LocaleContext';
 import { saveSettings, exportUserData, triggerDownload, reportProblem } from '../../services/settingsService';
+import { updateNotificationsEnabled } from '../../services/userService';
 import './Settings.css';
 
 // ── Persistence key ───────────────────────────────────────────────────────────
@@ -102,11 +103,28 @@ const Settings = () => {
 
   const { notifs, focus, privacy, goal, defaultEst } = settings;
 
+  // If the profile says notifications are globally disabled, reflect that on mount
+  useEffect(() => {
+    if (profile.notificationsEnabled === false) {
+      setSettings((p) => ({
+        ...p,
+        notifs: Object.fromEntries(Object.keys(p.notifs).map((k) => [k, false])),
+      }));
+    }
+  }, [profile.notificationsEnabled]);
+
   // Persist whenever settings change
   useEffect(() => { persistSettings(settings); }, [settings]);
 
   const patch = (key, val) => setSettings((p) => ({ ...p, [key]: val }));
-  const toggleN = (k) => patch('notifs',  { ...notifs,  [k]: !notifs[k] });
+
+  const toggleN = (k) => {
+    const newNotifs = { ...notifs, [k]: !notifs[k] };
+    patch('notifs', newNotifs);
+    // Sync master notifications_enabled flag to Supabase profile
+    const anyOn = Object.values(newNotifs).some(Boolean);
+    updateNotificationsEnabled(anyOn);
+  };
   const toggleF = (k) => patch('focus',   { ...focus,   [k]: !focus[k] });
   const toggleP = (k) => patch('privacy', { ...privacy, [k]: !privacy[k] });
 

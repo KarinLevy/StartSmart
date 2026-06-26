@@ -57,6 +57,19 @@ export async function uploadAvatar(file) {
 }
 
 /**
+ * Sync the notifications_enabled flag to the profiles row.
+ * @param {boolean} enabled
+ */
+export async function updateNotificationsEnabled(enabled) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return;
+  await supabase
+    .from('profiles')
+    .update({ notifications_enabled: enabled })
+    .eq('id', session.user.id);
+}
+
+/**
  * Change the authenticated user's password via Supabase Auth.
  * Note: Supabase does not re-validate the current password server-side;
  * the UI validates it as a UX guard.
