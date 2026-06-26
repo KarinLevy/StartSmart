@@ -11,6 +11,7 @@ import {
   validateTag,
   collectExistingTags,
   filterSuggestions,
+  getTagDisplayColor,
 } from '../../utils/tagUtils';
 import './TaskForm.css';
 
@@ -30,7 +31,7 @@ import './TaskForm.css';
 // ── TagChip ───────────────────────────────────────────────────────────────────
 
 export function TagChip({ tag, onRemove }) {
-  const color = tag.color || DEFAULT_COLOR;
+  const color = getTagDisplayColor(tag);
   return (
     <span
       className="tag-chip"

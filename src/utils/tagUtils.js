@@ -54,7 +54,7 @@ const KEYWORD_MAP = [
       'backend', 'frontend', 'react', 'javascript', 'typescript', 'nodejs', 'node',
       'vue', 'angular', 'svelte', 'python', 'java', 'golang', 'rust', 'swift',
       'kotlin', 'php', 'ruby', 'scala', 'cpp', 'csharp',
-      'ai', 'ml', 'llm', 'devops', 'docker', 'kubernetes', 'aws', 'gcp', 'azure',
+      'dev', 'ai', 'ml', 'llm', 'devops', 'docker', 'kubernetes', 'aws', 'gcp', 'azure',
       'database', 'sql', 'mongodb', 'redis', 'graphql', 'rest', 'api', 'grpc',
       'development', 'programming', 'coding', 'code', 'software', 'tech', 'git',
       'github', 'testing', 'deployment', 'infrastructure', 'architecture',
@@ -216,6 +216,25 @@ export function resolveColor(name) {
   const suggested = suggestColor(name);
   if (suggested !== DEFAULT_COLOR) return { color: suggested, source: 'suggested' };
   return { color: DEFAULT_COLOR, source: 'default' };
+}
+
+/**
+ * Resolve the display color for a tag, always using the single source of truth.
+ * Priority: user preference > smart keyword suggestion > stored tag.color > default
+ *
+ * Use this everywhere tags are rendered — never read tag.color directly.
+ */
+export function getTagDisplayColor(tag) {
+  if (!tag?.name) return DEFAULT_COLOR;
+  // 1. User's manually saved preference
+  const pref = getTagPreference(tag.name);
+  if (pref) return pref;
+  // 2. Smart keyword suggestion
+  const suggested = suggestColor(tag.name);
+  if (suggested !== DEFAULT_COLOR) return suggested;
+  // 3. Color stored on the tag object (backwards compat with persisted tasks)
+  if (tag.color) return tag.color;
+  return DEFAULT_COLOR;
 }
 
 // ── Tag validation ─────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
+import { getTagDisplayColor } from '../../utils/tagUtils';
 import './TaskDetails.css';
 
 const fmtMin = (m) => {
@@ -295,7 +296,7 @@ const TaskDetails = () => {
             <span className="td-field-label">Tags</span>
             <div className="td-tags">
               {task.tags.map((tag) => {
-                const c = tag.color || '#6b38d4';
+                const c = getTagDisplayColor(tag);
                 return (
                   <span
                     key={tag.name}

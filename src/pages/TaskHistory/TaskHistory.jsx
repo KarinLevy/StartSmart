@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
+import { getTagDisplayColor } from '../../utils/tagUtils';
 import './TaskHistory.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -126,7 +127,7 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
                 <span
                   key={tag.name}
                   className="tag-chip"
-                  style={{ background: tag.color + '1e', color: tag.color, borderColor: tag.color + '40' }}
+                  style={(() => { const c = getTagDisplayColor(tag); return { background: c + '1e', color: c, borderColor: c + '40' }; })()}
                 >
                   {tag.name}
                 </span>
@@ -269,7 +270,7 @@ const TaskHistoryCard = ({ task, onView }) => {
             <span
               key={tag.name}
               className="tag-chip"
-              style={{ background: tag.color + '1e', color: tag.color, borderColor: tag.color + '40' }}
+              style={(() => { const c = getTagDisplayColor(tag); return { background: c + '1e', color: c, borderColor: c + '40' }; })()}
             >
               {tag.name}
             </span>

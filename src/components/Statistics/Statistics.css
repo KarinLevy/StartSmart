@@ -561,7 +561,99 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   background-color: rgba(255, 255, 255, 0.4);
+}
+
+.analytics-table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.analytics-table-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Sort control in Task Breakdown */
+.stat-sort-label {
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+}
+
+.stat-sort-select {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-full);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  font-size: var(--font-size-label-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+
+.stat-sort-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Custom date range picker */
+.stat-custom-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  padding: 0.45rem 0.75rem;
+  background: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-md);
+  margin-top: 0.5rem;
+  width: fit-content;
+}
+
+.stat-date-label {
+  font-size: var(--font-size-label-xs, 0.7rem);
+  font-weight: 700;
+  color: var(--color-outline);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-date-input {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-md);
+  background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+  font-size: var(--font-size-label-sm);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.stat-date-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.12);
+}
+
+.stat-date-sep {
+  color: var(--color-outline);
+  font-size: 0.8rem;
+}
+
+/* Stat insights link */
+.stat-insights-link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .analytics-table-title {
