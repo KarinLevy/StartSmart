@@ -1,6 +1,10 @@
 # StartSmart
 
-A personal productivity application that helps people plan tasks, track focus time, and understand where their time really goes.
+StartSmart is a personal productivity application that goes beyond simple task management. It combines planning, scheduling, focus sessions, time tracking, and estimation analytics into one cohesive tool — so users can not only complete their work but gradually become better at planning it.
+
+Most productivity apps help you organize what needs to be done. StartSmart also helps you understand how long things actually take, where time is lost, and how to plan more accurately next time. Every completed focus session feeds into a personal analytics layer that surfaces patterns, highlights gaps, and gives actionable recommendations.
+
+The result is a tool that grows with you: the more you use it, the more useful the data becomes, and the more accurately you can plan your future work.
 
 **Live Demo:** [https://start-smart-app.vercel.app](https://start-smart-app.vercel.app)
 **GitHub:** [https://github.com/KarinLevy/StartSmart](https://github.com/KarinLevy/StartSmart)
@@ -9,19 +13,21 @@ A personal productivity application that helps people plan tasks, track focus ti
 
 ## The Problem
 
-Most productivity tools help you organize tasks. They do not help you understand why tasks take longer than expected, or how to improve your planning over time.
+Most people don't fail at productivity because they forget their tasks. They fail because they consistently underestimate how long tasks take. A task you estimate at 30 minutes takes 90. A project you plan for a week runs two. Over time, this gap between intention and reality creates stress, missed deadlines, and a growing distrust of your own planning.
 
-People — students, employees, freelancers, managers — consistently underestimate how long work takes. Tasks slip, deadlines approach unexpectedly, and no existing tool provides honest feedback on the gap between intention and reality.
+Existing productivity tools — task managers, calendars, time trackers — solve pieces of this problem. But none of them close the loop. They don't show you how your estimates compared to reality, they don't help you spot patterns in your planning, and they don't get smarter the more you use them.
+
+StartSmart was built specifically to solve this. It treats every completed task as useful data. It measures the gap between estimated and actual time, tracks it over time, and turns it into insights that make future planning more accurate.
 
 ---
 
 ## Target Audience
 
-- Students managing coursework and deadlines
-- Employees juggling multiple projects
-- Freelancers tracking billable time
-- Managers coordinating team work
-- Anyone who struggles with procrastination, planning, or staying focused
+- **Students** — organize coursework, track study sessions, and prepare for exams with realistic time estimates
+- **Employees** — manage daily workloads and build a clear picture of where working hours actually go
+- **Freelancers** — improve project estimation accuracy and reduce the risk of underquoting time on client work
+- **Managers** — gain better visibility into planning accuracy and understand where team time is being spent
+- **Anyone who struggles with procrastination** — use structured focus sessions to build momentum and improve time awareness session by session
 
 ---
 
@@ -35,13 +41,15 @@ People — students, employees, freelancers, managers — consistently underesti
 | Toggl | Time tracking | StartSmart ties tracking directly to tasks with planning estimates |
 | Excel / paper planner | Manual planning | StartSmart automates tracking, analytics, and personalised insights |
 
+Each of these tools solves part of the problem. Todoist organizes tasks. Toggl tracks time. Google Calendar schedules work. But none of them connect all three — plan, execute, and reflect — in a single loop. StartSmart is designed around that loop: plan a task with an estimate, execute it in a focus session, and immediately see how accurate the estimate was. Over time, this cycle builds better planning habits that no single-purpose tool can create.
+
 ---
 
 ## What Makes StartSmart Different
 
-StartSmart is built around the concept of the **Gap** — the difference between how long you estimate a task will take and how long it actually takes.
+The core idea is simple: every completed task is more than a checkbox. It is a data point. StartSmart records the gap between how long you planned to work and how long you actually worked, then aggregates those gaps into statistics, trends, and personalised recommendations.
 
-Every focus session captures this gap. Over time, patterns emerge. StartSmart surfaces those patterns through statistics, insights, and recommendations so that planning gradually improves — session by session, week by week.
+The goal is not just to manage your task list — it is to help you become a better planner. Over weeks and months, you start to see whether you consistently overestimate certain types of work, whether your accuracy improves on tasks you have done before, and what your most productive hours look like. That continuous feedback loop is what makes StartSmart different from any task manager or timer on its own.
 
 ---
 
@@ -84,6 +92,8 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 
 ## Entity Relationship Diagram
 
+The database was designed in Supabase and includes normalized tables with defined relationships, primary keys, foreign keys, and Row Level Security policies that enforce per-user data isolation at the database level.
+
 ![ERD](docs/ERD.png)
 
 **Tables:** `profiles`, `tasks`, `task_tags`, `tags`, `time_logs`, `break_logs`, `notifications`, `user_settings`, `subscriptions`
@@ -93,6 +103,8 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 ---
 
 ## Technologies
+
+React was chosen for its component model and ecosystem, which made it practical to build a complex multi-page application with shared state. Supabase was selected because it provides a managed PostgreSQL database, authentication, and file storage in one platform — removing the need to build and maintain a separate backend. Vercel was chosen for deployment because it integrates directly with GitHub and handles builds, CDN, and HTTPS automatically.
 
 ### Frontend
 | Technology | Version | Purpose |
@@ -109,8 +121,8 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 |---|---|
 | Supabase | Backend as a Service — database, auth, storage |
 | PostgreSQL | Relational database (managed by Supabase) |
-| Supabase Auth | User registration, login, password reset, JWT sessions |
-| Supabase Storage | Avatar image uploads |
+| Supabase Auth | User registration, login, password reset, JWT sessions, and full session management |
+| Supabase Storage | Avatar image uploads and delivery |
 | Row Level Security (RLS) | Per-user data isolation at the database level |
 
 ### Deployment
@@ -126,8 +138,8 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 | Service | Type | Purpose |
 |---|---|---|
 | Supabase | Backend as a Service | PostgreSQL database, authentication, file storage |
-| Supabase Auth | Authentication service | User registration, login, JWT sessions, password reset emails |
-| Supabase Storage | Object storage | Avatar image uploads and delivery |
+| Supabase Auth | Authentication service | Handles user registration, login, password recovery via email link, and JWT session management — no credentials are stored in the frontend |
+| Supabase Storage | Object storage | Stores and serves user avatar images uploaded from the Profile page |
 | Vercel | Deployment platform | Hosting, CDN, automatic deploys from GitHub |
 | Material Symbols | CDN icon font | UI icons throughout the application |
 
@@ -249,16 +261,42 @@ The language switcher is available on every page via the Navbar. Locale is persi
 
 ## Future Roadmap
 
-| Feature | Status |
+The features below are planned for future development and are **not yet implemented**.
+
+### AI Features
+| Feature | Description |
 |---|---|
-| Google Sign-In (OAuth) | Planned |
-| Google Calendar Sync | Planned |
-| AI Productivity Assistant | Planned |
-| AI Weekly Reports | Planned |
-| Premium subscription (Stripe) | Planned — UI exists, payment not wired |
-| Motivation & Rewards System | Planned |
-| Gift Card / Partner Store | Planned |
-| Mobile app (React Native) | Planned |
+| AI Productivity Assistant | Conversational assistant to help plan tasks and manage workload |
+| AI Planning Assistant | Suggests realistic time estimates based on past performance |
+| AI Recommendations | Personalised advice based on usage patterns and gap history |
+| AI Weekly Summaries | Automated weekly report summarising productivity and trends |
+
+### Google Integration
+| Feature | Description |
+|---|---|
+| Google Sign-In | OAuth login with Google account |
+| Google Calendar Sync | Two-way sync between StartSmart tasks and Google Calendar |
+
+### Motivation & Rewards
+| Feature | Description |
+|---|---|
+| Motivation System | Streaks, badges, and progress milestones |
+| Rewards | Points earned for completing tasks and sessions |
+| Partner Stores | Redeem points at partner retailers |
+| Gift Cards | Digital gift cards as productivity rewards |
+
+### Premium Subscription
+| Feature | Description |
+|---|---|
+| Secure Online Payments | Stripe integration for subscription billing |
+| Subscription Activation | Unlock premium features on payment |
+| Premium Analytics | Advanced statistics, custom date ranges, export |
+
+### Localization
+| Feature | Description |
+|---|---|
+| Translation Refinement | Complete review and improvement of all 6 language files |
+| Additional Languages | Support for Spanish, Italian, Portuguese, and others |
 
 ---
 
@@ -266,4 +304,8 @@ The language switcher is available on every page via the Navbar. Locale is persi
 
 **Karin Levy** — Business Administration, Information Systems specialisation, Ono Academic College.
 
-StartSmart was developed as a university Web Development course project and grew into a full production application. The motivation was personal: a real struggle with procrastination and time estimation that no existing tool addressed the way this one does.
+StartSmart grew out of a personal problem. For years I struggled with procrastination and with consistently underestimating how long things take. I would plan my day optimistically, run out of time by early afternoon, and feel like I had achieved nothing — even on days when I had actually worked hard.
+
+I looked for a tool that would help me understand this pattern and improve over time, not just one that would show me a list of tasks. I couldn't find one, so I built it.
+
+The goal of StartSmart is not to turn users into productivity machines. It is to give people honest, useful feedback about how they actually spend their time — so they can gradually plan more realistically, feel less overwhelmed, and build habits that stick.
