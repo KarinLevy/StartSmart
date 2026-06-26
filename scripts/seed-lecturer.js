@@ -15,14 +15,16 @@
  *        npm run seed:lecturer
  *   This creates demo@startsmart.app in Supabase Auth and seeds all data.
  *
- * PATH B (manual user creation):
- *   1. In Supabase dashboard → Authentication → Users → Add user:
- *        Email:    demo@startsmart.app
- *        Password: Demo2026!
- *        ✓ Auto Confirm User
- *   2. Copy the generated UUID from the user list.
- *   3. Run:
- *        DEMO_USER_ID=<paste-uuid-here> npm run seed:lecturer
+ * PATH B (user already exists — provide UUID):
+ *   The demo user demo@startsmart.app already exists with:
+ *     UUID:     0f914d13-fbf9-4449-95b8-96b0c46eb37b
+ *     Password: Demo2026!  (set in Supabase Auth dashboard if needed)
+ *   Run:
+ *     DEMO_USER_ID=0f914d13-fbf9-4449-95b8-96b0c46eb37b SUPABASE_SERVICE_ROLE_KEY=<key> npm run seed:lecturer
+ *
+ *   Note: PATH B still requires the service_role key so the script can write
+ *   through RLS on behalf of the demo user. Without it, the script cannot
+ *   write to profiles, tasks, tags etc. as a different user.
  *
  * Both paths produce identical results. Re-running always wipes and recreates
  * the demo data so the account stays clean.
