@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
+import { useAuth } from '../../context/AuthContext';
 import Avatar from '../../components/Avatar/Avatar';
 import { useLocale } from '../../i18n/LocaleContext';
 import {
@@ -344,6 +345,7 @@ const ACHIEVEMENTS_CONFIG = [
 
 const Profile = () => {
   const navigate  = useNavigate();
+  const { signOut } = useAuth();
   const { tasks } = useTasks();
   const { profile, setProfile, avatarSrc, setAvatarSrc } = useProfile();
   const { t } = useLocale();
@@ -409,9 +411,8 @@ const Profile = () => {
   };
 
   // ── Delete account ────────────────────────────────────────────────────────
-  const handleAccountDeleted = () => {
-    // Backend integration point: clear auth token from AuthContext
-    // e.g.: logout(); navigate('/');
+  const handleAccountDeleted = async () => {
+    await signOut();
     navigate('/');
   };
 

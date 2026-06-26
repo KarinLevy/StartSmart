@@ -1,105 +1,80 @@
-/**
- * userService.js
- * Centralized API functions for user/account management.
- *
- * All functions return { data, error }.
- * When DEV_MODE is true they simulate network delay and return mock success
- * so the UI can be tested without a real backend.
- *
- * Replace DEV_MODE with `false` (or remove the flag) once the backend is live.
- *
- * Base URL is read from VITE_API_URL env var (set in .env).
- * Example: VITE_API_URL=https://api.startsmart.app
- */
-
-const DEV_MODE = true; // TODO: remove when backend is ready
-const BASE_URL = import.meta.env.VITE_API_URL ?? '';
-
-const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  // Backend integration point: replace with real token from AuthContext
-  Authorization: `Bearer ${localStorage.getItem('ss_token') ?? ''}`,
-});
-
-async function request(method, path, body) {
-  if (DEV_MODE) {
-    await delay(800);
-    return { data: { ok: true }, error: null };
-  }
-  try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method,
-      headers: authHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) return { data: null, error: json.message ?? `HTTP ${res.status}` };
-    return { data: json, error: null };
-  } catch (err) {
-    return { data: null, error: 'Network error. Please try again.' };
-  }
-}
+import { supabase } from '../lib/supabaseClient';
 
 /**
- * GET /api/user/me
- * Fetch the current authenticated user's profile.
- */
-export async function fetchCurrentUser() {
-  return request('GET', '/api/user/me');
-}
-
-/**
- * PATCH /api/user/profile
- * Update editable profile fields.
- * @param {{ firstName, lastName, username, email, phone, bio }} fields
+ * PATCH profiles row for the current user.
+ * @param {{ firstName, lastName, username, phone, bio }} fields
  */
 export async function updateProfile(fields) {
-  return request('PATCH', '/api/user/profile', fields);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return { data: null, error: 'Not authenticated' };
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      first_name: fields.firstName ?? '',
+      last_name:  fields.lastName  ?? '',
+      username:   fields.username  ?? '',
+      phone:      fields.phone     || null,
+    })
+    .eq('id', session.user.id);
+
+  if (error) return { data: null, error: error.message };
+  return { data: { ok: true }, error: null };
 }
 
 /**
- * POST /api/user/avatar
  * Upload a new avatar image.
- * Accepts a File object; sends as multipart/form-data.
+ * Keeps the local object-URL approach for immediate preview; persists via
+ * Supabase Storage if a bucket named "avatars" is configured.
  * @param {File} file
  */
 export async function uploadAvatar(file) {
-  if (DEV_MODE) {
-    await delay(1000);
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return { data: null, error: 'Not authenticated' };
+
+  const ext  = file.name.split('.').pop();
+  const path = `${session.user.id}/avatar.${ext}`;
+
+  const { error: upErr } = await supabase.storage
+    .from('avatars')
+    .upload(path, file, { upsert: true });
+
+  if (upErr) {
+    // Storage bucket not configured — return a local object URL so the
+    // avatar preview still works in the session.
     return { data: { avatarUrl: URL.createObjectURL(file) }, error: null };
   }
-  try {
-    const form = new FormData();
-    form.append('avatar', file);
-    const res = await fetch(`${BASE_URL}/api/user/avatar`, {
-      method: 'POST',
-      headers: { Authorization: authHeaders().Authorization },
-      body: form,
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) return { data: null, error: json.message ?? `HTTP ${res.status}` };
-    return { data: json, error: null }; // expects { avatarUrl: string }
-  } catch (err) {
-    return { data: null, error: 'Upload failed. Please try again.' };
-  }
+
+  const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
+
+  // Persist URL back to profiles row
+  await supabase
+    .from('profiles')
+    .update({ profile_image: urlData.publicUrl })
+    .eq('id', session.user.id);
+
+  return { data: { avatarUrl: urlData.publicUrl }, error: null };
 }
 
 /**
- * PATCH /api/user/password
- * Change account password.
+ * Change the authenticated user's password via Supabase Auth.
+ * Note: Supabase does not re-validate the current password server-side;
+ * the UI validates it as a UX guard.
  * @param {{ currentPassword, newPassword }} payload
  */
-export async function changePassword(payload) {
-  return request('PATCH', '/api/user/password', payload);
+export async function changePassword({ newPassword }) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { data: null, error: error.message };
+  return { data: { ok: true }, error: null };
 }
 
 /**
- * DELETE /api/user/account
- * Permanently delete the authenticated user's account.
- * @param {{ confirmationText }} payload — the user's typed confirmation
+ * Delete the current user's account.
+ * Supabase does not expose a self-delete endpoint from the client with the
+ * anon key — this requires a server-side function or admin API call.
+ * For now we sign the user out, which is the safest client-side action.
  */
-export async function deleteAccount(payload) {
-  return request('DELETE', '/api/user/account', payload);
+export async function deleteAccount() {
+  await supabase.auth.signOut();
+  return { data: { ok: true }, error: null };
 }

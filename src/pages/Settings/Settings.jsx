@@ -88,7 +88,7 @@ const DEFAULT_SETTINGS = {
 
 const Settings = () => {
   const { theme } = useTheme();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const { tasks } = useTasks();
   const { profile } = useProfile();
   const { locale, setLocale, t, LANGUAGES } = useLocale();
@@ -151,8 +151,8 @@ const Settings = () => {
   };
 
   // ── Logout ───────────────────────────────────────────────────────────────
-  const handleLogout = () => {
-    logout(); // clears ss_auth_token + ss_auth_user from localStorage
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 

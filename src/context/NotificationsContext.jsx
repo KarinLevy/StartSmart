@@ -1,25 +1,57 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import {
+  listNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from '../services/notificationsService';
 
 const NotificationsContext = createContext(null);
 
-const SEED = [
-  { id: '1', icon: 'task_alt',     title: 'Task completed',           body: '"Database Migration Check" finished 2 min early. Nice pacing!',  time: '2m ago',    read: false },
-  { id: '2', icon: 'query_stats',  title: 'Gap insight',              body: 'Your last 3 reports averaged +8 min over estimate. Consider adding a buffer.',  time: '1h ago',    read: false },
-  { id: '3', icon: 'timer',        title: 'Focus session started',    body: '"Refine Product Architecture" timer is running.',                time: '2h ago',    read: true  },
-  { id: '4', icon: 'event',        title: 'Upcoming task',            body: '"Client Feedback Loop" is scheduled in 30 minutes.',            time: '4h ago',    read: true  },
-  { id: '5', icon: 'emoji_events', title: 'Weekly streak',            body: "You've focused for 5 consecutive days. Keep it up!",            time: 'Yesterday', read: true  },
-];
-
 export function NotificationsProvider({ children }) {
-  const [notifications, setNotifications] = useState(SEED);
+  const [notifications, setNotifications] = useState([]);
+  const [userId, setUserId] = useState(null);
+
+  const load = useCallback(async (uid) => {
+    try {
+      const items = await listNotifications(uid);
+      setNotifications(items);
+    } catch {
+      setNotifications([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) { setUserId(session.user.id); load(session.user.id); }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (session?.user) {
+        setUserId(session.user.id);
+        load(session.user.id);
+      } else {
+        setUserId(null);
+        setNotifications([]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [load]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markRead = (id) =>
+  const markRead = async (id) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    try { await markNotificationRead(id); } catch {}
+  };
 
-  const markAllRead = () =>
+  const markAllRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    if (userId) {
+      try { await markAllNotificationsRead(userId); } catch {}
+    }
+  };
 
   return (
     <NotificationsContext.Provider value={{ notifications, unreadCount, markRead, markAllRead }}>
