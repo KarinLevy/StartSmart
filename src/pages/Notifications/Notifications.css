@@ -80,7 +80,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  overflow: hidden;
 }
 .notif-full-row {
   display: flex;
@@ -135,38 +134,9 @@
 }
 
 /* ── RTL overrides ─────────────────────────────────────────────────────────── */
-[dir="rtl"] .notif-page-header {
-  flex-direction: row-reverse;
-  align-items: flex-start;
-}
-
-[dir="rtl"] .notif-back-link {
-  flex-direction: row-reverse;
-}
+/* dir="rtl" on <html> already reverses flex row direction automatically.     */
+/* Only override what RTL inheritance cannot handle on its own.               */
 
 [dir="rtl"] .notif-back-link .material-symbols-outlined {
   transform: scaleX(-1);
-}
-
-[dir="rtl"] .notif-full-btn {
-  flex-direction: row-reverse;
-}
-
-[dir="rtl"] .notif-full-row {
-  flex-direction: row-reverse;
-}
-
-[dir="rtl"] .notif-title,
-[dir="rtl"] .notif-text {
-  text-align: right;
-}
-
-[dir="rtl"] .notif-full-body {
-  align-items: flex-end;
-}
-
-[dir="rtl"] .notif-unread-dot {
-  margin-inline-start: 0;
-  margin-inline-end: 0;
-  flex-shrink: 0;
 }
