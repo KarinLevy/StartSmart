@@ -9,8 +9,10 @@ const DAY_NAMES_FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Fri
 const DAY_NAMES_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// Full 24-hour timeline: 00 – 23, plus a closing 00 (midnight next day) represented as 24
-const DAY_HOURS = Array.from({ length: 25 }, (_, i) => i); // 0 … 24
+// 25 hour marks: 0–23 are full rows, 24 is the closing midnight line
+const DAY_HOURS = Array.from({ length: 25 }, (_, i) => i);
+// Pixel height of one hour on the timeline canvas
+const HOUR_PX = 64;
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
 // Use local date components (not UTC) so midnight = same calendar day in any timezone
@@ -37,9 +39,12 @@ const fmtMin = (m) => {
 // 24-hour label: 0→"00:00", 13→"13:00", 24→"00:00" (closing midnight)
 const fmtHour24 = (h) => `${String(h === 24 ? 0 : h).padStart(2, '0')}:00`;
 
-const getTaskHour = (task) => {
-  if (task.scheduledDate?.includes('T')) return parseInt(task.scheduledDate.slice(11, 13), 10);
-  return null;
+// Returns total minutes from midnight for a timed task, or null if unscheduled
+const getTaskMinutes = (task) => {
+  if (!task.scheduledDate?.includes('T')) return null;
+  const hh = parseInt(task.scheduledDate.slice(11, 13), 10);
+  const mm = parseInt(task.scheduledDate.slice(14, 16), 10);
+  return hh * 60 + mm;
 };
 
 const statusCls = (s) => s === 'done' ? 'sc-done' : s === 'in_progress' ? 'sc-progress' : 'sc-pending';
@@ -125,22 +130,30 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }) => {
 };
 
 // ── DailyView ──────────────────────────────────────────────────────────────────
+// Continuous absolute-positioned canvas: each hour = HOUR_PX pixels.
+// Tasks are positioned at (startMinutes / 60) * HOUR_PX from the top
+// and sized by (durationMinutes / 60) * HOUR_PX.
 const DailyView = ({ viewDate, tasks }) => {
   const todayKey = toKey(new Date());
   const key      = toKey(viewDate);
   const isToday  = key === todayKey;
   const now      = new Date();
-  const nowHour  = isToday ? now.getHours() : -1;
-  const nowMin   = now.getMinutes();
 
   const dayTasks  = tasks.filter((t) => t.scheduledDate?.slice(0, 10) === key);
-  const unslotted = dayTasks.filter((t) => !t.scheduledDate?.includes('T'));
+  const timed     = dayTasks.filter((t) => getTaskMinutes(t) !== null);
+  const unslotted = dayTasks.filter((t) => getTaskMinutes(t) === null);
 
-  const hours = DAY_HOURS; // 0–24 full day
+  // Pixel position of the now-line (null when not viewing today)
+  const nowLinePx = isToday
+    ? ((now.getHours() * 60 + now.getMinutes()) / 60) * HOUR_PX
+    : null;
+
+  // Canvas height covers hours 0–24 (24 full rows + closing line)
+  const canvasHeight = 24 * HOUR_PX;
 
   return (
     <div className="sc-daily">
-      {/* Current time indicator */}
+      {/* Current time ribbon pill */}
       {isToday && (
         <div className="sc-now-ribbon" role="status" aria-label="Current time">
           <span className="sc-now-dot" aria-hidden="true" />
@@ -151,41 +164,59 @@ const DailyView = ({ viewDate, tasks }) => {
         </div>
       )}
 
-      {/* Timeline */}
-      <div className="sc-timeline">
-        {hours.map((h) => {
-          const slotTasks  = dayTasks.filter((t) => getTaskHour(t) === h);
-          const isCurrent  = h === nowHour;
-          const fraction   = isCurrent ? (nowMin / 60) * 100 : 0;
+      {/* Timeline canvas */}
+      <div className="sc-timeline-canvas" style={{ height: `${canvasHeight}px` }}>
 
+        {/* Hour grid rows */}
+        {DAY_HOURS.map((h) => {
+          const isNowHour = isToday && h === now.getHours();
           return (
-            <div key={h} className={`sc-slot${isCurrent ? ' sc-slot-now' : ''}`}>
-              <div className="sc-slot-label">
+            <div
+              key={h}
+              className={`sc-hour-row${isNowHour ? ' sc-hour-row-now' : ''}`}
+              style={{ top: `${h * HOUR_PX}px` }}
+            >
+              <div className="sc-hour-label">
                 <span>{fmtHour24(h)}</span>
-                {isCurrent && <span className="sc-now-badge" aria-label="Current hour">Now</span>}
+                {isNowHour && <span className="sc-now-badge" aria-label="Current hour">Now</span>}
               </div>
-              <div className="sc-slot-track" aria-hidden="true">
-                <div className="sc-slot-line" />
-                {isCurrent && (
-                  <div
-                    className="sc-now-line"
-                    style={{ top: `${fraction}%` }}
-                    aria-hidden="true"
-                  />
-                )}
-              </div>
-              <div className="sc-slot-tasks">
-                {slotTasks.map((t) => (
-                  <Link key={t.id} to={`/task-details/${t.id}`} className={`sc-task ${statusCls(t.status)}`}>
-                    <span className="sc-task-time">{t.scheduledDate.slice(11, 16)}</span>
-                    <span className="sc-task-title">{t.title}</span>
-                    {t.estimatedMinutes && <span className="sc-task-est">{fmtMin(t.estimatedMinutes)}</span>}
-                  </Link>
-                ))}
-              </div>
+              <div className="sc-hour-line" aria-hidden="true" />
             </div>
           );
         })}
+
+        {/* Now line — exact pixel position */}
+        {nowLinePx !== null && (
+          <div
+            className="sc-now-line"
+            style={{ top: `${nowLinePx}px` }}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Task cards — absolutely positioned by start time and duration */}
+        <div className="sc-tasks-layer" aria-label="Scheduled tasks">
+          {timed.map((t) => {
+            const startMin   = getTaskMinutes(t);
+            const durationMin = t.estimatedMinutes || 30; // default 30 min when unset
+            const topPx      = (startMin / 60) * HOUR_PX;
+            const heightPx   = Math.max((durationMin / 60) * HOUR_PX, 24); // min 24px
+            const timeStr    = t.scheduledDate.slice(11, 16);
+
+            return (
+              <Link
+                key={t.id}
+                to={`/task-details/${t.id}`}
+                className={`sc-task sc-task-abs ${statusCls(t.status)}`}
+                style={{ top: `${topPx}px`, height: `${heightPx}px` }}
+              >
+                <span className="sc-task-time">{timeStr}</span>
+                <span className="sc-task-title">{t.title}</span>
+                {t.estimatedMinutes && <span className="sc-task-est">{fmtMin(t.estimatedMinutes)}</span>}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Unscheduled */}

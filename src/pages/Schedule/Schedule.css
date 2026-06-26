@@ -291,37 +291,54 @@
   letter-spacing: 0.02em;
 }
 
-/* Timeline */
-.sc-timeline { display: flex; flex-direction: column; }
-.sc-slot {
-  display: grid;
-  grid-template-columns: 5rem 1.25rem 1fr;
-  min-height: 3.5rem;
+/* ── Timeline canvas — absolute positioning for minute-precise layout ── */
+
+/* Outer canvas: fixed height set via inline style (24 * HOUR_PX px) */
+.sc-timeline-canvas {
+  position: relative;
+  width: 100%;
+  overflow: visible; /* tasks can exceed canvas if needed */
 }
-.sc-slot-label {
+
+/* One row per hour mark — positioned absolutely at h * HOUR_PX */
+.sc-hour-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Height = HOUR_PX — gives each row its click / hover target area */
+  height: 64px;
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  pointer-events: none;
+}
+
+/* Current hour: subtle coral tint on the full row */
+.sc-hour-row-now {
+  background: rgba(var(--sc-now-rgb), 0.04);
+  border-radius: 6px;
+}
+
+.sc-hour-label {
   font-size: var(--font-size-label-xs);
   font-weight: 600;
   color: var(--color-outline);
   text-align: right;
-  padding-top: 0.2rem;
-  padding-right: 0.25rem;
+  padding-right: 0.75rem;
+  padding-top: 0;
   white-space: nowrap;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 0.15rem;
+  /* vertically flush with the grid line */
+  transform: translateY(-0.5em);
 }
-/* Current hour: softer label color + full-row background tint */
-.sc-slot.sc-slot-now {
-  background: rgba(var(--sc-now-rgb), 0.045);
-  border-radius: 6px;
-}
-.sc-slot.sc-slot-now .sc-slot-label {
+.sc-hour-row-now .sc-hour-label {
   color: var(--sc-now-color);
   font-weight: 700;
 }
 
-/* "Now" pill badge — small rounded chip next to the hour label */
+/* "Now" pill badge */
 .sc-now-badge {
   display: inline-flex;
   align-items: center;
@@ -336,64 +353,72 @@
   box-shadow: 0 1px 4px rgba(var(--sc-now-rgb), 0.35);
 }
 
-/* Track = the vertical line + horizontal now-line */
-.sc-slot-track {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.sc-slot-line {
-  width: 1px;
+/* Horizontal hour divider line */
+.sc-hour-line {
+  height: 1px;
   background: var(--color-outline-variant);
-  flex: 1;
-  position: relative;
+  align-self: flex-start;
+  margin-top: 0; /* sits exactly at the top of the row = the hour mark */
+  opacity: 0.6;
 }
-.sc-slot-line::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-outline-variant);
-}
-/* Current slot: coral track line + glow dot */
-.sc-slot.sc-slot-now .sc-slot-line {
-  background: rgba(var(--sc-now-rgb), 0.55);
-}
-.sc-slot.sc-slot-now .sc-slot-line::before {
-  width: 9px;
-  height: 9px;
-  background: var(--sc-now-color);
-  box-shadow: 0 0 0 3px rgba(var(--sc-now-rgb), 0.18), 0 0 8px rgba(var(--sc-now-rgb), 0.25);
+.sc-hour-row-now .sc-hour-line {
+  background: rgba(var(--sc-now-rgb), 0.4);
+  opacity: 1;
 }
 
-/* Horizontal current-time line — soft coral, not an error */
+/* Horizontal current-time line — exact minute position */
 .sc-now-line {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
-  height: 1.5px;
+  left: 5rem;   /* align with content area (after label column) */
+  right: 0;
+  height: 2px;
   background: linear-gradient(
     to right,
-    transparent 0%,
-    rgba(var(--sc-now-rgb), 0.5) 8%,
-    rgba(var(--sc-now-rgb), 0.5) 92%,
-    transparent 100%
+    var(--sc-now-color) 0%,
+    rgba(var(--sc-now-rgb), 0.35) 100%
   );
   border-radius: 1px;
   pointer-events: none;
+  z-index: 2;
+}
+/* Dot at the left edge of the now-line */
+.sc-now-line::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sc-now-color);
+  box-shadow: 0 0 0 3px rgba(var(--sc-now-rgb), 0.2);
 }
 
-.sc-slot-tasks {
-  padding: 0.2rem 0 0.6rem 0.875rem;
+/* Tasks layer — sits above the grid lines */
+.sc-tasks-layer {
+  position: absolute;
+  top: 0;
+  left: 5rem;   /* same left edge as content area */
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* grid layer is non-interactive; tasks re-enable below */
+}
+
+/* Absolutely positioned task card */
+.sc-task-abs {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  min-height: 24px;
+  overflow: hidden;
+  pointer-events: auto;
+  /* flex layout for time + title + est */
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.1rem;
+  padding: 0.25rem 0.5rem;
+  /* keep border-left from .sc-task */
 }
 
 /* Unscheduled section */
@@ -652,5 +677,7 @@
   .sc-month-cell    { min-height: 4rem; padding: 0.25rem; }
   .sc-month-task    { display: none; }
   .sc-month-more    { display: none; }
-  .sc-slot          { grid-template-columns: 4rem 1.1rem 1fr; }
+  .sc-hour-row      { grid-template-columns: 4rem 1fr; }
+  .sc-tasks-layer   { left: 4rem; }
+  .sc-now-line      { left: 4rem; }
 }
