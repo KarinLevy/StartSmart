@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
 import {
@@ -193,12 +193,22 @@ const TaskForm = () => {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleSubmit = (e) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const estimatedMinutes = (parseInt(estHours || 0) * 60) + parseInt(estMins || 0);
     if (!title.trim() || estimatedMinutes <= 0) return;
-    addTask({ title: title.trim(), description, scheduledDate, estimatedMinutes, priorityHigh, tags });
-    navigate('/dashboard');
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      await addTask({ title: title.trim(), description, scheduledDate, estimatedMinutes, priorityHigh, tags });
+      navigate('/dashboard');
+    } catch (err) {
+      setSubmitError(err.message ?? 'Failed to save task. Please try again.');
+      setSubmitting(false);
+    }
   };
 
   const addTag = (nameOverride, colorOverride, skipPref = false) => {
@@ -489,9 +499,18 @@ const TaskForm = () => {
           </button>
         </div>
 
+        {submitError && (
+          <p className="auth-field-error" role="alert" style={{ marginBottom: '0.5rem' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>error</span>
+            {submitError}
+          </p>
+        )}
+
         <div className="form-actions">
-          <button className="action-btn-cancel" type="button" onClick={() => navigate(-1)}>Cancel</button>
-          <button className="action-btn-save" type="submit">Save Task</button>
+          <button className="action-btn-cancel" type="button" onClick={() => navigate(-1)} disabled={submitting}>Cancel</button>
+          <button className="action-btn-save" type="submit" disabled={submitting}>
+            {submitting ? 'Saving…' : 'Save Task'}
+          </button>
         </div>
 
       </form>

@@ -26,7 +26,7 @@ const STATUS_CFG = {
 const DOT_CLS = { in_progress: 'secondary', pending: 'outline', done: 'green' };
 
 const WorkflowTable = () => {
-  const { tasks } = useTasks();
+  const { tasks, loading, error } = useTasks();
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
 
@@ -37,6 +37,14 @@ const WorkflowTable = () => {
   });
 
   const visible = filtered.slice(0, 6);
+
+  if (error) {
+    return (
+      <div className="glass-card workflow-card" style={{ padding: '1.5rem', color: 'var(--color-error)' }}>
+        <span className="material-symbols-outlined">error</span> {error}
+      </div>
+    );
+  }
 
   return (
     <div className="glass-card workflow-card" style={{ overflow: 'hidden' }}>

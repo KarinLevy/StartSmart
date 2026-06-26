@@ -4,10 +4,18 @@ import { useTasks } from '../../context/TasksContext';
 import './TaskCards.css';
 
 const HeroTaskCard = () => {
-  const { tasks } = useTasks();
+  const { tasks, loading } = useTasks();
   const navigate = useNavigate();
 
   const task = tasks.find((t) => t.status === 'in_progress') || tasks.find((t) => t.status === 'pending');
+
+  if (loading) {
+    return (
+      <div className="glass-card hero-card hero-card-empty">
+        <span className="material-symbols-outlined" style={{ fontSize: '2rem', color: 'var(--color-outline)', animation: 'spin 1s linear infinite' }}>progress_activity</span>
+      </div>
+    );
+  }
 
   if (!task) {
     return (

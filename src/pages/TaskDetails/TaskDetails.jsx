@@ -22,7 +22,7 @@ const STATUSES = ['pending', 'in_progress', 'done'];
 
 const TaskDetails = () => {
   const { id } = useParams();
-  const { tasks, updateTask, deleteTask } = useTasks();
+  const { tasks, loading, updateTask, deleteTask } = useTasks();
   const navigate = useNavigate();
   const { t } = useLocale();
 
@@ -36,6 +36,16 @@ const TaskDetails = () => {
   const [editStatus, setEditStatus] = useState('');
   const [editPrio, setEditPrio]     = useState(false);
   const [showDel, setShowDel]       = useState(false);
+
+  if (loading && !task) {
+    return (
+      <PageShell narrow title={t('taskDetails.title')}>
+        <div className="td-not-found">
+          <span className="material-symbols-outlined td-not-found-icon" style={{ animation: 'spin 1s linear infinite' }}>progress_activity</span>
+        </div>
+      </PageShell>
+    );
+  }
 
   if (!task) {
     return (
@@ -60,23 +70,42 @@ const TaskDetails = () => {
     setEditing(true);
   };
 
+  const [saving,  setSaving]  = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [mutErr,   setMutErr]  = useState('');
+
   const cancelEdit = () => setEditing(false);
 
-  const saveEdit = () => {
-    updateTask(id, {
-      title:            editTitle.trim() || task.title,
-      description:      editDesc,
-      estimatedMinutes: parseInt(editEst) || task.estimatedMinutes,
-      scheduledDate:    editDate,
-      status:           editStatus,
-      priorityHigh:     editPrio,
-    });
-    setEditing(false);
+  const saveEdit = async () => {
+    setSaving(true);
+    setMutErr('');
+    try {
+      await updateTask(id, {
+        title:            editTitle.trim() || task.title,
+        description:      editDesc,
+        estimatedMinutes: parseInt(editEst) || task.estimatedMinutes,
+        scheduledDate:    editDate,
+        status:           editStatus,
+        priorityHigh:     editPrio,
+      });
+      setEditing(false);
+    } catch (err) {
+      setMutErr(err.message ?? 'Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const confirmDelete = () => {
-    deleteTask(id);
-    navigate('/dashboard');
+  const confirmDelete = async () => {
+    setDeleting(true);
+    try {
+      await deleteTask(id);
+      navigate('/dashboard');
+    } catch (err) {
+      setMutErr(err.message ?? 'Failed to delete. Please try again.');
+      setDeleting(false);
+      setShowDel(false);
+    }
   };
 
   const scheduledFormatted = task.scheduledDate
@@ -98,27 +127,35 @@ const TaskDetails = () => {
         <div className="td-header-actions">
           {!editing ? (
             <>
-              <button className="btn btn-secondary" onClick={startEdit}>
+              <button className="btn btn-secondary" onClick={startEdit} disabled={deleting}>
                 <span className="material-symbols-outlined" aria-hidden="true">edit</span>
                 {t('taskDetails.edit')}
               </button>
-              <button className="btn btn-danger" onClick={() => setShowDel(true)}>
+              <button className="btn btn-danger" onClick={() => setShowDel(true)} disabled={deleting}>
                 <span className="material-symbols-outlined" aria-hidden="true">delete</span>
                 {t('taskDetails.delete')}
               </button>
             </>
           ) : (
             <>
-              <button className="btn btn-secondary" onClick={cancelEdit}>{t('common.cancel')}</button>
-              <button className="btn btn-primary" onClick={saveEdit}>
+              <button className="btn btn-secondary" onClick={cancelEdit} disabled={saving}>{t('common.cancel')}</button>
+              <button className="btn btn-primary" onClick={saveEdit} disabled={saving}>
                 <span className="material-symbols-outlined" aria-hidden="true">save</span>
-                {t('taskDetails.save')}
+                {saving ? '…' : t('taskDetails.save')}
               </button>
             </>
           )}
         </div>
       }
     >
+
+      {/* Mutation error banner */}
+      {mutErr && (
+        <p className="auth-field-error" role="alert" style={{ marginBottom: '1rem' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>error</span>
+          {mutErr}
+        </p>
+      )}
 
       {/* Delete confirmation */}
       {showDel && (
@@ -128,8 +165,10 @@ const TaskDetails = () => {
             <h3 className="td-confirm-title">{t('taskDetails.deleteTitle')}</h3>
             <p className="td-confirm-text">{t('taskDetails.deleteMsg')}</p>
             <div className="td-confirm-actions">
-              <button className="btn btn-secondary" onClick={() => setShowDel(false)}>{t('common.cancel')}</button>
-              <button className="btn btn-danger" onClick={confirmDelete}>{t('taskDetails.delete')}</button>
+              <button className="btn btn-secondary" onClick={() => setShowDel(false)} disabled={deleting}>{t('common.cancel')}</button>
+              <button className="btn btn-danger" onClick={confirmDelete} disabled={deleting}>
+                {deleting ? '…' : t('taskDetails.delete')}
+              </button>
             </div>
           </div>
         </div>

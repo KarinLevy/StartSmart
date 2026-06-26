@@ -7,10 +7,21 @@ import WorkflowTable from '../../components/TaskCards/WorkflowTable';
 import './Dashboard.css';
 import Footer from '../../components/Footer/Footer';
 import { useLocale } from '../../i18n/LocaleContext';
+import { useAuth } from '../../context/AuthContext';
+import { useProfile } from '../../context/ProfileContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { t, locale } = useLocale();
+  const { user } = useAuth();
+  const { profile } = useProfile();
+
+  // Display name: profile first name → user metadata → email prefix
+  const firstName =
+    profile?.firstName ||
+    user?.user_metadata?.first_name ||
+    user?.email?.split('@')[0] ||
+    '';
 
   const greet = () => {
     const h = new Date().getHours();
@@ -30,7 +41,7 @@ const Dashboard = () => {
 
           <div className="dashboard-header">
             <div>
-              <h1 className="dashboard-greeting">{greet()}, Maya</h1>
+              <h1 className="dashboard-greeting">{greet()}{firstName ? `, ${firstName}` : ''}</h1>
               <div className="dashboard-date">
                 <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>calendar_today</span>
                 <span>{today}</span>

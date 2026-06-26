@@ -1,95 +1,68 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
+import * as tasksService from '../services/tasksService';
 
 const TasksContext = createContext(null);
 
-const SEED_TASKS = [
-  {
-    id: '1',
-    title: 'Refine Product Architecture',
-    description: 'Finalize the technical documentation for the SmartScale module before the stakeholder sync.',
-    estimatedMinutes: 45,
-    scheduledDate: new Date().toISOString().slice(0, 10) + 'T09:00',
-    status: 'in_progress',
-    priorityHigh: true,
-    tags: [{ name: 'Work', color: '#2563eb' }, { name: 'Urgent', color: '#b91c1c' }],
-    actualMinutes: null,
-    gap: null,
-  },
-  {
-    id: '2',
-    title: 'Client Feedback Loop',
-    description: 'Review client notes and prepare action items for the product team.',
-    estimatedMinutes: 45,
-    scheduledDate: new Date().toISOString().slice(0, 10) + 'T10:30',
-    status: 'pending',
-    priorityHigh: false,
-    tags: [{ name: 'Work', color: '#2563eb' }],
-    actualMinutes: null,
-    gap: null,
-  },
-  {
-    id: '3',
-    title: 'Database Migration Check',
-    description: 'Verify that the latest migration ran cleanly across all environments.',
-    estimatedMinutes: 30,
-    scheduledDate: new Date(Date.now() - 86400000).toISOString().slice(0, 10) + 'T11:00',
-    status: 'done',
-    priorityHigh: false,
-    tags: [{ name: 'Dev', color: '#0e7490' }],
-    actualMinutes: 28,
-    gap: -2,
-  },
-  {
-    id: '4',
-    title: 'Write Sprint Summary',
-    description: 'Summarize completed tickets, blockers, and velocity for the sprint retro.',
-    estimatedMinutes: 60,
-    scheduledDate: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10) + 'T14:00',
-    status: 'done',
-    priorityHigh: false,
-    tags: [{ name: 'Work', color: '#2563eb' }],
-    actualMinutes: 78,
-    gap: 18,
-  },
-];
-
-let nextId = 5;
-
 export function TasksProvider({ children }) {
-  const [tasks, setTasks] = useState(SEED_TASKS);
+  const { user } = useAuth();
+  const [tasks,   setTasks]   = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error,   setError]   = useState(null);
 
-  function addTask(taskData) {
-    const task = {
-      id: String(nextId++),
-      status: 'pending',
-      actualMinutes: null,
-      gap: null,
-      ...taskData,
-    };
+  // Load tasks whenever the logged-in user changes
+  const refresh = useCallback(async () => {
+    if (!user) { setTasks([]); return; }
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await tasksService.listTasks();
+      setTasks(data);
+    } catch (err) {
+      setError(err.message ?? 'Failed to load tasks.');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  // ── Mutations ──────────────────────────────────────────────────────────────
+
+  const addTask = useCallback(async (taskData) => {
+    if (!user) throw new Error('Not authenticated');
+    const task = await tasksService.createTask(user.id, taskData);
     setTasks((prev) => [task, ...prev]);
     return task.id;
-  }
+  }, [user]);
 
-  function updateTask(id, updates) {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
-  }
+  const updateTask = useCallback(async (id, updates) => {
+    if (!user) throw new Error('Not authenticated');
+    const updated = await tasksService.updateTask(id, user.id, updates);
+    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+  }, [user]);
 
-  function deleteTask(id) {
+  const deleteTask = useCallback(async (id) => {
+    if (!user) throw new Error('Not authenticated');
+    // Optimistic remove
     setTasks((prev) => prev.filter((t) => t.id !== id));
-  }
+    await tasksService.deleteTask(id);
+  }, [user]);
 
-  function finishFocus(id, actualMinutes) {
+  /** Called by FocusMode when a session finishes — B3 will also write time_logs */
+  const finishFocus = useCallback(async (id, actualMinutes) => {
+    if (!user) throw new Error('Not authenticated');
+    const estimatedMinutes = tasks.find((t) => t.id === id)?.estimatedMinutes ?? 0;
+    const gap = actualMinutes - estimatedMinutes;
+    // Optimistic update
     setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id !== id) return t;
-        const gap = actualMinutes - t.estimatedMinutes;
-        return { ...t, status: 'done', actualMinutes, gap };
-      })
+      prev.map((t) => t.id === id ? { ...t, status: 'done', actualMinutes, gap } : t)
     );
-  }
+    await tasksService.updateTask(id, user.id, { status: 'done' });
+  }, [user, tasks]);
 
   return (
-    <TasksContext.Provider value={{ tasks, addTask, updateTask, deleteTask, finishFocus }}>
+    <TasksContext.Provider value={{ tasks, loading, error, addTask, updateTask, deleteTask, finishFocus, refresh }}>
       {children}
     </TasksContext.Provider>
   );
