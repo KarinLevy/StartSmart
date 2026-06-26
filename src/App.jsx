@@ -22,6 +22,7 @@ import Terms from './pages/FooterPages/Terms';
 import About from './pages/FooterPages/About';
 import FAQ from './pages/FooterPages/FAQ';
 import Contact from './pages/FooterPages/Contact';
+import Insights from './pages/Insights/Insights';
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/insights" element={<Insights />} />
       </Routes>
     </Router>
     </TasksProvider>
