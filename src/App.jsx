@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { TasksProvider } from './context/TasksContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationsProvider } from './context/NotificationsContext';
@@ -25,9 +26,16 @@ import Contact from './pages/FooterPages/Contact';
 import Insights from './pages/Insights/Insights';
 import Premium from './pages/Premium/Premium';
 
+/* Redirects unauthenticated users to /login */
+function ProtectedRoute({ children }) {
+  const { token } = useAuth();
+  return token ? children : <Navigate to="/login" replace />;
+}
+
 function App() {
   return (
     <ThemeProvider>
+    <AuthProvider>
     <NotificationsProvider>
     <TasksProvider>
     <Router>
@@ -38,30 +46,31 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* App */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-task" element={<CreateTask />} />
-        <Route path="/task-details/:id" element={<TaskDetails />} />
-        <Route path="/focus-mode/:id" element={<FocusMode />} />
-        <Route path="/schedule" element={<Schedule />} />
-        <Route path="/task-history" element={<TaskHistory />} />
-        <Route path="/statistics" element={<Statistics />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/notifications" element={<Notifications />} />
-
-        {/* Footer pages */}
+        {/* Footer pages (public) */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/about" element={<About />} />
         <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/insights" element={<Insights />} />
         <Route path="/premium" element={<Premium />} />
+
+        {/* Protected app routes */}
+        <Route path="/dashboard"          element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/create-task"        element={<ProtectedRoute><CreateTask /></ProtectedRoute>} />
+        <Route path="/task-details/:id"   element={<ProtectedRoute><TaskDetails /></ProtectedRoute>} />
+        <Route path="/focus-mode/:id"     element={<ProtectedRoute><FocusMode /></ProtectedRoute>} />
+        <Route path="/schedule"           element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
+        <Route path="/task-history"       element={<ProtectedRoute><TaskHistory /></ProtectedRoute>} />
+        <Route path="/statistics"         element={<ProtectedRoute><Statistics /></ProtectedRoute>} />
+        <Route path="/profile"            element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/settings"           element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/notifications"      element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/insights"           element={<ProtectedRoute><Insights /></ProtectedRoute>} />
       </Routes>
     </Router>
     </TasksProvider>
     </NotificationsProvider>
+    </AuthProvider>
     </ThemeProvider>
   );
 }

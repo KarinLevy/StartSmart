@@ -1,6 +1,30 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import '../Auth/Auth.css';
+
+/*
+ * TODO (Backend): Implement POST /api/auth/register
+ *
+ * Request body:
+ *   { "firstName", "lastName", "username", "email", "password", "phone" (optional) }
+ *
+ * Success response (201):
+ *   {
+ *     "token": "<jwt_or_session_token>",
+ *     "user": { "id": "...", "name": "...", "email": "..." }
+ *   }
+ *
+ * Error responses:
+ *   409: { "message": "An account with this email already exists." }
+ *   409: { "message": "This username is already taken." }
+ *   422: { "message": "Validation error description" }
+ *
+ * Set VITE_API_BASE_URL in .env to point to the backend.
+ * Until this endpoint exists every registration attempt will fail with a network error.
+ */
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
 
 /* Generate a consistent colour from a string */
 const AVATAR_COLORS = [
@@ -20,8 +44,9 @@ const PHONE_RE = /^[\d\s\-+().]{7,15}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Register = () => {
-  const navigate = useNavigate();
-  const fileRef = useRef(null);
+  const navigate  = useNavigate();
+  const { login } = useAuth();
+  const fileRef   = useRef(null);
 
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -33,9 +58,10 @@ const Register = () => {
   const [avatarSrc, setAvatarSrc] = useState(null);
   const [uploadState, setUploadState] = useState('idle');
 
-  const [errors,  setErrors]  = useState({});
-  const [touched, setTouched] = useState({});
+  const [errors,   setErrors]   = useState({});
+  const [touched,  setTouched]  = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   /* Derived initials / avatar */
   const initials = getInitials(firstName, lastName);
@@ -86,7 +112,7 @@ const Register = () => {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const allTouched = { firstName: true, lastName: true, username: true, email: true, phone: true, password: true };
     setTouched(allTouched);
@@ -95,8 +121,32 @@ const Register = () => {
     if (Object.keys(errs).length > 0) return;
 
     setSubmitting(true);
-    // In-memory app — navigate to dashboard on success
-    setTimeout(() => { navigate('/dashboard'); }, 400);
+    setServerError('');
+
+    try {
+      const res  = await fetch(`${API_BASE}/api/auth/register`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ firstName, lastName, username, email, password, phone }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.token && data.user) {
+        login(data.token, data.user);
+        navigate('/dashboard', { replace: true });
+      } else {
+        setServerError(
+          data.message ||
+          (res.status === 409
+            ? 'An account with this email or username already exists.'
+            : 'Registration failed. Please try again.')
+        );
+        setSubmitting(false);
+      }
+    } catch {
+      setServerError('Unable to reach the server. Check your connection and try again.');
+      setSubmitting(false);
+    }
   };
 
   const FieldError = ({ field }) =>
@@ -321,8 +371,20 @@ const Register = () => {
             )}
           </div>
 
+          {serverError && (
+            <p className="auth-field-error" role="alert">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">error</span>
+              {serverError}
+            </p>
+          )}
+
           <button type="submit" className="auth-submit" disabled={submitting} aria-busy={submitting}>
-            {submitting ? 'Creating account…' : 'Create account'}
+            {submitting ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px', animation: 'spin 1s linear infinite' }} aria-hidden="true">progress_activity</span>
+                Creating account…
+              </span>
+            ) : 'Create account'}
           </button>
         </form>
 
