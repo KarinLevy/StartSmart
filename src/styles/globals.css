@@ -160,3 +160,36 @@ html, body {
 }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Global polish ── */
+
+/* Accessible focus ring for all interactive elements */
+:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Smooth color transitions site-wide */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+
+/* Elements that also animate transform/opacity */
+.lp-gap-card, .lp-feature-card, .lp-problem-card, .fab-button,
+.lp-btn-hero-primary, .lp-btn-banner-primary, .btn,
+.focus-ctrl-btn, .lp-btn-primary, .lp-btn-hero-secondary,
+.lp-btn-banner-ghost, .lp-btn-ghost {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: 0.18s;
+  transition-timing-function: ease;
+}
+
+/* prefers-reduced-motion: only allow color transitions */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
