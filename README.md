@@ -6,7 +6,7 @@ Most productivity apps help you organize what needs to be done. StartSmart also 
 
 The result is a tool that grows with you: the more you use it, the more useful the data becomes, and the more accurately you can plan your future work.
 
-**Live Demo:** [https://start-smart-app.vercel.app](https://start-smart-app.vercel.app)
+**Live Vercel:** [https://start-smart-app.vercel.app](https://start-smart-livid.vercel.app)
 **GitHub:** [https://github.com/KarinLevy/StartSmart](https://github.com/KarinLevy/StartSmart)
 
 ---
@@ -53,9 +53,9 @@ The goal is not just to manage your task list — it is to help you become a bet
 
 ---
 
-## Live Demo
+## Live vercel
 
-**URL:** [https://start-smart-app.vercel.app](https://start-smart-app.vercel.app)
+**URL:** [https://start-smart-app.vercel.app](https://start-smart-livid.vercel.app)
 
 ### Demo Account
 
@@ -95,6 +95,8 @@ A demo account is available with realistic tasks, statistics, achievements, and 
 The database was designed in Supabase and includes normalized tables with defined relationships, primary keys, foreign keys, and Row Level Security policies that enforce per-user data isolation at the database level.
 
 ![ERD](docs/ERD.png)
+<img width="2846" height="1808" alt="image" src="https://github.com/user-attachments/assets/70cb8db3-7783-488b-b21f-1b59ef6f64af" />
+
 
 **Tables:** `profiles`, `tasks`, `task_tags`, `tags`, `time_logs`, `break_logs`, `notifications`, `user_settings`, `subscriptions`
 
