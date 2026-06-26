@@ -168,6 +168,23 @@ const en = {
   'forgot.err.generic':  'Something went wrong. Please try again.',
   'forgot.err.network':  'Unable to reach the server. Check your connection and try again.',
 
+  // ── Reset Password ─────────────────────────────────────────────────────────
+  'resetPw.title':      'Set a new password',
+  'resetPw.subtitle':   'Choose a strong password for your StartSmart account.',
+  'resetPw.newPw':      'New password',
+  'resetPw.newPwPh':    'At least 8 characters',
+  'resetPw.hint':       'At least 8 characters.',
+  'resetPw.confirm':    'Confirm new password',
+  'resetPw.confirmPh':  'Repeat new password',
+  'resetPw.submit':     'Update password',
+  'resetPw.updating':   'Updating…',
+  'resetPw.success':    'Password updated successfully! You can now log in with your new password.',
+  'resetPw.redirecting':'Redirecting to login…',
+  'resetPw.waiting':    'Verifying reset link…',
+  'resetPw.errMin':     'Password must be at least 8 characters.',
+  'resetPw.errNoMatch': 'Passwords do not match.',
+  'resetPw.errGeneric': 'Something went wrong. Please request a new reset link.',
+
   // ── Dashboard ──────────────────────────────────────────────────────────────
   'dashboard.createTask':    'Create new task',
   'dashboard.greeting.morning':   'Good morning',

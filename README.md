@@ -1,232 +1,269 @@
-# 🚀 StartSmart
+# StartSmart
 
-StartSmart is a web application I developed to help people manage their time more effectively, stay focused, and reduce procrastination. The application combines task management, focus sessions, scheduling, and productivity insights to help users understand not only what they need to do, but also how they actually work.
+A personal productivity application that helps people plan tasks, track focus time, and understand where their time really goes.
 
----
-
-# 📌 The Problem
-
-The idea for StartSmart came from a problem I personally deal with every day.
-
-I often found myself procrastinating, losing focus, and leaving important assignments until the last minute. Even when I used task management apps, they only helped me organize my tasks—they didn't help me understand why I wasn't finishing them or how I could improve.
-
-I realized that many people experience the same challenges, whether they are students, employees, freelancers, or parents trying to balance multiple responsibilities.
-
-That is why I decided to build an application that does more than just manage tasks. I wanted to create something that helps people improve their productivity habits over time.
+**Live Demo:** [https://start-smart-app.vercel.app](https://start-smart-app.vercel.app)
+**GitHub:** [https://github.com/KarinLevy/StartSmart](https://github.com/KarinLevy/StartSmart)
 
 ---
 
-# 👥 Target Audience
+## The Problem
 
-StartSmart is designed for anyone who wants to improve their productivity and time management.
+Most productivity tools help you organize tasks. They do not help you understand why tasks take longer than expected, or how to improve your planning over time.
 
-It is especially useful for:
-
-- Students
-- Employees
-- Freelancers
-- Parents
-- Managers
-- Anyone who struggles with procrastination, planning, or staying focused.
+People — students, employees, freelancers, managers — consistently underestimate how long work takes. Tasks slip, deadlines approach unexpectedly, and no existing tool provides honest feedback on the gap between intention and reality.
 
 ---
 
-# 💡 Project Story
+## Target Audience
 
-I developed StartSmart as part of a Web Development course during my Bachelor's degree in Business Administration with a specialization in Information Systems at Ono Academic College.
-
-The project began as a university assignment where I had to identify a real problem and develop a solution for it.
-
-Instead of choosing a random idea, I decided to build something based on a challenge I personally experience.
-
-Throughout the development process, the project grew into much more than a course assignment. I continuously improved it by adding new features, redesigning the user experience, building a real backend with Supabase, and focusing on creating an application that people could actually use.
-
-My goal is simple: to help people work smarter, stay organized, and feel less overwhelmed by their daily responsibilities.
+- Students managing coursework and deadlines
+- Employees juggling multiple projects
+- Freelancers tracking billable time
+- Managers coordinating team work
+- Anyone who struggles with procrastination, planning, or staying focused
 
 ---
 
-# ⭐ Main Features
+## Competitor Analysis
 
-- User registration and login
-- Personal dashboard
-- Task management
-- Schedule management
-- Focus Mode
-- Productivity statistics
-- Personal insights
-- Achievements system
-- Notifications
-- User profile management
-- Responsive design
-- Multi-language support
-- Dark and Light mode
+| Competitor | What it offers | How StartSmart differs |
+|---|---|---|
+| Todoist | Excellent task management | StartSmart adds focus sessions, time tracking, and gap analysis |
+| Notion | Flexible workspace | StartSmart provides a guided productivity experience with real data |
+| Google Calendar | Calendar and scheduling | StartSmart combines scheduling with focus sessions and statistics |
+| Toggl | Time tracking | StartSmart ties tracking directly to tasks with planning estimates |
+| Excel / paper planner | Manual planning | StartSmart automates tracking, analytics, and personalised insights |
 
 ---
 
-# 🏆 Competitor Analysis
+## What Makes StartSmart Different
 
-| Competitor | What it offers | How StartSmart is different |
-|------------|---------------|-----------------------------|
-| Todoist | Excellent task management | StartSmart also analyzes productivity and focus habits. |
-| Notion | Flexible workspace | StartSmart provides a simpler and more guided productivity experience. |
-| Google Calendar | Calendar management | StartSmart combines scheduling with productivity tracking. |
-| Excel / Paper Planner | Manual planning | StartSmart automates tracking, statistics, and insights. |
+StartSmart is built around the concept of the **Gap** — the difference between how long you estimate a task will take and how long it actually takes.
+
+Every focus session captures this gap. Over time, patterns emerge. StartSmart surfaces those patterns through statistics, insights, and recommendations so that planning gradually improves — session by session, week by week.
 
 ---
 
-# 🌟 What Makes StartSmart Different?
+## Live Demo
 
-Most productivity applications focus on helping users organize their tasks.
+**URL:** [https://start-smart-app.vercel.app](https://start-smart-app.vercel.app)
 
-StartSmart goes one step further by helping users understand how they manage their time.
+### Demo Account
 
-Instead of only showing a task list, the application also provides:
+A demo account is available with realistic tasks, statistics, achievements, and history.
 
-- Focus sessions
-- Productivity statistics
-- Time tracking
-- Personal insights
-- Achievements
-- Progress monitoring
-
-The goal is to help users build better habits rather than simply complete more tasks.
+| Field | Value |
+|---|---|
+| Email | demo@startsmart.app |
+| Password | Demo2026! |
 
 ---
 
-# 🛠 Technologies
+## Features
 
-## Frontend
+### Fully Implemented
 
-- React
-- Vite
-- JavaScript
-- CSS
-
-## Backend
-
-- Supabase
-
-## Database
-
-- PostgreSQL
-
-## Authentication
-
-- Supabase Authentication
-
-## Security
-
-- Row Level Security (RLS)
-
-## Version Control
-
-- Git
-- GitHub
+- **Task Management** — Create, edit, delete tasks with title, description, estimated time, priority, tags, and scheduled date
+- **Focus Mode** — Full-screen countdown timer; tracks actual vs estimated time; pause/resume/discard; saves time log to Supabase on finish
+- **Schedule** — Daily timeline, weekly grid, monthly calendar; status/priority/tag filters; tag colour accents; RTL-aware navigation
+- **Task History** — Read-only record of completed tasks; sort by date, A–Z, gap size, estimated/actual time; date-range filters; per-task reflection notes
+- **Statistics** — Estimation accuracy, total focus time, average gap, productivity score; task breakdown table; time range filters (this week, last 30 days, all time, custom)
+- **Insights** — Gap distribution, trend analysis, best/worst estimation, personalised recommendations
+- **Dashboard** — Hero card showing active task, Priority Workflow table, Insight card
+- **Notifications** — In-app notifications with unread count badge; mark all read
+- **User Profile** — Avatar upload (Supabase Storage), bio, name, phone; password change modal; account deletion
+- **Settings** — Theme toggle (light/dark), language switcher, focus/planning toggles, notification preferences
+- **Achievements** — First task, 7-day streak, 90% accuracy, 100 tasks, study master, work champion
+- **Multi-language** — English, Hebrew (RTL), Arabic (RTL), French, German, Russian
+- **Dark Mode** — Full dark theme via CSS custom properties; respects `prefers-color-scheme`
+- **Responsive Design** — Works from 375 px (iPhone SE) to desktop
+- **Password Reset** — Full forgot-password + reset-password flow via Supabase Auth email links
 
 ---
 
-# 🔗 External Services
+## Entity Relationship Diagram
+
+![ERD](docs/ERD.png)
+
+**Tables:** `profiles`, `tasks`, `task_tags`, `tags`, `time_logs`, `break_logs`, `notifications`, `user_settings`, `subscriptions`
+
+**Storage buckets:** `avatars`
+
+---
+
+## Technologies
+
+### Frontend
+| Technology | Version | Purpose |
+|---|---|---|
+| React | 19.x | UI component library |
+| Vite | 8.x | Build tool and dev server |
+| React Router DOM | 7.x | Client-side routing (SPA) |
+| JavaScript (ES Modules) | — | Application language |
+| CSS (custom properties) | — | Styling and design tokens |
+| Material Symbols | CDN | Icon font |
+
+### Backend & Database
+| Technology | Purpose |
+|---|---|
+| Supabase | Backend as a Service — database, auth, storage |
+| PostgreSQL | Relational database (managed by Supabase) |
+| Supabase Auth | User registration, login, password reset, JWT sessions |
+| Supabase Storage | Avatar image uploads |
+| Row Level Security (RLS) | Per-user data isolation at the database level |
+
+### Deployment
+| Technology | Purpose |
+|---|---|
+| Vercel | Hosting and CI/CD deployment |
+| GitHub | Version control and source repository |
+
+---
+
+## External Services
 
 | Service | Type | Purpose |
-|---------|------|---------|
-| Supabase | Backend as a Service | Database, Authentication and Backend |
-| PostgreSQL | Database | Stores application data |
-| Supabase Authentication | Authentication | User registration and login |
-| Row Level Security (RLS) | Security | Protects user data |
+|---|---|---|
+| Supabase | Backend as a Service | PostgreSQL database, authentication, file storage |
+| Supabase Auth | Authentication service | User registration, login, JWT sessions, password reset emails |
+| Supabase Storage | Object storage | Avatar image uploads and delivery |
+| Vercel | Deployment platform | Hosting, CDN, automatic deploys from GitHub |
+| Material Symbols | CDN icon font | UI icons throughout the application |
 
 ---
 
-# 🚀 Installation
+## Architecture
 
-Clone the repository:
-
-```bash
-git clone https://github.com/KarinLevy/StartSmart.git
+```
+src/
+├── components/         # Shared UI components (Navbar, Footer, PageShell, TaskCards, Statistics)
+├── context/            # React context providers (Auth, Tasks, Theme, Locale, Notifications, Profile)
+├── i18n/               # Locale files (en, he, ar, fr, de, ru) + LocaleContext
+├── lib/                # Supabase client
+├── pages/              # One directory per route/page
+│   ├── Auth/           # Shared auth CSS
+│   ├── Dashboard/
+│   ├── FocusMode/      # FocusPicker (select task) + FocusMode (active session)
+│   ├── FooterPages/    # About, FAQ, Contact, HelpCenter, Privacy, Terms, Cookies, Accessibility
+│   ├── ForgotPassword/
+│   ├── ResetPassword/
+│   ├── Insights/
+│   ├── LandingPage/
+│   ├── Login/
+│   ├── Notifications/
+│   ├── Premium/
+│   ├── Profile/
+│   ├── Register/
+│   ├── Schedule/
+│   ├── Settings/
+│   ├── Statistics/
+│   ├── TaskDetails/
+│   └── TaskHistory/
+├── services/           # Supabase data access (tasks, timeLogs, notifications, settings, user)
+├── styles/             # Global CSS and design tokens
+└── utils/              # Tag colours, achievement logic, formatting helpers
 ```
 
-Install dependencies:
+**State management:** React Context (no Redux). Auth state lives in `AuthContext`; tasks in `TasksContext` (real-time Supabase subscription); theme in `ThemeContext`; locale in `LocaleContext`.
 
-```bash
-npm install
-```
+**Routing:** React Router DOM v7 with `BrowserRouter`. Protected routes redirect unauthenticated users to `/login`. The `vercel.json` SPA rewrite ensures direct URL navigation does not return 404.
 
-Create a `.env` file:
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
 
 ```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Run the project:
+The `SUPABASE_SERVICE_ROLE_KEY` is only needed for the optional seed scripts (`npm run seed:demo`) and should never be committed.
+
+---
+
+## Installation
 
 ```bash
+# Clone
+git clone https://github.com/KarinLevy/StartSmart.git
+cd StartSmart
+
+# Install
+npm install
+
+# Configure
+cp .env.example .env
+# Edit .env with your Supabase project credentials
+
+# Develop
 npm run dev
-```
 
-Build the project:
-
-```bash
+# Build
 npm run build
 ```
 
 ---
 
-# 👤 Demo Account
+## Internationalization
 
-A demo account is available for testing the application's main features.
+StartSmart supports 6 languages with full RTL support for Hebrew and Arabic:
 
-**Email**
+| Language | Code | Direction |
+|---|---|---|
+| English | en | LTR |
+| Hebrew | he | RTL |
+| Arabic | ar | RTL |
+| French | fr | LTR |
+| German | de | LTR |
+| Russian | ru | LTR |
 
-demo@startsmart.app
-
-**Password**
-
-Demo2026!
-
-The demo user includes realistic tasks, statistics, achievements, notifications, and productivity history so the application can be explored without creating a new account.
-
----
-
-# 📸 Screenshots
-
-Screenshots of the application will be added before submission.
-
-Recommended screenshots:
-
-- Landing Page
-- Dashboard
-- Schedule
-- Focus Mode
-- Statistics
-- Insights
-- Profile
+The language switcher is available on every page via the Navbar. Locale is persisted in `localStorage`. RTL layout is applied via `document.documentElement.dir = 'rtl'`.
 
 ---
 
-# 🔮 Future Improvements
+## Security
 
-Some ideas I would like to add in future versions include:
-
-- Google OAuth login
-- Google Calendar integration
-- AI-powered productivity recommendations
-- Rewards system to encourage productivity
-- Mobile application
+- **Supabase Auth** — JWT-based sessions; passwords hashed by Supabase; no credentials stored in frontend
+- **Row Level Security (RLS)** — Every Supabase table enforces per-user access; users can only read/write their own data
+- **Protected routes** — Unauthenticated users are redirected to `/login` before any protected page renders
+- **HTTPS** — Enforced by Vercel on all requests
+- **Input validation** — Client-side validation on all forms; server rejects invalid data via Supabase constraints
 
 ---
 
-# 👩‍💻 About the Developer
+## Accessibility
 
-**Karin Levy**
-
-Business Administration – Information Systems
-
-Ono Academic College
-
-StartSmart was developed as a personal project inspired by a real challenge I wanted to solve. I hope it can help other people improve their productivity, stay focused, and achieve their goals with less stress.
+- Semantic HTML (`<main>`, `<nav>`, `<button>`, `<label>`, `<form>`)
+- ARIA labels on icon-only buttons and status regions
+- Keyboard navigation throughout; Space bar starts/pauses Focus Mode timer
+- Focus indicators visible on all interactive elements
+- Skip-navigation link in `index.html`
+- Colour contrast meets WCAG AA in both light and dark themes
+- Responsive layout from 375 px upward
+- `aria-live` regions for timer and filter state changes
 
 ---
 
-# 📄 License
+## Future Roadmap
 
-This project was developed as part of an academic web development course and is intended for educational purposes.
+| Feature | Status |
+|---|---|
+| Google Sign-In (OAuth) | Planned |
+| Google Calendar Sync | Planned |
+| AI Productivity Assistant | Planned |
+| AI Weekly Reports | Planned |
+| Premium subscription (Stripe) | Planned — UI exists, payment not wired |
+| Motivation & Rewards System | Planned |
+| Gift Card / Partner Store | Planned |
+| Mobile app (React Native) | Planned |
+
+---
+
+## About the Developer
+
+**Karin Levy** — Business Administration, Information Systems specialisation, Ono Academic College.
+
+StartSmart was developed as a university Web Development course project and grew into a full production application. The motivation was personal: a real struggle with procrastination and time estimation that no existing tool addressed the way this one does.

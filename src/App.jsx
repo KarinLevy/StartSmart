@@ -10,6 +10,7 @@ import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Dashboard from './pages/Dashboard/Dashboard';
 import CreateTask from './pages/CreateTask/CreateTask';
 import TaskDetails from './pages/TaskDetails/TaskDetails';
@@ -54,6 +55,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password"  element={<ResetPassword />} />
 
         {/* Footer pages (public) */}
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
