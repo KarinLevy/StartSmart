@@ -368,6 +368,11 @@
   font-size: var(--font-size-label-sm);
   margin: 0.25rem 0 0;
 }
+.auth-field-hint {
+  font-size: var(--font-size-label-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0.25rem 0 0;
+}
 .auth-avatar-hint {
   font-size: var(--font-size-label-sm);
   color: var(--color-on-surface-variant);

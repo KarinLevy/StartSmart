@@ -112,10 +112,24 @@ const Insights = () => {
   const accuracy  = done.length > 0 ? Math.min(Math.round((totalEst / totalAct) * 100), 100) : null;
   const avgGap    = done.length > 0 ? Math.round(done.reduce((s, tk) => s + (tk.gap || 0), 0) / done.length) : null;
 
-  const sorted    = [...done].sort((a, b) => (a.gap || 0) - (b.gap || 0));
-  const bestTask  = sorted[0] || null;
-  const worstTask = sorted[sorted.length - 1] || null;
   const maxAbsGap = done.length > 0 ? Math.max(...done.map((tk) => Math.abs(tk.gap || 0)), 1) : 1;
+
+  // Best Estimation = task whose estimate was closest to actual (smallest |gap|)
+  const accurateTask = done.length > 0
+    ? done.reduce((best, tk) => Math.abs(tk.gap || 0) < Math.abs(best.gap || 0) ? tk : best)
+    : null;
+
+  // Biggest Time Saved = task that finished furthest under estimate (most negative gap)
+  const underTasks = done.filter(tk => (tk.gap || 0) < 0);
+  const savedTask  = underTasks.length > 0
+    ? underTasks.reduce((best, tk) => (tk.gap || 0) < (best.gap || 0) ? tk : best)
+    : null;
+
+  // Biggest Overrun = task that exceeded its estimate the most (most positive gap)
+  const overTasks  = done.filter(tk => (tk.gap || 0) > 0);
+  const worstTask  = overTasks.length > 0
+    ? overTasks.reduce((best, tk) => (tk.gap || 0) > (best.gap || 0) ? tk : best)
+    : null;
 
   const overCount  = done.filter((tk) => (tk.gap || 0) > 0).length;
   const underCount = done.filter((tk) => (tk.gap || 0) < 0).length;
@@ -278,41 +292,82 @@ const Insights = () => {
               </div>
             </div>
 
-            {/* ── Best / Worst task ── */}
-            {bestTask && (
-              <div className="ins-card ins-card-best">
-                <div className="ins-card-label">
-                  <span className="material-symbols-outlined" aria-hidden="true">thumb_up</span>
-                  {t('insights.bestLabel')}
-                </div>
-                <Link to={`/task-details/${bestTask.id}`} className="ins-task-link">
-                  <span className="ins-task-title">{bestTask.title}</span>
-                  <span className={`ins-task-gap ${(bestTask.gap || 0) <= 0 ? 'under' : 'over'}`} dir="ltr">
-                    {fmtGap_(bestTask.gap || 0)}
-                  </span>
-                </Link>
-                <p className="ins-task-sub">
-                  {t('insights.taskEst', { est: fmtMin(bestTask.estimatedMinutes), act: fmtMin(bestTask.actualMinutes) })}
-                </p>
-                <p className="ins-task-date">{fmtDate(bestTask.scheduledDate)}</p>
+            {/* ── Best Estimation ── */}
+            <div className="ins-card ins-card-accurate">
+              <div className="ins-card-label">
+                <span className="material-symbols-outlined" aria-hidden="true">gps_fixed</span>
+                {t('insights.bestLabel')}
               </div>
-            )}
-            {worstTask && worstTask.id !== bestTask?.id && (
-              <div className="ins-card ins-card-worst">
-                <div className="ins-card-label">
-                  <span className="material-symbols-outlined" aria-hidden="true">thumb_down</span>
-                  {t('insights.worstLabel')}
+              {accurateTask ? (
+                <>
+                  <Link to={`/task-details/${accurateTask.id}`} className="ins-task-link">
+                    <span className="ins-task-title">{accurateTask.title}</span>
+                    <span className={`ins-task-gap ${(accurateTask.gap || 0) > 0 ? 'over' : 'under'}`} dir="ltr">
+                      {fmtGap_(accurateTask.gap || 0)}
+                    </span>
+                  </Link>
+                  <p className="ins-task-sub">
+                    {t('insights.taskEst', { est: fmtMin(accurateTask.estimatedMinutes), act: fmtMin(accurateTask.actualMinutes) })}
+                  </p>
+                  <p className="ins-task-date">{fmtDate(accurateTask.scheduledDate)}</p>
+                </>
+              ) : (
+                <div className="ins-card-empty">
+                  <span className="material-symbols-outlined" aria-hidden="true">inbox</span>
+                  <p>{t('insights.cardEmptyMsg')}</p>
                 </div>
-                <Link to={`/task-details/${worstTask.id}`} className="ins-task-link">
-                  <span className="ins-task-title">{worstTask.title}</span>
-                  <span className="ins-task-gap over" dir="ltr">{fmtGap_(worstTask.gap || 0)}</span>
-                </Link>
-                <p className="ins-task-sub">
-                  {t('insights.taskEst', { est: fmtMin(worstTask.estimatedMinutes), act: fmtMin(worstTask.actualMinutes) })}
-                </p>
-                <p className="ins-task-date">{fmtDate(worstTask.scheduledDate)}</p>
+              )}
+            </div>
+
+            {/* ── Biggest Time Saved ── */}
+            <div className="ins-card ins-card-saved">
+              <div className="ins-card-label">
+                <span className="material-symbols-outlined" aria-hidden="true">bolt</span>
+                {t('insights.savedLabel')}
               </div>
-            )}
+              {savedTask ? (
+                <>
+                  <Link to={`/task-details/${savedTask.id}`} className="ins-task-link">
+                    <span className="ins-task-title">{savedTask.title}</span>
+                    <span className="ins-task-gap under" dir="ltr">{fmtGap_(savedTask.gap || 0)}</span>
+                  </Link>
+                  <p className="ins-task-sub">
+                    {t('insights.taskEst', { est: fmtMin(savedTask.estimatedMinutes), act: fmtMin(savedTask.actualMinutes) })}
+                  </p>
+                  <p className="ins-task-date">{fmtDate(savedTask.scheduledDate)}</p>
+                </>
+              ) : (
+                <div className="ins-card-empty">
+                  <span className="material-symbols-outlined" aria-hidden="true">inbox</span>
+                  <p>{t('insights.cardEmptyMsg')}</p>
+                </div>
+              )}
+            </div>
+
+            {/* ── Biggest Overrun ── */}
+            <div className="ins-card ins-card-worst">
+              <div className="ins-card-label">
+                <span className="material-symbols-outlined" aria-hidden="true">thumb_down</span>
+                {t('insights.worstLabel')}
+              </div>
+              {worstTask ? (
+                <>
+                  <Link to={`/task-details/${worstTask.id}`} className="ins-task-link">
+                    <span className="ins-task-title">{worstTask.title}</span>
+                    <span className="ins-task-gap over" dir="ltr">{fmtGap_(worstTask.gap || 0)}</span>
+                  </Link>
+                  <p className="ins-task-sub">
+                    {t('insights.taskEst', { est: fmtMin(worstTask.estimatedMinutes), act: fmtMin(worstTask.actualMinutes) })}
+                  </p>
+                  <p className="ins-task-date">{fmtDate(worstTask.scheduledDate)}</p>
+                </>
+              ) : (
+                <div className="ins-card-empty">
+                  <span className="material-symbols-outlined" aria-hidden="true">inbox</span>
+                  <p>{t('insights.cardEmptyMsg')}</p>
+                </div>
+              )}
+            </div>
 
             {/* ── Gap per Task ── */}
             <div className="ins-card ins-card-bars">

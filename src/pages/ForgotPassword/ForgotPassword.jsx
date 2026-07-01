@@ -12,20 +12,33 @@ const ForgotPassword = () => {
   const { resetPassword } = useAuth();
   const { t } = useLocale();
 
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) {
+    const trimmed = email.trim();
+    if (!trimmed) {
       setStatus('error');
       setErrorMsg(t('forgot.err.emailEmpty'));
+      return;
+    }
+    if (!EMAIL_RE.test(trimmed)) {
+      setStatus('error');
+      setErrorMsg(t('forgot.err.invalidEmail'));
       return;
     }
     setStatus('loading');
     setErrorMsg('');
 
-    const { error } = await resetPassword(email.trim());
+    const { error } = await resetPassword(trimmed);
     if (error) {
       setStatus('error');
-      setErrorMsg(error.message || t('forgot.err.generic'));
+      const msg = error.message || '';
+      if (msg.toLowerCase().includes('network') || msg.toLowerCase().includes('fetch')) {
+        setErrorMsg(t('forgot.err.network'));
+      } else {
+        setErrorMsg(t('forgot.err.generic'));
+      }
     } else {
       setStatus('success');
     }

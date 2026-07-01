@@ -92,23 +92,32 @@
 .ins-card-score        { grid-column: span 7; }
 .ins-card-dist         { grid-column: span 5; }
 .ins-card-trends       { grid-column: span 12; }
-.ins-card-best         { grid-column: span 6; }
-.ins-card-worst        { grid-column: span 6; }
+.ins-card-accurate     { grid-column: span 4; }
+.ins-card-saved        { grid-column: span 4; }
+.ins-card-worst        { grid-column: span 4; }
 .ins-card-bars         { grid-column: span 6; }
 .ins-card-recs         { grid-column: span 6; }
 .ins-card-achievements { grid-column: span 12; }
 .ins-card-ai           { grid-column: span 12; }
 
 @media (max-width: 900px) {
-  .ins-card-score        { grid-column: span 12; }
-  .ins-card-dist         { grid-column: span 12; }
-  .ins-card-best         { grid-column: span 6; }
-  .ins-card-worst        { grid-column: span 6; }
-  .ins-card-bars         { grid-column: span 12; }
-  .ins-card-recs         { grid-column: span 12; }
+  .ins-card-score    { grid-column: span 12; }
+  .ins-card-dist     { grid-column: span 12; }
+  .ins-card-accurate { grid-column: span 4; }
+  .ins-card-saved    { grid-column: span 4; }
+  .ins-card-worst    { grid-column: span 4; }
+  .ins-card-bars     { grid-column: span 12; }
+  .ins-card-recs     { grid-column: span 12; }
 }
-@media (max-width: 560px) {
-  .ins-card-best, .ins-card-worst { grid-column: span 12; }
+@media (max-width: 700px) {
+  .ins-card-accurate { grid-column: span 6; }
+  .ins-card-saved    { grid-column: span 6; }
+  .ins-card-worst    { grid-column: span 6; }
+}
+@media (max-width: 480px) {
+  .ins-card-accurate,
+  .ins-card-saved,
+  .ins-card-worst    { grid-column: span 12; }
 }
 
 /* ── Productivity Score ────────────────────────────────────────────────────── */
@@ -261,6 +270,20 @@
 .ins-task-gap.under { background: rgba(22,163,74,0.1); color: var(--color-success, #16a34a); }
 .ins-task-sub  { font-size: var(--font-size-label-xs); color: var(--color-on-surface-variant); margin: 0; }
 .ins-task-date { font-size: var(--font-size-label-xs); color: var(--color-outline); margin: 0; }
+
+/* ── Per-card empty state ──────────────────────────────────────────────────── */
+
+.ins-card-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: var(--color-on-surface-variant);
+}
+.ins-card-empty .material-symbols-outlined { font-size: 1.75rem; opacity: 0.4; }
+.ins-card-empty p { font-size: var(--font-size-label-sm); margin: 0; line-height: 1.5; }
 
 /* ── Gap per Task ──────────────────────────────────────────────────────────── */
 

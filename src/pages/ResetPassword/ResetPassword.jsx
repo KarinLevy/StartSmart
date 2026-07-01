@@ -11,7 +11,8 @@ const ResetPassword = () => {
   const [showPw,    setShowPw]    = useState(false);
   const [status,    setStatus]    = useState('idle'); // idle | loading | success | error
   const [errorMsg,  setErrorMsg]  = useState('');
-  const [ready,     setReady]     = useState(false);  // true once Supabase sets the recovery session
+  const [ready,      setReady]      = useState(false);  // true once Supabase sets the recovery session
+  const [linkStatus, setLinkStatus] = useState('pending'); // pending | valid | expired
   const { t } = useLocale();
   const navigate = useNavigate();
 
@@ -19,15 +20,29 @@ const ResetPassword = () => {
   // This sets a temporary session that allows updateUser() to work.
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setReady(true);
+      if (event === 'PASSWORD_RECOVERY') {
+        setReady(true);
+        setLinkStatus('valid');
+      }
     });
 
-    // Also check if there is already an active session from the link
+    // Check for an existing recovery session (e.g. page refresh)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
+      if (session) {
+        setReady(true);
+        setLinkStatus('valid');
+      }
     });
 
-    return () => subscription.unsubscribe();
+    // If no PASSWORD_RECOVERY event fires within 8s, treat link as expired/invalid
+    const timer = setTimeout(() => {
+      setLinkStatus((prev) => (prev === 'pending' ? 'expired' : prev));
+    }, 8000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -85,6 +100,17 @@ const ResetPassword = () => {
               {t('forgot.backToLogin')}
             </Link>
           </>
+        ) : linkStatus === 'expired' ? (
+          <>
+            <div className="auth-note" role="alert" style={{ background: 'var(--color-error-container)', color: 'var(--color-error)' }}>
+              <span className="material-symbols-outlined" aria-hidden="true">link_off</span>
+              <span>{t('resetPw.errExpired')}</span>
+            </div>
+            <Link to="/forgot-password" className="auth-back-link" style={{ marginTop: 'var(--spacing-card-gap)', justifyContent: 'center' }}>
+              <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
+              {t('resetPw.requestNew')}
+            </Link>
+          </>
         ) : !ready ? (
           <div className="auth-note" role="status" style={{ flexDirection: 'column', gap: '0.75rem' }}>
             <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>progress_activity</span>
@@ -112,9 +138,9 @@ const ResetPassword = () => {
                   />
                   <button
                     type="button"
-                    className="auth-show-pw"
+                    className="auth-toggle-visibility"
                     onClick={() => setShowPw((v) => !v)}
-                    aria-label={showPw ? 'Hide password' : 'Show password'}
+                    aria-label={showPw ? t('resetPw.hidePw') : t('resetPw.showPw')}
                   >
                     <span className="material-symbols-outlined">{showPw ? 'visibility_off' : 'visibility'}</span>
                   </button>
