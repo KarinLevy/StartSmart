@@ -80,20 +80,22 @@ The demo account includes preloaded tasks, completed focus sessions, statistics,
 ### Fully Implemented
 
 - **Task Management** — Create, edit, delete tasks with title, description, estimated time, priority, tags, and scheduled date
-- **Focus Mode** — Full-screen countdown timer; tracks actual vs estimated time; pause/resume/discard; saves time log to Supabase on finish
-- **Schedule** — Daily timeline, weekly grid, monthly calendar; status/priority/tag filters; tag colour accents; RTL-aware navigation
-- **Task History** — Read-only record of completed tasks; sort by date, A–Z, gap size, estimated/actual time; date-range filters; per-task reflection notes
-- **Statistics** — Estimation accuracy, total focus time, average gap, productivity score; task breakdown table; time range filters (this week, last 30 days, all time, custom)
+- **Focus Mode** — Full-screen countdown timer, tracks actual vs estimated time, pause/resume/discard, saves time log to Supabase on finish
+- **Schedule** — Daily timeline, weekly grid, monthly calendar, status/priority/tag filters, tag colour accents, RTL-aware navigation
+- **Task History** — Read-only record of completed tasks, sort by date, A–Z, gap size, estimated/actual time, date-range filters, per-task reflection notes
+- **Statistics** — Estimation accuracy, total focus time, average gap, productivity score, task breakdown table, time range filters (this week, last 30 days, all time, custom)
 - **Insights** — Gap distribution, trend analysis, best/worst estimation, personalised recommendations
 - **Dashboard** — Hero card showing active task, Priority Workflow table, Insight card
-- **Notifications** — In-app notifications with unread count badge; mark all read
-- **User Profile** — Avatar upload (Supabase Storage), bio, name, phone; password change modal; account deletion
-- **Settings** — Theme toggle (light/dark), language switcher, focus/planning toggles, notification preferences
+- **Notifications** — In-app notifications with unread count badge, mark all read
+- **User Profile** — Avatar upload (Supabase Storage), bio, name, phone, secure password change with current-password verification, account deletion
+- **Settings** — Theme toggle, language switcher, notification preferences, Google Calendar connection management, sync status, reconnect and disconnect controls
 - **Achievements** — First task, 7-day streak, 90% accuracy, 100 tasks, study master, work champion
 - **Multi-language** — English, Hebrew (RTL), Arabic (RTL), French, German, Russian
-- **Dark Mode** — Full dark theme via CSS custom properties; respects `prefers-color-scheme`
+- **Dark Mode** — Full dark theme via CSS custom properties, respects `prefers-color-scheme`
 - **Responsive Design** — Works from 375 px (iPhone SE) to desktop
 - **Password Reset** — Full forgot-password + reset-password flow via Supabase Auth email links
+- **Google Authentication** — Secure sign-in with Google OAuth using Supabase Auth
+- **Google Calendar Integration** (Read-only) — Optional connection to Google Calendar with explicit user consent, upcoming events are displayed inside the Schedule and Settings pages without modifying the user's calendar
 
 ---
 
@@ -113,7 +115,7 @@ The database was designed in Supabase and includes normalized tables with define
 
 ## Technologies
 
-React was chosen for its component model and ecosystem, which made it practical to build a complex multi-page application with shared state. Supabase was selected because it provides a managed PostgreSQL database, authentication, and file storage in one platform — removing the need to build and maintain a separate backend. Vercel was chosen for deployment because it integrates directly with GitHub and handles builds, CDN, and HTTPS automatically.
+React was chosen for its component model and ecosystem, which made it practical to build a complex multi-page application with shared state. Supabase was selected because it provides a managed PostgreSQL database, authentication, file storage, and OAuth integration in one platform — removing the need to build and maintain a separate backend. Vercel was chosen for deployment because it integrates directly with GitHub and handles builds, CDN, and HTTPS automatically. Google OAuth and the Google Calendar API were integrated to provide optional calendar connectivity while keeping user data secure.
 
 ### Frontend
 | Technology | Version | Purpose |
@@ -126,13 +128,16 @@ React was chosen for its component model and ecosystem, which made it practical 
 | Material Symbols | CDN | Icon font |
 
 ### Backend & Database
+
 | Technology | Purpose |
 |---|---|
-| Supabase | Backend as a Service — database, auth, storage |
+| Supabase | Backend as a Service — database, authentication, storage, and OAuth integration |
 | PostgreSQL | Relational database (managed by Supabase) |
-| Supabase Auth | User registration, login, password reset, JWT sessions, and full session management |
-| Supabase Storage | Avatar image uploads and delivery |
-| Row Level Security (RLS) | Per-user data isolation at the database level |
+| Supabase Auth | Email/password authentication, Google OAuth, password reset, JWT sessions, and session management |
+| Supabase Storage | Secure avatar image uploads and delivery |
+| Row Level Security (RLS) | Per-user data isolation enforced at the database level |
+| Google OAuth 2.0 | Secure authentication with Google accounts |
+| Google Calendar API | Optional read-only synchronization of upcoming Google Calendar events |
 
 ### Deployment
 | Technology | Purpose |
@@ -142,14 +147,16 @@ React was chosen for its component model and ecosystem, which made it practical 
 
 ---
 
-## External Services
+### External Services
 
 | Service | Type | Purpose |
 |---|---|---|
-| Supabase | Backend as a Service | PostgreSQL database, authentication, file storage |
-| Supabase Auth | Authentication service | Handles user registration, login, password recovery via email link, and JWT session management — no credentials are stored in the frontend |
-| Supabase Storage | Object storage | Stores and serves user avatar images uploaded from the Profile page |
-| Vercel | Deployment platform | Hosting, CDN, automatic deploys from GitHub |
+| Supabase | Backend as a Service | PostgreSQL database, authentication, storage, and security |
+| Supabase Auth | Authentication service | Email/password authentication, Google OAuth, password recovery, JWT session management |
+| Supabase Storage | Object storage | Stores and serves user avatar images |
+| Google OAuth 2.0 | OAuth provider | Secure Google authentication |
+| Google Calendar API | External API | Optional read-only synchronization of upcoming calendar events |
+| Vercel | Deployment platform | Hosting, CDN, HTTPS, automatic deployments from GitHub |
 | Material Symbols | CDN icon font | UI icons throughout the application |
 
 ---
@@ -157,15 +164,16 @@ React was chosen for its component model and ecosystem, which made it practical 
 ## Architecture
 
 ```
+
 src/
-├── components/         # Shared UI components (Navbar, Footer, PageShell, TaskCards, Statistics)
-├── context/            # React context providers (Auth, Tasks, Theme, Locale, Notifications, Profile)
+├── components/         # Shared UI components (Navbar, Footer, PageShell, TaskCards, Statistics, Google Calendar UI)
+├── context/            # React context providers (Auth, Tasks, Theme, Locale, Regional, Notifications, Profile, Calendar)
 ├── i18n/               # Locale files (en, he, ar, fr, de, ru) + LocaleContext
-├── lib/                # Supabase client
+├── lib/                # Supabase client configuration
 ├── pages/              # One directory per route/page
-│   ├── Auth/           # Shared auth CSS
+│   ├── Auth/           # Shared authentication CSS
 │   ├── Dashboard/
-│   ├── FocusMode/      # FocusPicker (select task) + FocusMode (active session)
+│   ├── FocusMode/      # FocusPicker + active focus session timer
 │   ├── FooterPages/    # About, FAQ, Contact, HelpCenter, Privacy, Terms, Cookies, Accessibility
 │   ├── ForgotPassword/
 │   ├── ResetPassword/
@@ -176,17 +184,17 @@ src/
 │   ├── Premium/
 │   ├── Profile/
 │   ├── Register/
-│   ├── Schedule/
-│   ├── Settings/
+│   ├── Schedule/       # Daily, weekly, monthly schedule + Google Calendar event display
+│   ├── Settings/       # Preferences, language/theme settings, Google Calendar connection management
 │   ├── Statistics/
 │   ├── TaskDetails/
 │   └── TaskHistory/
-├── services/           # Supabase data access (tasks, timeLogs, notifications, settings, user)
+├── services/           # Data/API services (tasks, time logs, notifications, settings, user, Google Calendar)
 ├── styles/             # Global CSS and design tokens
-└── utils/              # Tag colours, achievement logic, formatting helpers
+└── utils/              # Tag colours, achievements, date/time formatting, analytics helpers
 ```
 
-**State management:** React Context (no Redux). Auth state lives in `AuthContext`; tasks in `TasksContext` (real-time Supabase subscription); theme in `ThemeContext`; locale in `LocaleContext`.
+**State management:** React Context (no Redux). Auth state lives in `AuthContext`, tasks in `TasksContext` (real-time Supabase subscriptions), theme in `ThemeContext`, locale in `LocaleContext`, and Google Calendar state in `CalendarContext`.
 
 **Routing:** React Router DOM v7 with `BrowserRouter`. Protected routes redirect unauthenticated users to `/login`. The `vercel.json` SPA rewrite ensures direct URL navigation does not return 404.
 
@@ -246,13 +254,20 @@ The selected language is stored in localStorage, allowing the application to rem
 StartSmart currently supports six languages, with most of the interface fully localized. As part of the project’s ongoing development, localization will continue to be refined by completing the remaining interface translations and improving language-specific layouts and user experience across all supported languages.
 ---
 
+
 ## Security
 
-- **Supabase Auth** — JWT-based sessions; passwords hashed by Supabase; no credentials stored in frontend
-- **Row Level Security (RLS)** — Every Supabase table enforces per-user access; users can only read/write their own data
-- **Protected routes** — Unauthenticated users are redirected to `/login` before any protected page renders
-- **HTTPS** — Enforced by Vercel on all requests
-- **Input validation** — Client-side validation on all forms; server rejects invalid data via Supabase constraints
+- **Supabase Auth** — Secure JWT-based authentication with email/password and Google OAuth. Passwords are hashed and managed entirely by Supabase.
+- **Row Level Security (RLS)** — Every database table enforces per-user access, ensuring users can only access their own data.
+- **Protected Routes** — Unauthenticated users are redirected to the login page before protected content is rendered.
+- **Subscription Protection** — Database policies prevent users from upgrading their own subscription from the client. Subscription changes require privileged backend access.
+- **Secure Password Reset** — Password reset uses Supabase email recovery with email enumeration protection, expired-link detection, and localized validation.
+- **Password Change Verification** — Users must verify their current password before changing it.
+- **Avatar Storage Security** — Avatar uploads are protected by Supabase Storage policies, allowing users to upload only their own files.
+- **Google OAuth Security** — Signing in with Google does not automatically grant Google Calendar access. Calendar permissions are requested only after the user explicitly chooses to connect Google Calendar.
+- **Google Calendar Privacy** — Google Calendar events are accessed in read-only mode. No Google Calendar data or OAuth tokens are permanently stored in the application database.
+- **HTTPS** — All production traffic is encrypted using HTTPS provided by Vercel.
+- **Input Validation** — Client-side validation is performed on all forms, while Supabase enforces additional database constraints.
 
 ---
 
@@ -260,7 +275,7 @@ StartSmart currently supports six languages, with most of the interface fully lo
 
 - Semantic HTML (`<main>`, `<nav>`, `<button>`, `<label>`, `<form>`)
 - ARIA labels on icon-only buttons and status regions
-- Keyboard navigation throughout; Space bar starts/pauses Focus Mode timer
+- Keyboard navigation throughout, Space bar starts/pauses Focus Mode timer
 - Focus indicators visible on all interactive elements
 - Skip-navigation link in `index.html`
 - Colour contrast meets WCAG AA in both light and dark themes
@@ -282,10 +297,12 @@ The features below are planned for future development and are **not yet implemen
 | AI Weekly Summaries | Automated weekly report summarising productivity and trends |
 
 ### Google Integration
+
 | Feature | Description |
 |---|---|
-| Google Sign-In | OAuth login with Google account |
-| Google Calendar Sync | Two-way sync between StartSmart tasks and Google Calendar |
+| Export Tasks to Google Calendar | Create Google Calendar events directly from scheduled StartSmart tasks |
+| Google Calendar Two-Way Sync | Keep StartSmart tasks and Google Calendar synchronized |
+| Google Meet Integration | Create Google Meet links for scheduled tasks |
 
 ### Motivation & Rewards
 | Feature | Description |
