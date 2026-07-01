@@ -417,7 +417,10 @@ const ru = {
   'pwModal.success':     'Пароль успешно изменён!',
   'pwModal.err.currentReq': 'Текущий пароль обязателен.',
   'pwModal.err.newMin':     'Новый пароль должен содержать минимум 8 символов.',
-  'pwModal.err.noMatch':    'Пароли не совпадают.',
+  'pwModal.err.noMatch':       'Пароли не совпадают.',
+  'pwModal.err.wrongCurrent':  'Текущий пароль неверный. Попробуй ещё раз.',
+  'pwModal.err.notAuth':       'Войди в систему, чтобы изменить пароль.',
+  'pwModal.err.generic':       'Что-то пошло не так. Попробуй снова.',
 
   'delModal.title':       'Удалить аккаунт',
   'delModal.subtitle':    'Это действие постоянно и не может быть отменено.',

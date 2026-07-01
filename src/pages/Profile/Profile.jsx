@@ -103,11 +103,15 @@ const ChangePasswordModal = ({ onClose }) => {
 
     setLoading(true);
     setApiError(null);
-    // Backend integration point: PATCH /api/user/password
     const { error } = await changePassword({ currentPassword: form.current, newPassword: form.next });
     setLoading(false);
 
-    if (error) { setApiError(error); return; }
+    if (error) {
+      // error is an i18n key for known cases, raw message otherwise
+      const msg = error.startsWith('pwModal.') ? t(error) : t('pwModal.err.generic');
+      setApiError(msg);
+      return;
+    }
     setSuccess(true);
     setTimeout(onClose, 1500);
   };
@@ -363,15 +367,15 @@ const Profile = () => {
     if (file.size > 5 * 1024 * 1024)    { setUpload('error'); return; }
 
     setUpload('uploading');
-    // Backend integration point: POST /api/user/avatar (multipart)
     const { data, error } = await uploadAvatar(file);
     if (error) { setUpload('error'); return; }
 
-    // In DEV_MODE the service creates an object URL; in production use data.avatarUrl
-    const reader = new FileReader();
-    reader.onload  = (ev) => { setAvatarSrc(ev.target.result); setUpload('idle'); };
-    reader.onerror = () => setUpload('error');
-    reader.readAsDataURL(file);
+    if (data?.avatarUrl) {
+      setAvatarSrc(data.avatarUrl);
+      setUpload('idle');
+    } else {
+      setUpload('error');
+    }
   };
 
   // ── Save profile ─────────────────────────────────────────────────────────

@@ -478,7 +478,10 @@ const fr = {
   'pwModal.success':     'Mot de passe modifié avec succès !',
   'pwModal.err.currentReq': 'Le mot de passe actuel est obligatoire.',
   'pwModal.err.newMin':     'Le nouveau mot de passe doit comporter au moins 8 caractères.',
-  'pwModal.err.noMatch':    'Les mots de passe ne correspondent pas.',
+  'pwModal.err.noMatch':       'Les mots de passe ne correspondent pas.',
+  'pwModal.err.wrongCurrent':  'Le mot de passe actuel est incorrect. Veuillez réessayer.',
+  'pwModal.err.notAuth':       'Vous devez être connecté pour changer votre mot de passe.',
+  'pwModal.err.generic':       'Une erreur s\'est produite. Veuillez réessayer.',
 
   // ── Delete modal ───────────────────────────────────────────────────────────
   'delModal.title':       'Supprimer le compte',

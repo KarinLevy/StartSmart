@@ -416,7 +416,10 @@ const ar = {
   'pwModal.success':     'تم تغيير كلمة المرور بنجاح!',
   'pwModal.err.currentReq': 'كلمة المرور الحالية مطلوبة.',
   'pwModal.err.newMin':     'يجب أن تحتوي كلمة المرور الجديدة على 8 أحرف على الأقل.',
-  'pwModal.err.noMatch':    'كلمتا المرور غير متطابقتين.',
+  'pwModal.err.noMatch':       'كلمتا المرور غير متطابقتين.',
+  'pwModal.err.wrongCurrent':  'كلمة المرور الحالية غير صحيحة. يرجى المحاولة مجدداً.',
+  'pwModal.err.notAuth':       'يجب أن تكون مسجلاً لتغيير كلمة المرور.',
+  'pwModal.err.generic':       'حدث خطأ ما. يرجى المحاولة مجدداً.',
 
   'delModal.title':       'حذف الحساب',
   'delModal.subtitle':    'هذا الإجراء دائم ولا يمكن التراجع عنه.',

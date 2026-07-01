@@ -606,7 +606,10 @@ const en = {
   'pwModal.success':     'Password changed successfully!',
   'pwModal.err.currentReq': 'Current password is required.',
   'pwModal.err.newMin':     'New password must be at least 8 characters.',
-  'pwModal.err.noMatch':    'Passwords do not match.',
+  'pwModal.err.noMatch':       'Passwords do not match.',
+  'pwModal.err.wrongCurrent':  'Current password is incorrect. Please try again.',
+  'pwModal.err.notAuth':       'You must be logged in to change your password.',
+  'pwModal.err.generic':       'Something went wrong. Please try again.',
 
   // ── Delete modal ───────────────────────────────────────────────────────────
   'delModal.title':       'Delete Account',

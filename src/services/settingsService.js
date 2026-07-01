@@ -6,15 +6,20 @@
  * Set to false and configure VITE_API_URL when backend is ready.
  */
 
+import { supabase } from '../lib/supabaseClient';
+
 const DEV_MODE = true;
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('ss_auth_token') ?? ''}`,
-});
+const authHeaders = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session?.access_token ?? ''}`,
+  };
+};
 
 async function request(method, path, body) {
   if (DEV_MODE) {
@@ -22,9 +27,10 @@ async function request(method, path, body) {
     return { data: { ok: true }, error: null };
   }
   try {
+    const headers = await authHeaders();
     const res = await fetch(`${BASE_URL}${path}`, {
       method,
-      headers: authHeaders(),
+      headers,
       body: body ? JSON.stringify(body) : undefined,
     });
     const json = await res.json().catch(() => ({}));
@@ -60,7 +66,7 @@ export async function exportUserData(exportData) {
   try {
     const res = await fetch(`${BASE_URL}/api/user/export`, {
       method: 'GET',
-      headers: { Authorization: authHeaders().Authorization },
+      headers: { Authorization: (await authHeaders()).Authorization },
     });
     if (!res.ok) return { data: null, error: `HTTP ${res.status}` };
     const blob = await res.blob();

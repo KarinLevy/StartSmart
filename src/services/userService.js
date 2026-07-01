@@ -45,9 +45,7 @@ export async function uploadAvatar(file) {
     .upload(path, file, { upsert: true });
 
   if (upErr) {
-    // Storage bucket not configured — return a local object URL so the
-    // avatar preview still works in the session.
-    return { data: { avatarUrl: URL.createObjectURL(file) }, error: null };
+    return { data: null, error: upErr.message || 'Upload failed' };
   }
 
   const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
@@ -76,13 +74,23 @@ export async function updateNotificationsEnabled(enabled) {
 
 /**
  * Change the authenticated user's password via Supabase Auth.
- * Note: Supabase does not re-validate the current password server-side;
- * the UI validates it as a UX guard.
+ * Re-authenticates with the current password first to confirm identity.
  * @param {{ currentPassword, newPassword }} payload
  */
-export async function changePassword({ newPassword }) {
+export async function changePassword({ currentPassword, newPassword }) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) return { data: null, error: 'pwModal.err.notAuth' };
+
+  // Re-authenticate to verify the current password
+  const { error: authErr } = await supabase.auth.signInWithPassword({
+    email:    session.user.email,
+    password: currentPassword,
+  });
+  if (authErr) return { data: null, error: 'pwModal.err.wrongCurrent' };
+
+  // Current password confirmed — update to new password
   const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) return { data: null, error: error.message };
+  if (error) return { data: null, error: 'pwModal.err.generic' };
   return { data: { ok: true }, error: null };
 }
 

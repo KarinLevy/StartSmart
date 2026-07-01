@@ -430,7 +430,10 @@ const he = {
   'pwModal.success':     'הסיסמה שונתה בהצלחה!',
   'pwModal.err.currentReq': 'סיסמה נוכחית היא חובה.',
   'pwModal.err.newMin':     'הסיסמה החדשה חייבת להכיל לפחות 8 תווים.',
-  'pwModal.err.noMatch':    'הסיסמאות אינן תואמות.',
+  'pwModal.err.noMatch':       'הסיסמאות אינן תואמות.',
+  'pwModal.err.wrongCurrent':  'הסיסמה הנוכחית שגויה. נסה שוב.',
+  'pwModal.err.notAuth':       'עליך להיות מחובר כדי לשנות את הסיסמה.',
+  'pwModal.err.generic':       'משהו השתבש. נסה שוב.',
 
   'delModal.title':       'מחק חשבון',
   'delModal.subtitle':    'פעולה זו קבועה ולא ניתן לבטלה.',
