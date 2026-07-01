@@ -57,14 +57,19 @@ export default function GoogleCalendarCard() {
   const handleSyncNow = async () => {
     setErrorMsg('');
     const { error } = await syncEvents();
-    if (error) setErrorMsg(t(error === 'expired' ? 'gcal.errExpired' : 'gcal.errSync'));
+    if (error) {
+      if (error === 'expired')    setErrorMsg(t('gcal.errExpired'));
+      else if (error === 'forbidden') setErrorMsg(t('gcal.errForbidden'));
+      else setErrorMsg(t('gcal.errSync'));
+    }
   };
 
   const isConnected = calStatus === 'connected' || calStatus === 'syncing';
+  const isExpired   = calStatus === 'expired' || calStatus === 'forbidden';
   const isBusy      = calStatus === 'syncing' || connecting;
 
   // ── Not connected ────────────────────────────────────────────────────────────
-  if (!isConnected && calStatus !== 'expired') {
+  if (!isConnected && !isExpired) {
     return (
       <div className="gcal-card gcal-card--idle surface-card">
         <div className="gcal-card-icon-wrap" aria-hidden="true">
@@ -93,8 +98,8 @@ export default function GoogleCalendarCard() {
     );
   }
 
-  // ── Expired ──────────────────────────────────────────────────────────────────
-  if (calStatus === 'expired') {
+  // ── Expired / Forbidden ───────────────────────────────────────────────────────
+  if (isExpired) {
     return (
       <div className="gcal-card gcal-card--expired surface-card">
         <div className="gcal-card-icon-wrap" aria-hidden="true">
@@ -105,7 +110,9 @@ export default function GoogleCalendarCard() {
             {t('gcal.title')}
             <span className="chip chip-pending gcal-card-badge">{t('gcal.expired')}</span>
           </p>
-          <p className="gcal-card-desc">{t('gcal.expiredDesc')}</p>
+          <p className="gcal-card-desc">
+            {calStatus === 'forbidden' ? t('gcal.errForbidden') : t('gcal.expiredDesc')}
+          </p>
         </div>
         <button
           className="gcal-card-btn gcal-card-btn--primary"

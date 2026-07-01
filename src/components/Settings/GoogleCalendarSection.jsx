@@ -41,10 +41,15 @@ export default function GoogleCalendarSection() {
   const handleSyncNow = async () => {
     setErrorMsg('');
     const { error } = await syncEvents();
-    if (error) setErrorMsg(t(error === 'expired' ? 'gcal.errExpired' : 'gcal.errSync'));
+    if (error) {
+      if (error === 'expired')         setErrorMsg(t('gcal.errExpired'));
+      else if (error === 'forbidden')  setErrorMsg(t('gcal.errForbidden'));
+      else                             setErrorMsg(t('gcal.errSync'));
+    }
   };
 
   const isConnected = calStatus === 'connected' || calStatus === 'syncing';
+  const isExpired   = calStatus === 'expired' || calStatus === 'forbidden';
 
   return (
     <div className="surface-card set-section">
@@ -64,7 +69,7 @@ export default function GoogleCalendarSection() {
           <div className="set-row-control">
             {calStatus === 'syncing'  && <Spinner />}
             {isConnected              && <span className="chip chip-done">{t('gcal.connected')}</span>}
-            {calStatus === 'expired'  && <span className="chip chip-pending">{t('gcal.expired')}</span>}
+            {isExpired                && <span className="chip chip-pending">{t('gcal.expired')}</span>}
             {(calStatus === 'idle' || calStatus === 'error') && (
               <span className="chip chip-pending">{t('gcal.notConnected')}</span>
             )}
@@ -72,7 +77,7 @@ export default function GoogleCalendarSection() {
         </div>
 
         {/* Connected Google account */}
-        {(isConnected || calStatus === 'expired') && googleEmail && (
+        {(isConnected || isExpired) && googleEmail && (
           <div className="set-row">
             <div className="set-row-text">
               <span className="set-row-label">{t('gcal.account')}</span>
@@ -112,8 +117,10 @@ export default function GoogleCalendarSection() {
             {calStatus === 'idle' && (
               <span className="set-row-label">{t('gcal.connectDesc')}</span>
             )}
-            {calStatus === 'expired' && (
-              <span className="set-row-label">{t('gcal.expiredDesc')}</span>
+            {isExpired && (
+              <span className="set-row-label">
+                {calStatus === 'forbidden' ? t('gcal.errForbidden') : t('gcal.expiredDesc')}
+              </span>
             )}
           </div>
           <div className="set-row-control">
@@ -123,7 +130,7 @@ export default function GoogleCalendarSection() {
                 {t('gcal.connect')}
               </button>
             )}
-            {calStatus === 'expired' && (
+            {isExpired && (
               <button className="set-action-btn" onClick={handleConnect}>
                 <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
                 {t('gcal.reconnect')}

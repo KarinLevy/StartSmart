@@ -722,6 +722,7 @@ const en = {
   'gcal.errConnect':     'Failed to connect. Please try again.',
   'gcal.errSync':        'Failed to load events. Please try syncing again.',
   'gcal.errExpired':     'Your Google session has expired. Please reconnect.',
+  'gcal.errForbidden':   'Google Calendar access was denied. Make sure Calendar is enabled in your Google account and try reconnecting.',
   'gcal.errNoToken':     'No access token received. Please try connecting again.',
 
   // ── Footer ─────────────────────────────────────────────────────────────────

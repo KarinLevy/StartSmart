@@ -28,6 +28,11 @@ export function CalendarProvider({ children }) {
       setCalStatus('expired');
       return { error };
     }
+    if (error === 'forbidden') {
+      setCalToken(null);
+      setCalStatus('forbidden');
+      return { error };
+    }
     if (error) {
       setCalStatus('idle');
       return { error };
@@ -48,6 +53,11 @@ export function CalendarProvider({ children }) {
     if (error === 'expired') {
       setCalToken(null);
       setCalStatus('expired');
+      return { error };
+    }
+    if (error === 'forbidden') {
+      setCalToken(null);
+      setCalStatus('forbidden');
       return { error };
     }
     if (error) {
@@ -79,7 +89,10 @@ export function CalendarProvider({ children }) {
    */
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      if (event !== 'SIGNED_IN') return;
+      // Handle both SIGNED_IN and INITIAL_SESSION: with implicit flow the hash
+      // may be processed before this useEffect registers, so Supabase replays
+      // the session as INITIAL_SESSION to the new subscriber instead of SIGNED_IN.
+      if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return;
 
       const pending = sessionStorage.getItem('gcal_pending');
       if (!pending) return;

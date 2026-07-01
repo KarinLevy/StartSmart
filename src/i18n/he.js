@@ -544,6 +544,7 @@ const he = {
   'gcal.errConnect':     'החיבור נכשל. אנא נסה שוב.',
   'gcal.errSync':        'טעינת האירועים נכשלה. אנא נסה לסנכרן שוב.',
   'gcal.errExpired':     'הפעלת גוגל פגה. אנא התחבר מחדש.',
+  'gcal.errForbidden':   'הגישה ל-Google Calendar נדחתה. ודא שהיומן מופעל בחשבון Google שלך ונסה להתחבר מחדש.',
   'gcal.errNoToken':     'לא התקבל אסימון גישה. אנא נסה להתחבר שוב.',
 
   'footer.about':         'אודות',

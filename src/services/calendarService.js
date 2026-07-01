@@ -29,7 +29,8 @@ export async function fetchUpcomingEvents(accessToken) {
     return { data: null, error: 'network' };
   }
 
-  if (res.status === 401 || res.status === 403) return { data: null, error: 'expired' };
+  if (res.status === 401) return { data: null, error: 'expired' };
+  if (res.status === 403) return { data: null, error: 'forbidden' };
   if (!res.ok) return { data: null, error: `api_${res.status}` };
 
   const json = await res.json();

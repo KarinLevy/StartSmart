@@ -594,6 +594,7 @@ const de = {
   'gcal.errConnect':     'Verbindung fehlgeschlagen. Bitte erneut versuchen.',
   'gcal.errSync':        'Laden der Termine fehlgeschlagen. Bitte erneut synchronisieren.',
   'gcal.errExpired':     'Ihre Google-Sitzung ist abgelaufen. Bitte erneut verbinden.',
+  'gcal.errForbidden':   'Zugriff auf Google Kalender verweigert. Stellen Sie sicher, dass der Kalender in Ihrem Google-Konto aktiviert ist, und verbinden Sie sich erneut.',
   'gcal.errNoToken':     'Kein Zugriffstoken erhalten. Bitte erneut versuchen.',
 
   // ── Footer ─────────────────────────────────────────────────────────────────

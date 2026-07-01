@@ -594,6 +594,7 @@ const fr = {
   'gcal.errConnect':     'Échec de la connexion. Veuillez réessayer.',
   'gcal.errSync':        'Échec du chargement des événements. Veuillez réessayer.',
   'gcal.errExpired':     'Votre session Google a expiré. Veuillez vous reconnecter.',
+  'gcal.errForbidden':   'L\'accès à Google Agenda a été refusé. Assurez-vous que le Calendrier est activé dans votre compte Google et reconnectez-vous.',
   'gcal.errNoToken':     'Aucun jeton d\'accès reçu. Veuillez réessayer.',
 
   // ── Footer ─────────────────────────────────────────────────────────────────
