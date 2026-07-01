@@ -8,6 +8,8 @@ import { useTasks } from '../../context/TasksContext';
 import { useProfile } from '../../context/ProfileContext';
 import { useLocale, LANGUAGES } from '../../i18n/LocaleContext';
 import { exportUserData, triggerDownload, reportProblem } from '../../services/settingsService';
+import { useRegional } from '../../context/RegionalContext';
+import { formatDate, formatTime } from '../../utils/dateFormat';
 import { updateNotificationsEnabled } from '../../services/userService';
 import { loadUserSettings, saveUserSettings } from '../../services/userSettingsService';
 import './Settings.css';
@@ -89,6 +91,7 @@ const Settings = () => {
   const { tasks } = useTasks();
   const { profile } = useProfile();
   const { locale, setLocale, t, LANGUAGES } = useLocale();
+  const { regional } = useRegional();
   const navigate = useNavigate();
 
   // Initialise from cache immediately; hydrate from Supabase in background
@@ -242,6 +245,50 @@ const Settings = () => {
         />
       </Section>
 
+      {/* ── Regional Settings ── */}
+      <Section icon="public" title={t('regional.title')}>
+        <p className="set-regional-auto-note">{t('regional.autoNote')}</p>
+        <div className="set-regional-info">
+          <div className="set-regional-info-row">
+            <span className="set-regional-info-label">{t('regional.timezone')}</span>
+            <span className="set-regional-info-value" dir="ltr">{regional.timezone}</span>
+          </div>
+          <div className="set-regional-info-row">
+            <span className="set-regional-info-label">{t('regional.dateFormat')}</span>
+            <span className="set-regional-info-value" dir="ltr">{regional.dateFormat}</span>
+          </div>
+          <div className="set-regional-info-row">
+            <span className="set-regional-info-label">{t('regional.timeFormat')}</span>
+            <span className="set-regional-info-value">
+              {regional.timeFormat === '24h' ? t('regional.24h') : t('regional.12h')}
+            </span>
+          </div>
+          <div className="set-regional-info-row">
+            <span className="set-regional-info-label">{t('regional.firstDay')}</span>
+            <span className="set-regional-info-value">
+              {regional.firstDayOfWeek === 'monday' ? t('regional.monday') : t('regional.sunday')}
+            </span>
+          </div>
+        </div>
+        <div className="set-regional-preview">
+          <span className="set-regional-preview-label">{t('regional.preview')}</span>
+          <div className="set-regional-preview-values">
+            <span>
+              <span className="set-regional-preview-key">{t('regional.previewDate')}: </span>
+              <span dir="ltr" style={{ unicodeBidi: 'embed' }}>
+                {formatDate(new Date(), { dateFormat: regional.dateFormat, timezone: regional.timezone })}
+              </span>
+            </span>
+            <span>
+              <span className="set-regional-preview-key">{t('regional.previewTime')}: </span>
+              <span dir="ltr" style={{ unicodeBidi: 'embed' }}>
+                {formatTime(new Date(), { timeFormat: regional.timeFormat, timezone: regional.timezone })}
+              </span>
+            </span>
+          </div>
+        </div>
+      </Section>
+
       {/* ── Focus & Planning ── */}
       <Section icon="timer" title={t('settings.focusPlanning')}>
         <Row
@@ -299,7 +346,7 @@ const Settings = () => {
                 : exportState === 'success'
                 ? <><span className="material-symbols-outlined" aria-hidden="true">check_circle</span>{t('settings.exportSuccess')}</>
                 : exportState === 'error'
-                ? <><span className="material-symbols-outlined" aria-hidden="true">error</span>Error</>
+                ? <><span className="material-symbols-outlined" aria-hidden="true">error</span>{t('settings.errorShort')}</>
                 : <><span className="material-symbols-outlined" aria-hidden="true">download</span>{t('settings.exportData')}</>
               }
             </button>
@@ -314,7 +361,7 @@ const Settings = () => {
           desc={t('settings.profileSettingsDesc')}
           control={
             <Link to="/profile" className="set-action-btn">
-              <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              <span className="material-symbols-outlined flip-rtl" aria-hidden="true">arrow_forward</span>
               {t('common.open')}
             </Link>
           }
@@ -338,7 +385,7 @@ const Settings = () => {
           label={t('settings.helpCenter')}
           desc={t('settings.helpCenterDesc')}
           control={
-            <button className="set-action-btn" onClick={() => alert('Help Center coming soon — documentation is being prepared.')}>
+            <button className="set-action-btn" onClick={() => alert(t('settings.helpComingSoon'))}>
               <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
               {t('common.open')}
             </button>
@@ -377,8 +424,8 @@ const Settings = () => {
                 ? <Spinner />
                 : <span className="material-symbols-outlined" aria-hidden="true">bug_report</span>}
               {reportState === 'loading' ? t('common.loading')
-                : reportState === 'success' ? 'Sent!'
-                : reportState === 'error'   ? 'Error'
+                : reportState === 'success' ? t('settings.sent')
+                : reportState === 'error'   ? t('settings.errorShort')
                 : t('common.open')}
             </button>
           }

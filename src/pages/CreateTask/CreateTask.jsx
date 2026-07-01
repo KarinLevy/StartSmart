@@ -3,6 +3,7 @@ import Navbar from '../../components/Navbar/Navbar';
 import TaskForm from '../../components/TaskForm/TaskForm';
 import Footer from '../../components/Footer/Footer';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration } from '../../utils/dateFormat';
 import './CreateTask.css';
 
 const CreateTask = () => {
@@ -14,6 +15,13 @@ const CreateTask = () => {
     { icon: 'calendar_month',   text: t('createTask.tip3') },
     { icon: 'flag',             text: t('createTask.tip4') },
   ];
+
+  // Demo values for the Gap card — use the localized duration formatter
+  const planned  = formatDuration(45, t);
+  const actual   = formatDuration(52, t);
+  const gapAbs   = formatDuration(7, t);
+  // Prefix +/- using a LTR mark so the sign stays left of the number in RTL
+  const gapVal   = `‎+${gapAbs}`;
 
   return (
     <div className="create-task-layout">
@@ -53,19 +61,19 @@ const CreateTask = () => {
               </ul>
 
               <div className="sidebar-gap-card">
-                <div className="sidebar-gap-label">The Gap</div>
+                <div className="sidebar-gap-label">{t('createTask.gapLabel')}</div>
                 <div className="sidebar-gap-row">
                   <div className="sidebar-gap-stat">
-                    <span className="sidebar-gap-val">45m</span>
+                    <span className="sidebar-gap-val">{planned}</span>
                     <span className="sidebar-gap-key">{t('stats.planned')}</span>
                   </div>
-                  <span className="sidebar-gap-arrow material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                  <span className="sidebar-gap-arrow material-symbols-outlined flip-rtl" aria-hidden="true">arrow_forward</span>
                   <div className="sidebar-gap-stat">
-                    <span className="sidebar-gap-val">52m</span>
+                    <span className="sidebar-gap-val">{actual}</span>
                     <span className="sidebar-gap-key">{t('stats.actual')}</span>
                   </div>
                   <div className="sidebar-gap-stat">
-                    <span className="sidebar-gap-val over">+7m</span>
+                    <span className="sidebar-gap-val over">{gapVal}</span>
                     <span className="sidebar-gap-key">{t('stats.gap')}</span>
                   </div>
                 </div>

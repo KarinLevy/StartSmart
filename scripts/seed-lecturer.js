@@ -210,19 +210,22 @@ const PENDING_TASKS = [
 ];
 
 // ── Notifications ──────────────────────────────────────────────────────────────
+// title stores the i18n key prefix (e.g. 'notif.tpl.taskDue.title') so the
+// client can call t(title) / t(bodyKey, { taskTitle: message }) without any
+// string matching.  message holds only the dynamic task name (empty when none).
 const NOTIFICATIONS = [
-  { type: 'reminder', title: 'Task due today',           message: '"Plan Q3 technical roadmap" is scheduled for today. Don\'t forget!',                         is_read: false, daysAgo: 0,  hoursAgo: 0.5 },
-  { type: 'time_gap', title: 'Time gap detected',        message: 'Your focus session for "Set up CI/CD pipeline" ran 24 min over estimate.',                   is_read: false, daysAgo: 0,  hoursAgo: 2   },
-  { type: 'reminder', title: 'Weekly goal progress',     message: 'You\'ve logged 4h 30m this week — 75% of your 6h daily goal. Keep going!',                   is_read: false, daysAgo: 0,  hoursAgo: 6   },
-  { type: 'reminder', title: 'Unstarted task reminder',  message: '"Set up load testing with k6" has been pending for 4 days. Ready to start?',                 is_read: false, daysAgo: 1,  hoursAgo: 0   },
-  { type: 'time_gap', title: 'Long session detected',    message: 'You\'ve been in focus mode for 2+ hours. Consider taking a short break.',                     is_read: false, daysAgo: 1,  hoursAgo: 3   },
-  { type: 'time_gap', title: 'Focus session complete',   message: 'Great work! You stayed on task for 90 minutes on "Implement JWT refresh token rotation".',    is_read: true,  daysAgo: 1,  hoursAgo: 0   },
-  { type: 'reminder', title: 'Daily summary',            message: 'You completed 3 tasks yesterday and logged 2h 45m of focus time. Excellent!',                 is_read: true,  daysAgo: 2,  hoursAgo: 0   },
-  { type: 'reminder', title: 'Streak milestone',         message: '5-day productivity streak! You\'ve hit your daily focus goal every day this week.',           is_read: true,  daysAgo: 3,  hoursAgo: 0   },
-  { type: 'system',   title: 'Weekly report ready',      message: 'Your week in review: 8 tasks completed, 5h 20m focus time, -8 min average gap.',             is_read: true,  daysAgo: 7,  hoursAgo: 0   },
-  { type: 'time_gap', title: 'Excellent estimation!',    message: '"Fix mobile layout in task list view" finished within 3 minutes of your estimate.',           is_read: true,  daysAgo: 12, hoursAgo: 0   },
-  { type: 'system',   title: 'New feature: Insights',    message: 'Check out your new Insights dashboard for personalised productivity trends.',                 is_read: true,  daysAgo: 15, hoursAgo: 0   },
-  { type: 'system',   title: 'Welcome to StartSmart!',   message: 'Your workspace is all set. Start by creating your first task and running a focus session.',  is_read: true,  daysAgo: 30, hoursAgo: 0   },
+  { type: 'reminder', title: 'notif.tpl.taskDue.title',      message: 'Plan Q3 technical roadmap',              is_read: false, daysAgo: 0,  hoursAgo: 0.5 },
+  { type: 'time_gap', title: 'notif.tpl.timeGap.title',      message: 'Set up CI/CD pipeline with GitHub Actions', is_read: false, daysAgo: 0,  hoursAgo: 2   },
+  { type: 'reminder', title: 'notif.tpl.weeklyGoal.title',   message: '',                                       is_read: false, daysAgo: 0,  hoursAgo: 6   },
+  { type: 'reminder', title: 'notif.tpl.unstarted.title',    message: 'Set up load testing with k6',            is_read: false, daysAgo: 1,  hoursAgo: 0   },
+  { type: 'time_gap', title: 'notif.tpl.longSession.title',  message: '',                                       is_read: false, daysAgo: 1,  hoursAgo: 3   },
+  { type: 'time_gap', title: 'notif.tpl.focusDone.title',    message: 'Implement JWT refresh token rotation',   is_read: true,  daysAgo: 1,  hoursAgo: 0   },
+  { type: 'reminder', title: 'notif.tpl.dailySummary.title', message: '',                                       is_read: true,  daysAgo: 2,  hoursAgo: 0   },
+  { type: 'reminder', title: 'notif.tpl.streak.title',       message: '',                                       is_read: true,  daysAgo: 3,  hoursAgo: 0   },
+  { type: 'system',   title: 'notif.tpl.weeklyReport.title', message: '',                                       is_read: true,  daysAgo: 7,  hoursAgo: 0   },
+  { type: 'time_gap', title: 'notif.tpl.excellentEst.title', message: 'Fix mobile layout in task list view',    is_read: true,  daysAgo: 12, hoursAgo: 0   },
+  { type: 'system',   title: 'notif.tpl.newInsights.title',  message: '',                                       is_read: true,  daysAgo: 15, hoursAgo: 0   },
+  { type: 'system',   title: 'notif.tpl.welcome.title',      message: '',                                       is_read: true,  daysAgo: 30, hoursAgo: 0   },
 ];
 
 // ── Main ──────────────────────────────────────────────────────────────────────

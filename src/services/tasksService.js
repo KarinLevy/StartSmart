@@ -2,6 +2,23 @@ import { supabase } from '../lib/supabaseClient';
 
 // ── Mappers ───────────────────────────────────────────────────────────────────
 
+/**
+ * Normalize a scheduled_date value coming from the DB.
+ * The column may be a timestamp type, which causes the DB to append T00:00:00
+ * to date-only saves. We detect midnight and strip the time so those tasks
+ * are treated as "unscheduled" rather than appearing at 00:00 on the timeline.
+ * Non-midnight times are kept as YYYY-MM-DDTHH:MM.
+ */
+function normalizeScheduledDate(raw) {
+  if (!raw) return '';
+  // Remove fractional seconds and timezone suffix (Z or ±HH:MM)
+  const s = raw.replace(/(\.\d+)?(Z|[+-]\d{2}:\d{2})$/, '');
+  if (!s.includes('T')) return s;           // already date-only
+  const timePart = s.slice(11);             // "HH:MM:SS" or "HH:MM"
+  if (timePart === '00:00:00' || timePart === '00:00') return s.slice(0, 10);
+  return s.slice(0, 16);                    // keep YYYY-MM-DDTHH:MM
+}
+
 /** DB row → app shape (camelCase) */
 function fromDB(row) {
   // Use the most recent time_log for actualMinutes / gap
@@ -15,7 +32,7 @@ function fromDB(row) {
     title:            row.title,
     description:      row.description   ?? '',
     estimatedMinutes: row.estimated_duration ?? 0,
-    scheduledDate:    row.scheduled_date ?? '',
+    scheduledDate:    normalizeScheduledDate(row.scheduled_date),
     status:           row.task_status,
     priorityHigh:     row.priority_high ?? false,
     actualMinutes:    latestLog?.actual_duration ?? null,

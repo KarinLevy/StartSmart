@@ -88,7 +88,7 @@ const Navbar = () => {
           <div className="notif-bell-wrap">
             <button
               className="navbar-notification"
-              aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+              aria-label={unreadCount > 0 ? (unreadCount === 1 ? t('notif.unread').replace('{n}', unreadCount) : t('notif.unreadPlural').replace('{n}', unreadCount)) : t('notif.title')}
               aria-haspopup="dialog"
               aria-expanded={notifOpen}
               onClick={() => setNotifOpen((v) => !v)}

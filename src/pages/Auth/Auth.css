@@ -152,12 +152,12 @@
 }
 
 .auth-input-icon-wrap .auth-input {
-  padding-left: 2.75rem;
+  padding-inline-start: 2.75rem;
 }
 
 .auth-input-icon {
   position: absolute;
-  left: 0.75rem;
+  inset-inline-start: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--color-outline);
@@ -167,7 +167,7 @@
 
 .auth-toggle-visibility {
   position: absolute;
-  right: 0.5rem;
+  inset-inline-end: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   background: transparent;

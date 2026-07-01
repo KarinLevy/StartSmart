@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../components/Navbar/Navbar';
 import { useNotifications } from '../../context/NotificationsContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatRelativeTime } from '../../utils/dateFormat';
 import './Notifications.css';
 
 const Notifications = () => {
@@ -29,7 +30,7 @@ const Notifications = () => {
             </p>
           </div>
           {unreadCount > 0 && (
-            <button className="btn-secondary" onClick={markAllRead}>
+            <button className="btn btn-secondary" onClick={markAllRead}>
               <span className="material-symbols-outlined" aria-hidden="true">done_all</span>
               {t('notif.markAllRead')}
             </button>
@@ -48,19 +49,19 @@ const Notifications = () => {
                 <button
                   className="notif-full-btn"
                   onClick={() => markRead(n.id)}
-                  aria-label={`${n.read ? '' : 'Unread: '}${n.title}`}
+                  aria-label={`${n.read ? '' : `${t('notif.unreadDot')}: `}${n.titleKey ? t(n.titleKey) : n.title}`}
                 >
                   <div className={`notif-icon-wrap notif-icon-${n.icon.split('_')[0]}`} aria-hidden="true">
                     <span className="material-symbols-outlined">{n.icon}</span>
                   </div>
                   <div className="notif-full-body">
                     <div className="notif-full-row">
-                      <span className="notif-title">{n.title}</span>
-                      <span className="notif-time">{n.time}</span>
+                      <span className="notif-title">{n.titleKey ? t(n.titleKey) : n.title}</span>
+                      <span className="notif-time">{formatRelativeTime(n.createdAt, t)}</span>
                     </div>
-                    <span className="notif-text">{n.body}</span>
+                    <span className="notif-text">{n.bodyKey ? t(n.bodyKey, { taskTitle: n.taskTitle ?? '' }) : n.body}</span>
                   </div>
-                  {!n.read && <span className="notif-unread-dot" aria-label="Unread" />}
+                  {!n.read && <span className="notif-unread-dot" aria-label={t('notif.unreadDot')} />}
                 </button>
               </li>
             ))}

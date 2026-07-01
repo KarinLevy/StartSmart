@@ -7,17 +7,12 @@ import InsightCard from '../../components/Statistics/InsightCard';
 import Footer from '../../components/Footer/Footer';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { useRegional } from '../../context/RegionalContext';
+import { formatDate, formatDuration, formatGap } from '../../utils/dateFormat';
+import LocaleDateInput from '../../components/shared/LocaleDateInput';
 import '../../components/Statistics/Statistics.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-const fmtMin = (m) => {
-  if (!m) return '0m';
-  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}`;
-  return `${m}m`;
-};
-
-const fmtGap = (g) => (g > 0 ? `+${g.toFixed(1)}m` : `${g.toFixed(1)}m`);
 
 // ── Period filter ─────────────────────────────────────────────────────────────
 
@@ -87,24 +82,24 @@ const sortTasks = (tasks, sortBy) => {
 
 // ── Range label ───────────────────────────────────────────────────────────────
 
-const getRangeLabel = (period, customStart, customEnd) => {
+const getRangeLabel = (period, customStart, customEnd, regional = {}, t) => {
   if (period === 'This Week') {
     const mon = startOfWeek();
     const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-    return `This Week (${mon.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${sun.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`;
+    return `${t('stats.thisWeek')} (${formatDate(mon, regional)} – ${formatDate(sun, regional)})`;
   }
   if (period === 'Last 30 Days') {
     const cutoff = new Date(Date.now() - 30 * 86400000);
-    return `Last 30 Days (${cutoff.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – Today)`;
+    return `${t('stats.last30')} (${formatDate(cutoff, regional)} – ${t('common.today')})`;
   }
   if (period === 'Custom Range') {
     if (customStart && customEnd) {
-      return `${new Date(customStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} – ${new Date(customEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+      return `${formatDate(new Date(customStart), regional)} – ${formatDate(new Date(customEnd), regional)}`;
     }
-    if (customStart) return `From ${new Date(customStart).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
-    return 'Select a start and end date';
+    if (customStart) return t('stats.fromDate', { date: formatDate(new Date(customStart), regional) });
+    return t('stats.selectStart');
   }
-  return 'All Time';
+  return t('stats.allTime');
 };
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -112,6 +107,7 @@ const getRangeLabel = (period, customStart, customEnd) => {
 const Statistics = () => {
   const { tasks, loading, error } = useTasks();
   const { t } = useLocale();
+  const { regional } = useRegional();
 
   const [period,      setPeriod]      = useState('All Time');
   const [prevPeriod,  setPrevPeriod]  = useState('All Time');
@@ -147,7 +143,9 @@ const Statistics = () => {
     { value: 'gap_low',     label: t('stats.sortGapLow') },
   ];
 
-  const rangeLabel = getRangeLabel(period, customStart, customEnd);
+  const rangeLabel = getRangeLabel(period, customStart, customEnd, regional, t);
+  const fmtDur = (m) => formatDuration(m || 0, t);
+  const fmtGap = (g) => formatGap(g, t);
 
   const handlePeriodChange = (p) => {
     if (p !== 'Custom Range') setPrevPeriod(p);
@@ -204,25 +202,25 @@ const Statistics = () => {
             {period === 'Custom Range' && (
               <div className="stat-custom-range" role="group" aria-label="Custom date range">
                 <label className="stat-date-label" htmlFor="stat-start">{t('stats.from')}</label>
-                <input
+                <LocaleDateInput
                   id="stat-start"
-                  type="date"
                   className="stat-date-input"
                   value={customStart}
                   max={customEnd || undefined}
                   onChange={(e) => setCustomStart(e.target.value)}
-                  aria-label="Start date"
+                  ariaLabel="Start date"
+                  regional={regional}
                 />
                 <span className="stat-date-sep" aria-hidden="true">—</span>
                 <label className="stat-date-label" htmlFor="stat-end">{t('stats.to')}</label>
-                <input
+                <LocaleDateInput
                   id="stat-end"
-                  type="date"
                   className="stat-date-input"
                   value={customEnd}
                   min={customStart || undefined}
                   onChange={(e) => setCustomEnd(e.target.value)}
-                  aria-label="End date"
+                  ariaLabel="End date"
+                  regional={regional}
                 />
                 <button
                   className="stat-custom-clear"
@@ -235,7 +233,7 @@ const Statistics = () => {
             )}
           </div>
 
-          <Link to="/insights" className="btn-secondary stat-insights-link">
+          <Link to="/insights" className="btn btn-secondary stat-insights-link">
             <span className="material-symbols-outlined" aria-hidden="true">insights</span>
             {t('stats.viewInsights')}
           </Link>
@@ -251,7 +249,7 @@ const Statistics = () => {
         <section className="summary-cards-grid" aria-label="Summary metrics">
           <StatisticsCard title={t('stats.totalTasks')}  value={String(done.length)}    icon="check_circle"    colorClass="summary-completed" />
           <StatisticsCard title={t('stats.productivity')} value={String(pending.length)} icon="pending_actions" colorClass="summary-pending" />
-          <StatisticsCard title={t('stats.totalFocus')}   value={fmtMin(totalWorked)}    icon="schedule"        colorClass="summary-time" />
+          <StatisticsCard title={t('stats.totalFocus')}   value={fmtDur(totalWorked)}    icon="schedule"        colorClass="summary-time" />
           <StatisticsCard
             title={t('stats.avgGap')}
             value={avgGap !== null ? fmtGap(avgGap) : '—'}
@@ -308,8 +306,8 @@ const Statistics = () => {
                             {task.title}
                           </Link>
                         </td>
-                        <td className="table-time">{fmtMin(task.estimatedMinutes)}</td>
-                        <td className="table-time">{fmtMin(task.actualMinutes)}</td>
+                        <td className="table-time">{fmtDur(task.estimatedMinutes)}</td>
+                        <td className="table-time">{fmtDur(task.actualMinutes)}</td>
                         <td className={task.gap > 0 ? 'table-gap-negative' : 'table-gap-positive'}>
                           {task.gap != null ? fmtGap(task.gap) : '—'}
                         </td>
@@ -325,7 +323,7 @@ const Statistics = () => {
             <span className="material-symbols-outlined stat-empty-icon" aria-hidden="true">insert_chart</span>
             <p>{period !== 'All Time' ? t('stats.noData') : t('stats.noTasksYet')}</p>
             {period !== 'All Time' && (
-              <button className="btn-secondary" onClick={() => handlePeriodChange('All Time')}>{t('stats.showAllTime')}</button>
+              <button className="btn btn-secondary" onClick={() => handlePeriodChange('All Time')}>{t('stats.showAllTime')}</button>
             )}
           </div>
         )}

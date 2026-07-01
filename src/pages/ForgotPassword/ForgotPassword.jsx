@@ -16,7 +16,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     if (!email.trim()) {
       setStatus('error');
-      setErrorMsg(t('forgot.err.emailEmpty') || 'Please enter your email.');
+      setErrorMsg(t('forgot.err.emailEmpty'));
       return;
     }
     setStatus('loading');

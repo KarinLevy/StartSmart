@@ -2,14 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration } from '../../utils/dateFormat';
 import './TaskCards.css';
-
-const fmtMin = (m) => {
-  if (m == null) return '--';
-  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}`;
-  return `${m}m`;
-};
-const fmtGap = (g) => (g == null ? '--' : g > 0 ? `+${g}m` : `${g}m`);
 
 const DOT_CLS = { in_progress: 'secondary', pending: 'outline', done: 'green' };
 
@@ -17,6 +11,13 @@ const WorkflowTable = () => {
   const { tasks, loading, error } = useTasks();
   const navigate = useNavigate();
   const { t } = useLocale();
+
+  const fmtMin = (m) => (m == null ? '--' : formatDuration(m, t));
+  const fmtGap = (g) => {
+    if (g == null) return '--';
+    const abs = formatDuration(Math.abs(g), t);
+    return g > 0 ? `+${abs}` : `-${abs}`;
+  };
   const [filter, setFilter] = useState('all');
 
   const FILTERS = [
@@ -119,14 +120,14 @@ const WorkflowTable = () => {
                           {task.priorityHigh && (
                             <span
                               className="material-symbols-outlined"
-                              style={{ fontSize: '14px', color: 'var(--color-error)', verticalAlign: 'middle', marginRight: '3px' }}
+                              style={{ fontSize: '14px', color: 'var(--color-error)', flexShrink: 0, marginTop: '2px' }}
                               aria-label="High priority"
                             >flag</span>
                           )}
                           <button
                             className="task-name-link"
                             onClick={() => navigate(`/task-details/${task.id}`)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit', padding: 0, textAlign: 'left' }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit', padding: 0, textAlign: 'start' }}
                           >
                             {task.title}
                           </button>

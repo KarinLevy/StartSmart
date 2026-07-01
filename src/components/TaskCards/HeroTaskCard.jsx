@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration } from '../../utils/dateFormat';
 import './TaskCards.css';
 
 const HeroTaskCard = () => {
@@ -28,9 +29,7 @@ const HeroTaskCard = () => {
     );
   }
 
-  const fmtEst = task.estimatedMinutes >= 60
-    ? `${Math.floor(task.estimatedMinutes / 60)}h ${task.estimatedMinutes % 60 > 0 ? task.estimatedMinutes % 60 + 'm' : ''} ${t('hero.session')}`
-    : `${task.estimatedMinutes}m ${t('hero.session')}`;
+  const fmtEst = `${formatDuration(task.estimatedMinutes, t)} ${t('hero.session')}`;
 
   return (
     <div className="glass-card hero-card group">

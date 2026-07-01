@@ -4,19 +4,8 @@ import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { getTagDisplayColor } from '../../utils/tagUtils';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration } from '../../utils/dateFormat';
 import './TaskDetails.css';
-
-const fmtMin = (m) => {
-  if (!m) return '--';
-  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}`;
-  return `${m}m`;
-};
-
-const STATUS_META = {
-  pending:     { label: 'Pending',     cls: 'chip-pending',  icon: 'schedule' },
-  in_progress: { label: 'In Progress', cls: 'chip-progress', icon: 'autorenew' },
-  done:        { label: 'Done',        cls: 'chip-done',     icon: 'check_circle' },
-};
 
 const STATUSES = ['pending', 'in_progress', 'done'];
 
@@ -24,9 +13,17 @@ const TaskDetails = () => {
   const { id } = useParams();
   const { tasks, loading, updateTask, deleteTask } = useTasks();
   const navigate = useNavigate();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const task = tasks.find((tk) => tk.id === id);
+
+  const fmtMin = (m) => formatDuration(m, t);
+
+  const STATUS_META = {
+    pending:     { label: t('taskDetails.statusPending'),    cls: 'chip-pending',  icon: 'schedule' },
+    in_progress: { label: t('taskDetails.statusInProgress'), cls: 'chip-progress', icon: 'autorenew' },
+    done:        { label: t('taskDetails.statusDone'),        cls: 'chip-done',     icon: 'check_circle' },
+  };
 
   const [editing, setEditing]       = useState(false);
   const [editTitle, setEditTitle]   = useState('');
@@ -90,7 +87,7 @@ const TaskDetails = () => {
       });
       setEditing(false);
     } catch (err) {
-      setMutErr(err.message ?? 'Failed to save. Please try again.');
+      setMutErr(err.message ?? t('common.error'));
     } finally {
       setSaving(false);
     }
@@ -102,14 +99,14 @@ const TaskDetails = () => {
       await deleteTask(id);
       navigate('/dashboard');
     } catch (err) {
-      setMutErr(err.message ?? 'Failed to delete. Please try again.');
+      setMutErr(err.message ?? t('common.error'));
       setDeleting(false);
       setShowDel(false);
     }
   };
 
   const scheduledFormatted = task.scheduledDate
-    ? new Date(task.scheduledDate).toLocaleString('en-US', {
+    ? new Date(task.scheduledDate).toLocaleString(locale, {
         weekday: 'short', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit',
       })
@@ -149,7 +146,6 @@ const TaskDetails = () => {
       }
     >
 
-      {/* Mutation error banner */}
       {mutErr && (
         <p className="auth-field-error" role="alert" style={{ marginBottom: '1rem' }}>
           <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>error</span>
@@ -157,9 +153,8 @@ const TaskDetails = () => {
         </p>
       )}
 
-      {/* Delete confirmation */}
       {showDel && (
-        <div className="td-confirm-overlay" role="dialog" aria-modal="true" aria-label="Delete task confirmation">
+        <div className="td-confirm-overlay" role="dialog" aria-modal="true" aria-label={t('taskDetails.deleteTitle')}>
           <div className="td-confirm-box">
             <span className="material-symbols-outlined td-confirm-icon" aria-hidden="true">warning</span>
             <h3 className="td-confirm-title">{t('taskDetails.deleteTitle')}</h3>
@@ -176,7 +171,6 @@ const TaskDetails = () => {
 
       <div className="surface-card td-card">
 
-        {/* Top: status + title */}
         <div className="td-top">
           <div className="td-status-row">
             {editing ? (
@@ -206,7 +200,7 @@ const TaskDetails = () => {
                 {task.priorityHigh && (
                   <span className="chip chip-priority">
                     <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">flag</span>
-                    High priority
+                    {t('taskDetails.highPriority')}
                   </span>
                 )}
               </>
@@ -218,23 +212,22 @@ const TaskDetails = () => {
               className="td-title-input"
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
-              aria-label="Task title"
+              aria-label={t('taskDetails.titleAriaLabel')}
             />
           ) : (
             <h2 className="td-title">{task.title}</h2>
           )}
         </div>
 
-        {/* Description */}
         <div className="td-field">
-          <span className="td-field-label">Description</span>
+          <span className="td-field-label">{t('taskDetails.description')}</span>
           {editing ? (
             <textarea
               className="td-textarea"
               value={editDesc}
               onChange={(e) => setEditDesc(e.target.value)}
               rows={4}
-              aria-label="Task description"
+              aria-label={t('taskDetails.descAriaLabel')}
             />
           ) : (
             <p className="td-field-value">
@@ -243,9 +236,7 @@ const TaskDetails = () => {
           )}
         </div>
 
-        {/* Meta grid */}
         <div className="td-meta-grid">
-          {/* Scheduled */}
           <div className="td-meta">
             <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">calendar_month</span>
             <div>
@@ -256,7 +247,7 @@ const TaskDetails = () => {
                   className="td-inline-input"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  aria-label="Scheduled date and time"
+                  aria-label={t('taskDetails.scheduled')}
                 />
               ) : (
                 <span className="td-meta-value">{scheduledFormatted}</span>
@@ -264,7 +255,6 @@ const TaskDetails = () => {
             </div>
           </div>
 
-          {/* Estimated */}
           <div className="td-meta">
             <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">hourglass_top</span>
             <div>
@@ -278,9 +268,9 @@ const TaskDetails = () => {
                     value={editEst}
                     onChange={(e) => setEditEst(e.target.value)}
                     style={{ width: '72px' }}
-                    aria-label="Estimated minutes"
+                    aria-label={t('taskDetails.estimated')}
                   />
-                  <span style={{ fontSize: 'var(--font-size-label-sm)', color: 'var(--color-outline)' }}>min</span>
+                  <span style={{ fontSize: 'var(--font-size-label-sm)', color: 'var(--color-outline)' }}>{t('taskDetails.minutes')}</span>
                 </div>
               ) : (
                 <span className="td-meta-value">{fmtMin(task.estimatedMinutes)}</span>
@@ -288,7 +278,6 @@ const TaskDetails = () => {
             </div>
           </div>
 
-          {/* Actual (read-only) */}
           {task.actualMinutes != null && (
             <div className="td-meta">
               <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">timer</span>
@@ -299,14 +288,13 @@ const TaskDetails = () => {
             </div>
           )}
 
-          {/* Gap */}
           {gap != null && (
             <div className="td-meta">
               <span className="material-symbols-outlined td-meta-icon" aria-hidden="true">query_stats</span>
               <div>
                 <span className="td-meta-label">{t('taskDetails.gap')}</span>
                 <span className={`td-meta-value ${gap > 0 ? 'gap-over' : 'gap-under'}`}>
-                  {gap > 0 ? `+${gap}m` : `${gap}m`}
+                  {gap > 0 ? `+${fmtMin(gap)}` : gap < 0 ? `-${fmtMin(Math.abs(gap))}` : fmtMin(0)}
                   <span className="td-gap-badge">
                     {gap === 0 ? t('taskDetails.onTarget') : gap > 0 ? t('taskDetails.over') : t('taskDetails.early')}
                   </span>
@@ -316,7 +304,6 @@ const TaskDetails = () => {
           )}
         </div>
 
-        {/* Priority toggle in edit mode */}
         {editing && (
           <div className="td-field">
             <button
@@ -326,12 +313,11 @@ const TaskDetails = () => {
               aria-pressed={editPrio}
             >
               <span className="material-symbols-outlined" aria-hidden="true">flag</span>
-              {editPrio ? 'High priority — click to remove' : 'Mark as high priority'}
+              {editPrio ? t('taskDetails.prioRemove') : t('taskDetails.prioAdd')}
             </button>
           </div>
         )}
 
-        {/* Tags */}
         {!editing && task.tags?.length > 0 && (
           <div className="td-field">
             <span className="td-field-label">{t('taskDetails.tags')}</span>
@@ -352,7 +338,6 @@ const TaskDetails = () => {
           </div>
         )}
 
-        {/* Bottom actions */}
         <div className="td-actions">
           <Link to="/dashboard" className="btn btn-secondary">
             <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>

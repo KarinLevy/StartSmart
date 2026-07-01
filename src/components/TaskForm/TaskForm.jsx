@@ -14,6 +14,8 @@ import {
   getTagDisplayColor,
 } from '../../utils/tagUtils';
 import { useLocale } from '../../i18n/LocaleContext';
+import { useRegional } from '../../context/RegionalContext';
+import { formatDate } from '../../utils/dateFormat';
 import './TaskForm.css';
 
 /*
@@ -32,6 +34,7 @@ import './TaskForm.css';
 // ── TagChip ───────────────────────────────────────────────────────────────────
 
 export function TagChip({ tag, onRemove }) {
+  const { t } = useLocale();
   const color = getTagDisplayColor(tag);
   return (
     <span
@@ -44,7 +47,7 @@ export function TagChip({ tag, onRemove }) {
         <button
           type="button"
           className="tag-chip-remove"
-          aria-label={`Remove tag ${tag.name}`}
+          aria-label={t('form.tagRemove', { name: tag.name })}
           style={{ color }}
           onClick={(e) => { e.stopPropagation(); onRemove(tag.name); }}
         >
@@ -59,6 +62,7 @@ export function TagChip({ tag, onRemove }) {
 
 function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, anchorRef }) {
   const popoverRef = useRef(null);
+  const { t } = useLocale();
 
   useEffect(() => {
     const onKey   = (e) => { if (e.key === 'Escape') onClose(); };
@@ -80,26 +84,26 @@ function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, 
       ref={popoverRef}
       className="tag-color-popover"
       role="dialog"
-      aria-label="Choose tag color"
+      aria-label={t('form.colorPickerAriaLabel')}
       aria-modal="false"
     >
       <div className="tcp-header">
-        <span className="tcp-title">Tag color</span>
-        <button type="button" className="tcp-close" onClick={onClose} aria-label="Close color picker">
+        <span className="tcp-title">{t('form.colorPickerTitle')}</span>
+        <button type="button" className="tcp-close" onClick={onClose} aria-label={t('form.colorPickerClose')}>
           <span className="material-symbols-outlined" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <div className="tcp-swatches" role="radiogroup" aria-label="Color options">
+      <div className="tcp-swatches" role="radiogroup" aria-label={t('form.colorPickerAriaLabel')}>
         {TAG_PRESETS.map((p) => (
           <button
             key={p.color}
             type="button"
             className={`tcp-swatch${selectedColor === p.color ? ' tcp-swatch--selected' : ''}`}
             style={{ background: p.color }}
-            aria-label={`${p.label} — ${p.hint}`}
+            aria-label={`${t(`tag.color.${p.id}.label`)} — ${t(`tag.color.${p.id}.hint`)}`}
             aria-pressed={selectedColor === p.color}
-            title={`${p.label}: ${p.hint}`}
+            title={`${t(`tag.color.${p.id}.label`)}: ${t(`tag.color.${p.id}.hint`)}`}
             onClick={() => { onSelect(p.color); onClose(); }}
           >
             {selectedColor === p.color && (
@@ -114,8 +118,8 @@ function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, 
           <li key={p.color} className="tcp-legend-item">
             <span className="tcp-legend-dot" style={{ background: p.color }} aria-hidden="true" />
             <span className="tcp-legend-text">
-              <span className="tcp-legend-hint">{p.hint}</span>
-              <span className="tcp-legend-examples">{p.examples}</span>
+              <span className="tcp-legend-hint">{t(`tag.color.${p.id}.hint`)}</span>
+              <span className="tcp-legend-examples">{t(`tag.color.${p.id}.examples`)}</span>
             </span>
           </li>
         ))}
@@ -124,7 +128,7 @@ function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, 
       {selectedColor !== DEFAULT_COLOR && (
         <button type="button" className="tcp-reset" onClick={() => { onReset(); onClose(); }}>
           <span className="material-symbols-outlined" aria-hidden="true">restart_alt</span>
-          Reset to default
+          {t('form.colorReset')}
         </button>
       )}
     </div>
@@ -136,16 +140,23 @@ function ColorPopover({ selectedColor, colorSource, onSelect, onReset, onClose, 
 const TaskForm = () => {
   const { addTask, tasks } = useTasks();
   const navigate           = useNavigate();
-  const { t }              = useLocale();
+  const { t } = useLocale();
+  const { regional } = useRegional();
   const tagInputRef        = useRef(null);
   const paletteRef         = useRef(null);
 
   const [title,         setTitle]        = useState('');
   const [description,   setDescription]  = useState('');
-  const [scheduledDate, setScheduledDate] = useState('');
+  const [dateOnly,      setDateOnly]     = useState(''); // YYYY-MM-DD
+  const [timeOnly,      setTimeOnly]     = useState(''); // HH:MM
   const [estHours,      setEstHours]     = useState('');
   const [estMins,       setEstMins]      = useState('');
   const [priorityHigh,  setPriorityHigh] = useState(false);
+
+  // Combine date + time into the ISO string used for submission
+  const scheduledDate = dateOnly
+    ? (timeOnly ? `${dateOnly}T${timeOnly}` : dateOnly)
+    : '';
 
   // Tag state
   const [tags,         setTags]        = useState([]);
@@ -181,6 +192,11 @@ const TaskForm = () => {
         setEstHours(String(Math.floor(p.estimatedMinutes / 60) || ''));
         setEstMins(String(p.estimatedMinutes % 60 || ''));
       }
+      if (p.scheduledDate) {
+        const [d, t2] = p.scheduledDate.split('T');
+        if (d) setDateOnly(d);
+        if (t2) setTimeOnly(t2.slice(0, 5));
+      }
     } catch { /* ignore malformed prefill */ }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -208,7 +224,7 @@ const TaskForm = () => {
       await addTask({ title: title.trim(), description, scheduledDate, estimatedMinutes, priorityHigh, tags });
       navigate('/dashboard');
     } catch (err) {
-      setSubmitError(err.message ?? 'Failed to save task. Please try again.');
+      setSubmitError(err.message ?? t('common.error'));
       setSubmitting(false);
     }
   };
@@ -234,7 +250,7 @@ const TaskForm = () => {
     tagInputRef.current?.focus();
   };
 
-  const removeTag = (name) => setTags((prev) => prev.filter((t) => t.name !== name));
+  const removeTag = (name) => setTags((prev) => prev.filter((tag) => tag.name !== name));
 
   const handleTagKeyDown = (e) => {
     if (e.key === 'Enter')  { e.preventDefault(); addTag(); }
@@ -255,6 +271,10 @@ const TaskForm = () => {
   };
 
   const atLimit = tags.length >= MAX_TAGS;
+
+  const formattedDate = dateOnly
+    ? formatDate(new Date(dateOnly + 'T00:00'), regional)
+    : null;
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -291,15 +311,58 @@ const TaskForm = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label" htmlFor="task-datetime">{t('form.dateLabel')}</label>
-            <div className="input-with-icon">
-              <span className="material-symbols-outlined input-icon-left">calendar_month</span>
+            <label className="form-label" htmlFor="task-date">{t('form.dateLabel')}</label>
+            <div className="date-time-row">
+              <div className="date-facade-wrap">
+                {/*
+                  Visual layer: pointer-events none so all clicks fall
+                  through to the native input sitting behind it.
+                */}
+                <div
+                  className={`form-input date-facade${dateOnly ? '' : ' date-facade--empty'}`}
+                  aria-hidden="true"
+                >
+                  <span className="material-symbols-outlined date-facade-icon" aria-hidden="true">calendar_month</span>
+                  <span className="date-facade-text">
+                    {formattedDate ?? t('form.datePlaceholder')}
+                  </span>
+                </div>
+
+                {/*
+                  Native date input: transparent, covers the full facade area,
+                  fully interactive — the browser owns open/close natively.
+                */}
+                <input
+                  id="task-date"
+                  type="date"
+                  value={dateOnly}
+                  onChange={(e) => setDateOnly(e.target.value)}
+                  className="date-hidden-input"
+                  aria-label={t('form.dateLabel')}
+                />
+
+                {/* Clear button sits above the hidden input (z-index: 2) */}
+                {dateOnly && (
+                  <button
+                    type="button"
+                    className="date-facade-clear"
+                    aria-label={t('form.dateClear')}
+                    onClick={() => { setDateOnly(''); setTimeOnly(''); }}
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Time input — dir="ltr" keeps HH:MM order in RTL pages */}
               <input
-                className="form-input form-input-with-icon-left"
-                id="task-datetime"
-                type="datetime-local"
-                value={scheduledDate}
-                onChange={(e) => setScheduledDate(e.target.value)}
+                id="task-time"
+                type="time"
+                dir="ltr"
+                className="form-input date-time-input"
+                value={timeOnly}
+                onChange={(e) => setTimeOnly(e.target.value)}
+                aria-label={t('form.timeLabel')}
               />
             </div>
           </div>
@@ -309,8 +372,9 @@ const TaskForm = () => {
               {t('form.estimateLabel')} <span className="form-label-required">*</span>
             </label>
             <div className="duration-inputs">
-              <div className="duration-input-wrapper">
+              <div className="duration-input-wrapper" dir="ltr">
                 <input
+                  dir="ltr"
                   className="form-input duration-input"
                   min="0"
                   placeholder={t('form.hoursPlaceholder')}
@@ -320,8 +384,9 @@ const TaskForm = () => {
                 />
                 <span className="duration-unit">h</span>
               </div>
-              <div className="duration-input-wrapper">
+              <div className="duration-input-wrapper" dir="ltr">
                 <input
+                  dir="ltr"
                   className="form-input duration-input"
                   max="59"
                   min="0"
@@ -344,20 +409,17 @@ const TaskForm = () => {
               {tags.length}/{MAX_TAGS}
             </span>
           </div>
-          <p className="form-field-hint">
-            Press <kbd className="kbd">Enter</kbd> or <strong>Add</strong> to create a tag.
-            <kbd className="kbd">Backspace</kbd> on an empty input removes the last tag.
-          </p>
+          <p className="form-field-hint">{t('form.tagHint')}</p>
 
           {/* Chip box + inline input */}
           <div
             className={`tag-field-box${tagError ? ' tag-field-box--error' : ''}`}
             onClick={() => !atLimit && tagInputRef.current?.focus()}
             role="group"
-            aria-label="Tag chips"
+            aria-label={t('form.tagsLabel')}
           >
-            {tags.map((t) => (
-              <TagChip key={t.name} tag={t} onRemove={removeTag} />
+            {tags.map((tag) => (
+              <TagChip key={tag.name} tag={tag} onRemove={removeTag} />
             ))}
             {!atLimit && (
               <input
@@ -365,7 +427,7 @@ const TaskForm = () => {
                 id="tag-input"
                 className="tag-inline-input"
                 type="text"
-                placeholder={tags.length === 0 ? 'e.g., work, study, urgent…' : 'Add another…'}
+                placeholder={tags.length === 0 ? t('form.tagPlaceholder') : t('form.tagAddAnother')}
                 value={tagInput}
                 maxLength={TAG_MAX_LEN + 1}
                 autoComplete="off"
@@ -391,7 +453,7 @@ const TaskForm = () => {
               id="tag-suggestions"
               className="tag-suggestions"
               role="listbox"
-              aria-label="Tag suggestions"
+              aria-label={t('form.tagsLabel')}
             >
               {suggestions.map((s) => (
                 <li
@@ -425,19 +487,19 @@ const TaskForm = () => {
             ) : atLimit ? (
               <p className="tag-limit-msg" role="status">
                 <span className="material-symbols-outlined" aria-hidden="true">info</span>
-                You can add up to {MAX_TAGS} tags per task.
+                {t('form.tagLimit', { max: MAX_TAGS })}
               </p>
             ) : (
               <span className="tag-footer-left" aria-live="polite">
                 {colorSource === 'suggested' && (
                   <span className="tag-suggested-badge">
-                    ✨ Suggested
+                    {t('form.tagSuggested')}
                   </span>
                 )}
                 {colorSource === 'preference' && (
                   <span className="tag-pref-badge">
                     <span className="material-symbols-outlined" aria-hidden="true">bookmark</span>
-                    Remembered
+                    {t('form.tagRemembered')}
                   </span>
                 )}
               </span>
@@ -451,7 +513,7 @@ const TaskForm = () => {
                     ref={paletteRef}
                     type="button"
                     className={`tag-palette-btn${colorOpen ? ' tag-palette-btn--open' : ''}`}
-                    aria-label="Choose tag color"
+                    aria-label={t('form.colorPickerAriaLabel')}
                     aria-expanded={colorOpen}
                     aria-haspopup="dialog"
                     onClick={() => setColorOpen((v) => !v)}
@@ -482,7 +544,7 @@ const TaskForm = () => {
                   onClick={() => addTag()}
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">add</span>
-                  Add
+                  {t('form.tagAdd')}
                 </button>
               </div>
             )}
@@ -497,7 +559,7 @@ const TaskForm = () => {
             onClick={() => setPriorityHigh((v) => !v)}
           >
             <span className="material-symbols-outlined option-icon">flag</span>
-            {priorityHigh ? 'High Priority ✓' : 'High Priority'}
+            {t('form.priorityLabel')}{priorityHigh ? ' ✓' : ''}
           </button>
         </div>
 
@@ -509,9 +571,9 @@ const TaskForm = () => {
         )}
 
         <div className="form-actions">
-          <button className="action-btn-cancel" type="button" onClick={() => navigate(-1)} disabled={submitting}>Cancel</button>
-          <button className="action-btn-save" type="submit" disabled={submitting}>
-            {submitting ? 'Saving…' : 'Save Task'}
+          <button className="btn btn-secondary" type="button" onClick={() => navigate(-1)} disabled={submitting}>{t('common.cancel')}</button>
+          <button className="btn btn-primary" type="submit" disabled={submitting}>
+            {submitting ? t('form.creating') : t('form.saveTask')}
           </button>
         </div>
 

@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
-import { getTagDisplayColor } from '../../utils/tagUtils';
+import { formatDuration } from '../../utils/dateFormat';
+import { getTagDisplayColor, TAG_PRESETS } from '../../utils/tagUtils';
 import './Schedule.css';
 
 const DEFAULT_ACCENT = '#6b38d4'; // StartSmart purple
@@ -37,10 +38,13 @@ const getMondayOf = (date) => {
   return d;
 };
 
-const fmtMin = (m) => {
-  if (!m) return '';
-  return m >= 60 ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}` : `${m}m`;
+const getSundayOf = (date) => {
+  const d = new Date(date);
+  d.setDate(d.getDate() - d.getDay()); // getDay() === 0 for Sunday
+  d.setHours(0, 0, 0, 0);
+  return d;
 };
+
 
 // 24-hour label: 0→"00:00", 13→"13:00", 24→"00:00" (closing midnight)
 const fmtHour24 = (h) => `${String(h === 24 ? 0 : h).padStart(2, '0')}:00`;
@@ -56,7 +60,7 @@ const getTaskMinutes = (task) => {
 const statusCls = (s) => s === 'done' ? 'sc-done' : s === 'in_progress' ? 'sc-progress' : 'sc-pending';
 
 // ── Header label helper ────────────────────────────────────────────────────────
-const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
+const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t, isRTL = false, locale = 'en') => {
   if (period === 'Daily') {
     const todayKey = toKey(new Date());
     const diff = Math.round(
@@ -68,13 +72,13 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
       diff === 1 ? t('schedule.tomorrow') : null;
 
     if (smartTitle) {
-      const subtitle = viewDate.toLocaleDateString(undefined, {
+      const subtitle = viewDate.toLocaleDateString(locale, {
         weekday: 'long', month: 'long', day: 'numeric',
       });
       return { title: smartTitle, subtitle };
     }
     return {
-      title: viewDate.toLocaleDateString(undefined, {
+      title: viewDate.toLocaleDateString(locale, {
         weekday: 'short', month: 'short', day: 'numeric',
       }),
       subtitle: t('schedule.daily'),
@@ -82,15 +86,15 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
   }
 
   if (period === 'Weekly') {
-    const thisMon = getMondayOf(new Date());
-    const diff = Math.round((monday - thisMon) / 86400000);
+    const thisWeekStart = isRTL ? getSundayOf(new Date()) : getMondayOf(new Date());
+    const diff = Math.round((monday - thisWeekStart) / 86400000);
     const smartTitle =
       diff === 0 ? t('schedule.thisWeek') :
       diff === -7 ? t('schedule.lastWeek') :
       diff === 7 ? t('schedule.nextWeek') : null;
 
     const end = addDays(monday, 6);
-    const weekRangeStr = `${monday.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+    const weekRangeStr = `${monday.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString(locale, { month: 'short', day: 'numeric' })}`;
     if (smartTitle) {
       return { title: smartTitle, subtitle: weekRangeStr };
     }
@@ -115,9 +119,97 @@ const getScheduleHeaderLabel = (period, { viewDate, monday, monthYear }, t) => {
   return { title: fullMonthYear, subtitle: t('schedule.monthly') };
 };
 
-// ── DailyView ──────────────────────────────────────────────────────────────────
-const DailyView = ({ viewDate, tasks }) => {
+// ── ScheduleTaskModal ──────────────────────────────────────────────────────────
+const ScheduleTaskModal = ({ task, onClose, onSave }) => {
   const { t } = useLocale();
+  const [date, setDate] = useState(task.scheduledDate?.slice(0, 10) || '');
+  const [time, setTime] = useState('09:00');
+  const [saving, setSaving] = useState(false);
+  const overlayRef = useRef(null);
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const handleSave = async () => {
+    if (!date || !time) return;
+    setSaving(true);
+    try {
+      await onSave(task.id, `${date}T${time}`);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="sc-modal-overlay"
+      ref={overlayRef}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('schedule.scheduleTask')}
+    >
+      <div className="sc-modal">
+        <div className="sc-modal-header">
+          <h3 className="sc-modal-title">
+            <span className="material-symbols-outlined" aria-hidden="true">schedule</span>
+            {t('schedule.scheduleTask')}
+          </h3>
+          <button className="sc-modal-close" onClick={onClose} aria-label={t('common.cancel')}>
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <p className="sc-modal-task-name">{task.title}</p>
+        <div className="sc-modal-fields">
+          <label className="sc-modal-field">
+            <span className="sc-modal-field-label">{t('schedule.scheduleDate')}</span>
+            <input
+              type="date"
+              className="sc-modal-input"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </label>
+          <label className="sc-modal-field">
+            <span className="sc-modal-field-label">{t('schedule.scheduleTime')}</span>
+            <input
+              type="time"
+              className="sc-modal-input"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              dir="ltr"
+            />
+          </label>
+        </div>
+        <div className="sc-modal-actions">
+          <button className="btn btn-ghost" onClick={onClose} disabled={saving}>
+            {t('common.cancel')}
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleSave}
+            disabled={!date || !time || saving}
+          >
+            {saving
+              ? <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>progress_activity</span>
+              : <span className="material-symbols-outlined" aria-hidden="true">check</span>
+            }
+            {t('schedule.scheduleSave')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── DailyView ──────────────────────────────────────────────────────────────────
+const DailyView = ({ viewDate, tasks, onScheduleTask }) => {
+  const { t } = useLocale();
+  const fmtMin = (m) => m ? formatDuration(m, t) : '';
   const todayKey = toKey(new Date());
   const key      = toKey(viewDate);
   const isToday  = key === todayKey;
@@ -141,7 +233,7 @@ const DailyView = ({ viewDate, tasks }) => {
       {isToday && (
         <div className="sc-now-ribbon" role="status" aria-label="Current time">
           <span className="sc-now-dot" aria-hidden="true" />
-          <span className="sc-now-time">
+          <span className="sc-now-time" dir="ltr">
             {`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`}
           </span>
           <span className="sc-now-label">now</span>
@@ -161,7 +253,7 @@ const DailyView = ({ viewDate, tasks }) => {
               style={{ top: `${h * HOUR_PX}px` }}
             >
               <div className="sc-hour-label">
-                <span>{fmtHour24(h)}</span>
+                <span dir="ltr">{fmtHour24(h)}</span>
                 {isNowHour && <span className="sc-now-badge" aria-label="Current hour">{t('schedule.now')}</span>}
               </div>
               <div className="sc-hour-line" aria-hidden="true" />
@@ -198,11 +290,11 @@ const DailyView = ({ viewDate, tasks }) => {
                 style={{
                   top: `${topPx}px`,
                   minHeight: `${minHeightPx}px`,
-                  borderLeftColor: accent,
+                  borderInlineStartColor: accent,
                   background: `${accent}12`,
                 }}
               >
-                <span className="sc-task-time">{timeStr}</span>
+                <span className="sc-task-time" dir="ltr">{timeStr}</span>
                 <span className="sc-task-title">{t.title}</span>
                 {t.estimatedMinutes && <span className="sc-task-est">{fmtMin(t.estimatedMinutes)}</span>}
               </Link>
@@ -219,18 +311,30 @@ const DailyView = ({ viewDate, tasks }) => {
             {t('schedule.unscheduled')}
           </div>
           <div className="sc-unslotted-tasks">
-            {unslotted.map((t) => {
-              const accent = taskAccentColor(t);
+            {unslotted.map((task) => {
+              const accent = taskAccentColor(task);
               return (
-                <Link
-                  key={t.id}
-                  to={`/task-details/${t.id}`}
-                  className={`sc-task ${statusCls(t.status)}`}
-                  style={{ borderLeftColor: accent, background: `${accent}12` }}
+                <div
+                  key={task.id}
+                  className={`sc-task sc-task-unslotted-row ${statusCls(task.status)}`}
+                  style={{ borderInlineStartColor: accent, background: `${accent}12` }}
                 >
-                  <span className="sc-task-title">{t.title}</span>
-                  {t.estimatedMinutes && <span className="sc-task-est">{fmtMin(t.estimatedMinutes)}</span>}
-                </Link>
+                  <Link
+                    to={`/task-details/${task.id}`}
+                    className="sc-task-link-area"
+                  >
+                    <span className="sc-task-title">{task.title}</span>
+                    {task.estimatedMinutes && <span className="sc-task-est">{fmtMin(task.estimatedMinutes)}</span>}
+                  </Link>
+                  <button
+                    className="sc-schedule-btn"
+                    onClick={() => onScheduleTask(task)}
+                    aria-label={`${t('schedule.scheduleTask')}: ${task.title}`}
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">more_time</span>
+                    {t('schedule.scheduleTask')}
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -253,8 +357,8 @@ const DailyView = ({ viewDate, tasks }) => {
 };
 
 // ── WeeklyView ─────────────────────────────────────────────────────────────────
-const WeeklyView = ({ monday, tasks, onDayClick }) => {
-  const { t, isRTL } = useLocale();
+const WeeklyView = ({ monday, tasks, onDayClick, onScheduleTask }) => {
+  const { t, isRTL, locale } = useLocale();
   const todayKey   = toKey(new Date());
   const days       = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const DAY_SHORT = [t('schedule.sun'), t('schedule.mon'), t('schedule.tue'), t('schedule.wed'), t('schedule.thu'), t('schedule.fri'), t('schedule.sat')];
@@ -290,7 +394,7 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
               type="button"
               className={`sc-day${isToday ? ' today' : ''}`}
               onClick={() => onDayClick(d)}
-              aria-label={`${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}, ${dayTasks.length} task${dayTasks.length !== 1 ? 's' : ''} — click to view`}
+              aria-label={`${d.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })}, ${dayTasks.length} task${dayTasks.length !== 1 ? 's' : ''} — click to view`}
             >
               <div className="sc-day-head">
                 <span className="sc-day-name">{DAY_SHORT[d.getDay()]}</span>
@@ -300,18 +404,27 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
                 {dayTasks.length === 0 ? (
                   <span className="sc-day-empty">{t('schedule.noTasks')}</span>
                 ) : (
-                  dayTasks.map((t) => {
-                    const accent = taskAccentColor(t);
+                  dayTasks.map((task) => {
+                    const accent = taskAccentColor(task);
+                    const hasTime = task.scheduledDate?.includes('T');
                     return (
                       <span
-                        key={t.id}
-                        className={`sc-week-task ${statusCls(t.status)}`}
-                        style={{ borderLeftColor: accent, background: `${accent}12` }}
+                        key={task.id}
+                        className={`sc-week-task ${statusCls(task.status)}`}
+                        style={{ borderInlineStartColor: accent, background: `${accent}12` }}
                       >
-                        {t.scheduledDate?.includes('T') && (
-                          <span className="sc-task-time">{t.scheduledDate.slice(11, 16)}</span>
+                        {hasTime ? (
+                          <span className="sc-task-time" dir="ltr">{task.scheduledDate.slice(11, 16)}</span>
+                        ) : (
+                          <button
+                            className="sc-week-schedule-btn"
+                            onClick={(e) => { e.stopPropagation(); onScheduleTask(task); }}
+                            aria-label={`${t('schedule.scheduleTask')}: ${task.title}`}
+                          >
+                            <span className="material-symbols-outlined" aria-hidden="true">more_time</span>
+                          </button>
                         )}
-                        <span className="sc-task-title">{t.title}</span>
+                        <span className="sc-task-title">{task.title}</span>
                       </span>
                     );
                   })
@@ -332,13 +445,25 @@ const WeeklyView = ({ monday, tasks, onDayClick }) => {
 };
 
 // ── MonthlyView ────────────────────────────────────────────────────────────────
-const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
-  const { t } = useLocale();
+const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick, onScheduleTask }) => {
+  const { t, locale, isRTL } = useLocale();
   const todayKey = toKey(new Date());
   const firstDay = new Date(year, month, 1);
   const lastDay  = new Date(year, month + 1, 0);
-  const startOffset = (firstDay.getDay() + 6) % 7; // Mon-based
-  const rows    = Math.ceil((startOffset + lastDay.getDate()) / 7);
+
+  // RTL (Hebrew/Arabic): week starts on Sunday (Sun=0 … Sat=6).
+  // LTR: week starts on Monday (Mon=0 … Sun=6).
+  const startOffset = isRTL
+    ? firstDay.getDay()                 // Sun=0, Mon=1, …, Sat=6
+    : (firstDay.getDay() + 6) % 7;     // Mon=0, …, Sun=6
+
+  // DOM order of day-name headers.
+  // In RTL the CSS grid reverses visual order, so DOM Sun→Sat renders as Sat←Sun visually.
+  const dowOrder = isRTL
+    ? ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+    : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+  const rows = Math.ceil((startOffset + lastDay.getDate()) / 7);
 
   const tasksByDate = {};
   tasks.forEach((t) => {
@@ -367,12 +492,11 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
           </Link>
         </div>
       )}
-      <div className="sc-month-dow-row">
-        {['mon','tue','wed','thu','fri','sat','sun'].map((d) => (
-          <div key={d} className="sc-month-dow">{t(`schedule.${d}`)}</div>
-        ))}
-      </div>
       <div className="sc-month-grid">
+        {/* Day-name headers live inside the same grid so columns always align */}
+        {dowOrder.map((d) => (
+          <div key={`dow-${d}`} className="sc-month-dow">{t(`schedule.${d}`)}</div>
+        ))}
         {cells.map((d, i) => {
           if (!d) return <div key={`blank-${i}`} className="sc-month-cell sc-month-blank" />;
           const key        = toKey(d);
@@ -386,19 +510,30 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
               type="button"
               className={`sc-month-cell${isToday ? ' today' : ''}${isSelected ? ' selected' : ''}`}
               onClick={() => onDayClick(d)}
-              aria-label={`${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}, ${dayTasks.length} task${dayTasks.length !== 1 ? 's' : ''}`}
+              aria-label={`${d.toLocaleDateString(locale, { month: 'long', day: 'numeric' })}, ${dayTasks.length} task${dayTasks.length !== 1 ? 's' : ''}`}
               aria-pressed={isSelected || isToday}
             >
               <div className={`sc-month-day-num${isToday ? ' today-dot' : ''}`}>{d.getDate()}</div>
-              {dayTasks.slice(0, MAX).map((t) => {
-                const accent = taskAccentColor(t);
+              {dayTasks.slice(0, MAX).map((task) => {
+                const accent = taskAccentColor(task);
+                const hasTime = task.scheduledDate?.includes('T');
                 return (
                   <span
-                    key={t.id}
-                    className={`sc-month-task ${statusCls(t.status)}`}
-                    style={{ borderLeftColor: accent, background: `${accent}12` }}
+                    key={task.id}
+                    className={`sc-month-task ${statusCls(task.status)}`}
+                    style={{ borderInlineStartColor: accent, background: `${accent}12` }}
                   >
-                    {t.title}
+                    {!hasTime && (
+                      <button
+                        className="sc-month-schedule-btn"
+                        onClick={(e) => { e.stopPropagation(); onScheduleTask(task); }}
+                        aria-label={`${t('schedule.scheduleTask')}: ${task.title}`}
+                        title={t('schedule.scheduleTask')}
+                      >
+                        <span className="material-symbols-outlined" aria-hidden="true">more_time</span>
+                      </button>
+                    )}
+                    {task.title}
                   </span>
                 );
               })}
@@ -415,15 +550,22 @@ const MonthlyView = ({ year, month, tasks, selectedKey, onDayClick }) => {
 
 // ── Schedule (main) ────────────────────────────────────────────────────────────
 const Schedule = () => {
-  const { tasks, loading } = useTasks();
-  const { t, isRTL } = useLocale();
+  const { tasks, loading, updateTask } = useTasks();
+  const { t, isRTL, locale } = useLocale();
+
+  const [schedulingTask, setSchedulingTask] = useState(null);
+
+  const handleScheduleSave = async (taskId, iso) => {
+    await updateTask(taskId, { scheduledDate: iso });
+  };
 
   // Period & pivot state
   const [period, setPeriod] = useState('Weekly');
 
   const todayMidnight = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+  const getWeekStart = (date) => isRTL ? getSundayOf(date) : getMondayOf(date);
   const [viewDate,  setViewDate]  = useState(new Date(todayMidnight));
-  const [monday,    setMonday]    = useState(getMondayOf(todayMidnight));
+  const [monday,    setMonday]    = useState(getWeekStart(todayMidnight));
   const [monthYear, setMonthYear] = useState({ year: todayMidnight.getFullYear(), month: todayMidnight.getMonth() });
 
   // Filters
@@ -431,17 +573,20 @@ const Schedule = () => {
   const [filterPriority, setFilterPriority] = useState(false);
   const [filterTag,      setFilterTag]      = useState('');
 
-  // Unique tag names from all tasks
-  const allTagNames = useMemo(() => {
-    const names = new Set();
-    tasks.forEach((t) => (t.tags || []).forEach((tag) => names.add(tag.name)));
-    return [...names].sort();
-  }, [tasks]);
+  // Resolve a tag to a preset, falling back to purple (the default category)
+  const tagToPresetId = (tag) => {
+    const color = getTagDisplayColor(tag)?.trim().toLowerCase();
+    const preset = TAG_PRESETS.find((p) => p.color.toLowerCase() === color);
+    return preset ? preset.id : 'purple';
+  };
 
-  const filteredTasks = useMemo(() => tasks.filter((t) => {
-    if (filterStatus !== 'all' && t.status !== filterStatus) return false;
-    if (filterPriority && !t.priorityHigh) return false;
-    if (filterTag && !(t.tags || []).some((tag) => tag.name === filterTag)) return false;
+  // All TAG_PRESETS — show the full list so every category (including General/purple) is always visible
+  const activePresets = TAG_PRESETS;
+
+  const filteredTasks = useMemo(() => tasks.filter((task) => {
+    if (filterStatus !== 'all' && task.status !== filterStatus) return false;
+    if (filterPriority && !task.priorityHigh) return false;
+    if (filterTag && !(task.tags || []).some((tag) => tagToPresetId(tag) === filterTag)) return false;
     return true;
   }), [tasks, filterStatus, filterPriority, filterTag]);
 
@@ -450,7 +595,7 @@ const Schedule = () => {
   // ── Navigation ──────────────────────────────────────────────────────────────
   const nav = (delta) => {
     if (period === 'Daily') {
-      setViewDate((d) => { const nd = addDays(d, delta); setMonday(getMondayOf(nd)); return nd; });
+      setViewDate((d) => { const nd = addDays(d, delta); setMonday(getWeekStart(nd)); return nd; });
     } else if (period === 'Weekly') {
       setMonday((d) => addDays(d, delta * 7));
     } else {
@@ -466,7 +611,7 @@ const Schedule = () => {
   const goToday = () => {
     const t = new Date(); t.setHours(0, 0, 0, 0);
     setViewDate(new Date(t));
-    setMonday(getMondayOf(t));
+    setMonday(getWeekStart(t));
     setMonthYear({ year: t.getFullYear(), month: t.getMonth() });
     setPeriod('Daily');
   };
@@ -475,14 +620,14 @@ const Schedule = () => {
   const handleDayClick = (d) => {
     const nd = new Date(d); nd.setHours(0, 0, 0, 0);
     setViewDate(nd);
-    setMonday(getMondayOf(nd));
+    setMonday(getWeekStart(nd));
     setPeriod('Daily');
   };
 
   // ── Smart labels ────────────────────────────────────────────────────────────
   const rangeLabel = useMemo(
-    () => getScheduleHeaderLabel(period, { viewDate, monday, monthYear }, t),
-    [period, viewDate, monday, monthYear, t]
+    () => getScheduleHeaderLabel(period, { viewDate, monday, monthYear }, t, isRTL, locale),
+    [period, viewDate, monday, monthYear, t, isRTL, locale]
   );
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -589,7 +734,7 @@ const Schedule = () => {
           </button>
         </div>
 
-        {allTagNames.length > 0 && (
+        {activePresets.length > 0 && (
           <>
             <div className="sc-filter-sep" aria-hidden="true" />
             <div className="sc-filter-section">
@@ -602,14 +747,15 @@ const Schedule = () => {
                 >
                   {t('schedule.all')}
                 </button>
-                {allTagNames.map((name) => (
+                {activePresets.map((preset) => (
                   <button
-                    key={name}
-                    className={`sc-filter-btn${filterTag === name ? ' active' : ''}`}
-                    onClick={() => setFilterTag((n) => (n === name ? '' : name))}
-                    aria-pressed={filterTag === name}
+                    key={preset.id}
+                    className={`sc-filter-btn${filterTag === preset.id ? ' active' : ''}`}
+                    onClick={() => setFilterTag((id) => (id === preset.id ? '' : preset.id))}
+                    aria-pressed={filterTag === preset.id}
                   >
-                    {name}
+                    <span className="sc-tag-dot" style={{ background: preset.color }} aria-hidden="true" />
+                    {t(`tag.color.${preset.id}.hint`)}
                   </button>
                 ))}
               </div>
@@ -631,10 +777,10 @@ const Schedule = () => {
 
       {/* Views */}
       {period === 'Daily' && (
-        <DailyView viewDate={viewDate} tasks={filteredTasks} />
+        <DailyView viewDate={viewDate} tasks={filteredTasks} onScheduleTask={setSchedulingTask} />
       )}
       {period === 'Weekly' && (
-        <WeeklyView monday={monday} tasks={filteredTasks} onDayClick={handleDayClick} />
+        <WeeklyView monday={monday} tasks={filteredTasks} onDayClick={handleDayClick} onScheduleTask={setSchedulingTask} />
       )}
       {period === 'Monthly' && (
         <MonthlyView
@@ -643,6 +789,16 @@ const Schedule = () => {
           tasks={filteredTasks}
           selectedKey={toKey(viewDate)}
           onDayClick={handleDayClick}
+          onScheduleTask={setSchedulingTask}
+        />
+      )}
+
+      {/* Schedule task modal */}
+      {schedulingTask && (
+        <ScheduleTaskModal
+          task={schedulingTask}
+          onClose={() => setSchedulingTask(null)}
+          onSave={handleScheduleSave}
         />
       )}
       </>}

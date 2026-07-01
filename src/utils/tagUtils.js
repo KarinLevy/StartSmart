@@ -14,14 +14,14 @@ export const MAX_TAGS      = 8;
 export const TAG_MAX_LEN   = 24;
 
 export const TAG_PRESETS = [
-  { color: '#6b38d4', label: 'Purple', hint: 'Default / General',       examples: 'Misc, General, Other'                   },
-  { color: '#2563eb', label: 'Blue',   hint: 'Work',                    examples: 'Client, Office, Business'               },
-  { color: '#16a34a', label: 'Green',  hint: 'Personal & Health',       examples: 'Family, Birthday, Gym, Health'          },
-  { color: '#c2610c', label: 'Orange', hint: 'Study & Learning',        examples: 'University, Exam, Course, Reading'      },
-  { color: '#b91c1c', label: 'Red',    hint: 'Urgent / High Priority',  examples: 'ASAP, Critical, Deadline'               },
-  { color: '#a16207', label: 'Yellow', hint: 'Planning & Reminders',    examples: 'Meeting, Schedule, Shopping, Reminder'  },
-  { color: '#be185d', label: 'Pink',   hint: 'Creative',                examples: 'Design, Writing, Ideas'                 },
-  { color: '#0e7490', label: 'Cyan',   hint: 'Technology',              examples: 'Backend, Frontend, AI, Programming'     },
+  { color: '#6b38d4', id: 'purple', label: 'Purple', hint: 'Default / General',       examples: 'Misc, General, Other'                   },
+  { color: '#2563eb', id: 'blue',   label: 'Blue',   hint: 'Work',                    examples: 'Client, Office, Business'               },
+  { color: '#16a34a', id: 'green',  label: 'Green',  hint: 'Personal & Health',       examples: 'Family, Birthday, Gym, Health'          },
+  { color: '#c2610c', id: 'orange', label: 'Orange', hint: 'Study & Learning',        examples: 'University, Exam, Course, Reading'      },
+  { color: '#b91c1c', id: 'red',    label: 'Red',    hint: 'Urgent / High Priority',  examples: 'ASAP, Critical, Deadline'               },
+  { color: '#a16207', id: 'yellow', label: 'Yellow', hint: 'Planning & Reminders',    examples: 'Meeting, Schedule, Shopping, Reminder'  },
+  { color: '#be185d', id: 'pink',   label: 'Pink',   hint: 'Creative',                examples: 'Design, Writing, Ideas'                 },
+  { color: '#0e7490', id: 'cyan',   label: 'Cyan',   hint: 'Technology',              examples: 'Backend, Frontend, AI, Programming'     },
 ];
 
 // ── Keyword → color map ───────────────────────────────────────────────────────

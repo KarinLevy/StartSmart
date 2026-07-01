@@ -4,52 +4,17 @@ import PageShell from '../../components/PageShell/PageShell';
 import { useTasks } from '../../context/TasksContext';
 import { getTagDisplayColor } from '../../utils/tagUtils';
 import { useLocale } from '../../i18n/LocaleContext';
+import { useRegional } from '../../context/RegionalContext';
+import { formatDate, formatDuration, formatGap } from '../../utils/dateFormat';
+import LocaleDateInput from '../../components/shared/LocaleDateInput';
 import './TaskHistory.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const fmtMin = (m) => {
-  if (m == null) return '--';
-  return m >= 60
-    ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}`
-    : `${m}m`;
-};
-
-const fmtGap = (g) => {
-  if (g == null) return '--';
-  const abs = fmtMin(Math.abs(g));
-  return g > 0 ? `+${abs}` : g < 0 ? `-${abs}` : abs;
-};
-
-const fmtDate = (d) => {
+const fmtDate = (d, regionalSettings) => {
   if (!d) return '--';
-  return new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  return formatDate(new Date(d), regionalSettings ?? {});
 };
-
-const fmtDateShort = (d) => {
-  if (!d) return '--';
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
-
-const SORT_OPTIONS = [
-  { value: 'newest',      label: 'Newest First' },
-  { value: 'oldest',      label: 'Oldest First' },
-  { value: 'az',          label: 'A → Z' },
-  { value: 'za',          label: 'Z → A' },
-  { value: 'est_high',    label: 'Highest Estimated' },
-  { value: 'est_low',     label: 'Lowest Estimated' },
-  { value: 'actual_high', label: 'Highest Actual' },
-  { value: 'actual_low',  label: 'Lowest Actual' },
-  { value: 'gap_high',    label: 'Largest Gap' },
-  { value: 'gap_low',     label: 'Smallest Gap' },
-];
-
-const DATE_FILTERS = [
-  { value: 'all',    label: 'All Time' },
-  { value: 'week',   label: 'This Week' },
-  { value: 'last30', label: 'Last 30 Days' },
-  { value: 'custom', label: 'Custom Range' },
-];
 
 // ── Reflections stored in localStorage, separate from task data ───────────────
 const REFLECTIONS_KEY = 'ss_th_reflections';
@@ -67,7 +32,10 @@ const saveReflection = (taskId, text) => {
 
 // ── HistoryModal ──────────────────────────────────────────────────────────────
 
-const HistoryModal = ({ task, onClose, onDuplicate }) => {
+const HistoryModal = ({ task, onClose, onDuplicate, regional }) => {
+  const { t } = useLocale();
+  const fmtDur = (m) => formatDuration(m, t);
+  const fmtGap = (g) => formatGap(g, t);
   const [reflection, setReflection] = useState(() => loadReflections()[task.id] || '');
 
   const handleReflectionChange = useCallback((e) => {
@@ -111,12 +79,12 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
           <div className="th-modal-chips">
             <span className="chip chip-done">
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>check_circle</span>
-              Done
+              {t('history.done')}
             </span>
             {task.priorityHigh && (
               <span className="chip th-chip-priority">
                 <span className="material-symbols-outlined" style={{ fontSize: 14 }}>flag</span>
-                High Priority
+                {t('history.highPriority')}
               </span>
             )}
           </div>
@@ -124,7 +92,7 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
           <h2 className="th-modal-title">{task.title}</h2>
           <p className="th-modal-date">
             <span className="material-symbols-outlined" aria-hidden="true">calendar_today</span>
-            Completed {fmtDate(task.scheduledDate)}
+            {t('history.completed')} {fmtDate(task.scheduledDate, regional)}
           </p>
 
           {task.tags?.length > 0 && (
@@ -145,17 +113,17 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
         {/* Time metrics */}
         <div className="th-modal-metrics" role="region" aria-label="Time metrics">
           <div className="th-modal-metric">
-            <span className="th-modal-metric-label">Estimated</span>
-            <span className="th-modal-metric-value">{fmtMin(task.estimatedMinutes)}</span>
+            <span className="th-modal-metric-label">{t('history.estimated')}</span>
+            <span className="th-modal-metric-value">{fmtDur(task.estimatedMinutes)}</span>
           </div>
           <div className="th-modal-metric-divider" aria-hidden="true" />
           <div className="th-modal-metric">
-            <span className="th-modal-metric-label">Actual</span>
-            <span className="th-modal-metric-value">{fmtMin(task.actualMinutes)}</span>
+            <span className="th-modal-metric-label">{t('history.actual')}</span>
+            <span className="th-modal-metric-value">{fmtDur(task.actualMinutes)}</span>
           </div>
           <div className="th-modal-metric-divider" aria-hidden="true" />
           <div className="th-modal-metric">
-            <span className="th-modal-metric-label">Gap</span>
+            <span className="th-modal-metric-label">{t('history.gap')}</span>
             <span className={`th-modal-metric-value ${gapCls}`}>{fmtGap(gap)}</span>
           </div>
         </div>
@@ -166,7 +134,7 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
           {/* Description */}
           {task.description && (
             <section className="th-modal-section" aria-label="Description">
-              <h3 className="th-modal-section-title">Description</h3>
+              <h3 className="th-modal-section-title">{t('history.description')}</h3>
               <p className="th-modal-description">{task.description}</p>
             </section>
           )}
@@ -175,16 +143,16 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
           <section className="th-modal-section" aria-label="Personal reflection">
             <h3 className="th-modal-section-title">
               <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>
-              Your Reflection
+              {t('history.reflection')}
             </h3>
             <p className="th-modal-section-hint">
-              Saved automatically and stored separately from the task record.
+              {t('history.reflectionHint')}
             </p>
             <textarea
               className="th-reflection-textarea"
               value={reflection}
               onChange={handleReflectionChange}
-              placeholder="What went well? What caused delays? What would you do differently next time?"
+              placeholder={t('history.reflectionPh')}
               rows={4}
               aria-label="Personal reflection about this task"
             />
@@ -211,10 +179,10 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
             aria-label={`Plan again based on ${task.title}`}
           >
             <span className="material-symbols-outlined" aria-hidden="true">content_copy</span>
-            Plan Again
+            {t('history.planAgain')}
           </button>
           <button className="btn btn-primary" onClick={onClose}>
-            Close
+            {t('common.close')}
           </button>
         </div>
       </div>
@@ -224,9 +192,12 @@ const HistoryModal = ({ task, onClose, onDuplicate }) => {
 
 // ── TaskHistoryCard ───────────────────────────────────────────────────────────
 
-const TaskHistoryCard = ({ task, onView }) => {
+const TaskHistoryCard = ({ task, onView, regional }) => {
+  const { t } = useLocale();
+  const fmtDur = (m) => formatDuration(m, t);
   const gap = task.gap;
   const gapCls = gap > 0 ? 'th-gap-over' : gap < 0 ? 'th-gap-under' : '';
+  const fmtGap = (g) => formatGap(g, t);
 
   return (
     <article className="th-card surface-card" aria-label={`Completed task: ${task.title}`}>
@@ -239,28 +210,28 @@ const TaskHistoryCard = ({ task, onView }) => {
             aria-label={`View details for ${task.title}`}
           >
             <span className="material-symbols-outlined" aria-hidden="true">open_in_new</span>
-            View Details
+            {t('history.viewDetails')}
           </button>
         </div>
 
         <div className="th-card-meta" aria-label="Task metadata">
           <span className="th-meta-item">
             <span className="material-symbols-outlined" aria-hidden="true">calendar_today</span>
-            {fmtDateShort(task.scheduledDate)}
+            {fmtDate(task.scheduledDate, regional)}
           </span>
           <span className="th-meta-sep" aria-hidden="true" />
           <span className="th-meta-item">
-            <span className="th-meta-label">Est</span>
-            <strong>{fmtMin(task.estimatedMinutes)}</strong>
+            <span className="th-meta-label">{t('history.est')}</span>
+            <strong>{fmtDur(task.estimatedMinutes)}</strong>
           </span>
           <span className="th-meta-sep" aria-hidden="true" />
           <span className="th-meta-item">
-            <span className="th-meta-label">Actual</span>
-            <strong>{fmtMin(task.actualMinutes)}</strong>
+            <span className="th-meta-label">{t('history.actual')}</span>
+            <strong>{fmtDur(task.actualMinutes)}</strong>
           </span>
           <span className="th-meta-sep" aria-hidden="true" />
           <span className={`th-meta-item th-meta-gap ${gapCls}`}>
-            <span className="th-meta-label">Gap</span>
+            <span className="th-meta-label">{t('history.gap')}</span>
             <strong>{fmtGap(gap)}</strong>
           </span>
         </div>
@@ -269,7 +240,7 @@ const TaskHistoryCard = ({ task, onView }) => {
           {task.priorityHigh && (
             <span className="chip th-chip-priority th-chip-sm" aria-label="High priority">
               <span className="material-symbols-outlined" style={{ fontSize: 13 }}>flag</span>
-              High Priority
+              {t('history.highPriority')}
             </span>
           )}
           {task.tags?.map((tag) => (
@@ -292,9 +263,33 @@ const TaskHistoryCard = ({ task, onView }) => {
 const TaskHistory = () => {
   const { tasks, loading, error } = useTasks();
   const navigate  = useNavigate();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const { regional } = useRegional();
 
-  const done = useMemo(() => tasks.filter((t) => t.status === 'done'), [tasks]);
+  const done = useMemo(() => tasks.filter((task) => task.status === 'done'), [tasks]);
+
+  const SORT_OPTIONS = useMemo(() => [
+    { value: 'newest',      label: t('history.sortNewest') },
+    { value: 'oldest',      label: t('history.sortOldest') },
+    { value: 'az',          label: t('history.sortAZ') },
+    { value: 'za',          label: t('history.sortZA') },
+    { value: 'est_high',    label: t('history.sortEstHigh') },
+    { value: 'est_low',     label: t('history.sortEstLow') },
+    { value: 'actual_high', label: t('history.sortActHigh') },
+    { value: 'actual_low',  label: t('history.sortActLow') },
+    { value: 'gap_high',    label: t('history.sortGapHigh') },
+    { value: 'gap_low',     label: t('history.sortGapLow') },
+  ], [t]);
+
+  const DATE_FILTERS = useMemo(() => [
+    { value: 'all',    label: t('history.allTime') },
+    { value: 'week',   label: t('history.thisWeek') },
+    { value: 'last30', label: t('history.last30') },
+    { value: 'custom', label: t('history.custom') },
+  ], [t]);
+
+  const fmtDur = useCallback((m) => formatDuration(m, t), [t]);
+  const fmtGap = useCallback((g) => formatGap(g, t), [t]);
 
   const [search,       setSearch]       = useState('');
   const [filterDate,   setFilterDate]   = useState('all');
@@ -324,15 +319,15 @@ const TaskHistory = () => {
       return d.getTime();
     };
 
-    let list = done.filter((t) => {
+    let list = done.filter((task) => {
       if (q) {
-        const hit = t.title.toLowerCase().includes(q)
-          || (t.description || '').toLowerCase().includes(q)
-          || t.tags?.some((tag) => tag.name.toLowerCase().includes(q));
+        const hit = task.title.toLowerCase().includes(q)
+          || (task.description || '').toLowerCase().includes(q)
+          || task.tags?.some((tag) => tag.name.toLowerCase().includes(q));
         if (!hit) return false;
       }
-      if (filterDate !== 'all' && t.scheduledDate) {
-        const ts = new Date(t.scheduledDate).getTime();
+      if (filterDate !== 'all' && task.scheduledDate) {
+        const ts = new Date(task.scheduledDate).getTime();
         if (filterDate === 'week'   && ts < startOfWeek())           return false;
         if (filterDate === 'last30' && ts < now - 30 * 86400000)     return false;
         if (filterDate === 'custom' && customStart && customEnd) {
@@ -341,8 +336,8 @@ const TaskHistory = () => {
           if (ts < start.getTime() || ts > end.getTime()) return false;
         }
       }
-      if (filterPrio && !t.priorityHigh) return false;
-      if (filterTag && !t.tags?.some((tag) => tag.name === filterTag)) return false;
+      if (filterPrio && !task.priorityHigh) return false;
+      if (filterTag && !task.tags?.some((tag) => tag.name === filterTag)) return false;
       return true;
     });
 
@@ -364,9 +359,9 @@ const TaskHistory = () => {
   }, [done, search, filterDate, customStart, customEnd, filterPrio, filterTag, sortBy]);
 
   // Summary stats across ALL done tasks (not filtered)
-  const totalMin = done.reduce((s, t) => s + (t.actualMinutes || 0), 0);
+  const totalMin = done.reduce((s, task) => s + (task.actualMinutes || 0), 0);
   const avgGap   = done.length > 0
-    ? done.reduce((s, t) => s + (t.gap || 0), 0) / done.length
+    ? done.reduce((s, task) => s + (task.gap || 0), 0) / done.length
     : 0;
   const avgGapRounded = Math.round(avgGap);
 
@@ -416,17 +411,17 @@ const TaskHistory = () => {
       <div className="th-summary" role="region" aria-label="Overall statistics">
         <div className="th-summary-card">
           <span className="th-summary-value">{done.length}</span>
-          <span className="th-summary-label">Tasks completed</span>
+          <span className="th-summary-label">{t('history.tasksCompleted')}</span>
         </div>
         <div className="th-summary-card">
-          <span className="th-summary-value">{fmtMin(totalMin)}</span>
-          <span className="th-summary-label">Total time worked</span>
+          <span className="th-summary-value">{fmtDur(totalMin)}</span>
+          <span className="th-summary-label">{t('history.totalTime')}</span>
         </div>
         <div className="th-summary-card">
           <span className={`th-summary-value ${avgGapRounded > 0 ? 'th-gap-over' : 'th-gap-under'}`}>
             {fmtGap(avgGapRounded)}
           </span>
-          <span className="th-summary-label">Avg gap per task</span>
+          <span className="th-summary-label">{t('history.avgGap')}</span>
         </div>
       </div>
 
@@ -439,7 +434,7 @@ const TaskHistory = () => {
           <input
             className="th-search"
             type="search"
-            placeholder="Search by name, description, or tag…"
+            placeholder={t('history.searchPh')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search task history"
@@ -463,26 +458,26 @@ const TaskHistory = () => {
 
           {filterDate === 'custom' && (
             <div className="th-custom-range" role="group" aria-label="Custom date range">
-              <label className="th-date-label" htmlFor="th-start">From</label>
-              <input
+              <label className="th-date-label" htmlFor="th-start">{t('history.from')}</label>
+              <LocaleDateInput
                 id="th-start"
-                type="date"
                 className="th-date-input"
                 value={customStart}
                 max={customEnd || undefined}
                 onChange={(e) => setCustomStart(e.target.value)}
-                aria-label="Start date"
+                ariaLabel="Start date"
+                regional={regional}
               />
               <span className="th-date-sep" aria-hidden="true">—</span>
-              <label className="th-date-label" htmlFor="th-end">To</label>
-              <input
+              <label className="th-date-label" htmlFor="th-end">{t('history.to')}</label>
+              <LocaleDateInput
                 id="th-end"
-                type="date"
                 className="th-date-input"
                 value={customEnd}
                 min={customStart || undefined}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                aria-label="End date"
+                ariaLabel="End date"
+                regional={regional}
               />
             </div>
           )}
@@ -495,7 +490,7 @@ const TaskHistory = () => {
             aria-pressed={filterPrio}
           >
             <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: 15 }}>flag</span>
-            Priority
+            {t('history.priority')}
           </button>
 
           {allTags.length > 0 && (
@@ -523,7 +518,7 @@ const TaskHistory = () => {
 
           {hasFilters && (
             <button className="th-clear-btn" onClick={clearFilters} aria-label="Clear all filters">
-              Clear
+              {t('history.clearAll')}
             </button>
           )}
         </div>
@@ -542,19 +537,19 @@ const TaskHistory = () => {
       {done.length === 0 ? (
         <div className="surface-card th-empty">
           <span className="material-symbols-outlined">history</span>
-          <p>No completed tasks yet.</p>
-          <p className="th-empty-hint">Finish a focus session and it will appear here.</p>
+          <p>{t('history.emptyTitle')}</p>
+          <p className="th-empty-hint">{t('history.emptyHint')}</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="surface-card th-empty">
           <span className="material-symbols-outlined">search_off</span>
-          <p>No tasks match your filters.</p>
-          <button className="btn btn-secondary" onClick={clearFilters}>Clear filters</button>
+          <p>{t('history.emptyFilter')}</p>
+          <button className="btn btn-secondary" onClick={clearFilters}>{t('history.clearFilters')}</button>
         </div>
       ) : (
         <div className="th-list" role="list" aria-label="Completed tasks">
           {filtered.map((task) => (
-            <TaskHistoryCard key={task.id} task={task} onView={setActiveTask} />
+            <TaskHistoryCard key={task.id} task={task} onView={setActiveTask} regional={regional} />
           ))}
         </div>
       )}
@@ -565,6 +560,7 @@ const TaskHistory = () => {
           task={activeTask}
           onClose={() => setActiveTask(null)}
           onDuplicate={() => handleDuplicate(activeTask)}
+          regional={regional}
         />
       )}
     </PageShell>

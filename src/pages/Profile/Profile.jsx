@@ -6,6 +6,7 @@ import { useProfile } from '../../context/ProfileContext';
 import { useAuth } from '../../context/AuthContext';
 import Avatar from '../../components/Avatar/Avatar';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration, formatGap } from '../../utils/dateFormat';
 import {
   updateProfile,
   uploadAvatar,
@@ -17,11 +18,6 @@ import './Profile.css';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const fmtMin = (m) => {
-  if (!m) return '0m';
-  if (m >= 60) return `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}`;
-  return `${m}m`;
-};
 
 const validateProfile = ({ firstName, lastName, email, phone }, t) => {
   const errs = {};
@@ -49,7 +45,7 @@ const StatCard = ({ icon, value, label, sublabel, onClick, colorClass = '' }) =>
     <span className="pr-stat-card-value">{value}</span>
     <span className="pr-stat-card-label">{label}</span>
     {sublabel && <span className="pr-stat-card-sublabel">{sublabel}</span>}
-    <span className="material-symbols-outlined pr-stat-card-arrow" aria-hidden="true">arrow_forward</span>
+    <span className="material-symbols-outlined pr-stat-card-arrow flip-rtl" aria-hidden="true">arrow_forward</span>
   </button>
 );
 
@@ -214,14 +210,14 @@ const ChangePasswordModal = ({ onClose }) => {
 
 // ── Delete Account Modal ──────────────────────────────────────────────────────
 
-const DELETE_CONFIRMATION = 'DELETE';
-
 const DeleteAccountModal = ({ userEmail, onClose, onConfirmed }) => {
   const [typed, setTyped]     = useState('');
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const inputRef = useRef(null);
   const { t } = useLocale();
+
+  const DELETE_CONFIRMATION = t('delModal.confirmWord');
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -414,7 +410,8 @@ const Profile = () => {
   const avgGap     = done.length > 0
     ? Math.round(done.reduce((s, t) => s + (t.gap || 0), 0) / done.length)
     : null;
-  const avgGapLabel = avgGap !== null ? (avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`) : '—';
+  const fmtMin = (m) => formatDuration(m, t);
+  const avgGapLabel = avgGap !== null ? formatGap(avgGap, t) : '—';
 
   const { achievements, streakDays } = computeAchievements(tasks, t);
 
@@ -483,7 +480,7 @@ const Profile = () => {
         />
         <StatCard
           icon="query_stats"
-          value={avgGapLabel}
+          value={<span dir="ltr">{avgGapLabel}</span>}
           label={t('profile.avgGap')}
           sublabel={t('profile.viewStats')}
           colorClass={avgGap !== null && avgGap > 0 ? 'color-error' : 'color-success'}
@@ -503,7 +500,7 @@ const Profile = () => {
             }
           </div>
         </div>
-        <div className="pr-streak-badge" aria-label={`${streakDays} day streak`}>
+        <div className="pr-streak-badge" aria-label={t('profile.streakValue', { n: streakDays, unit: streakDays === 1 ? t('profile.streakUnit1') : t('profile.streakUnitN') })}>
           <span className="pr-streak-badge-num">{streakDays}</span>
           <span className="pr-streak-badge-label">{t('profile.streakBadgeDays')}</span>
         </div>

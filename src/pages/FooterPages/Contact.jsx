@@ -63,7 +63,7 @@ const Contact = () => {
               <h3>{t('contact.successTitle')}</h3>
               <p>{t('contact.successMsg', { email: form.email || t('contact.emailPh') })}</p>
               <button
-                className="btn-secondary"
+                className="btn btn-secondary"
                 style={{ marginTop: '0.5rem' }}
                 onClick={() => { setSubmitted(false); setForm({ name: '', email: '', topic: '', message: '' }); }}
               >
@@ -93,7 +93,7 @@ const Contact = () => {
                 <label htmlFor="contact-message">{t('contact.messageLbl')}</label>
                 <textarea id="contact-message" placeholder={t('contact.messagePh')} value={form.message} onChange={set('message')} required />
               </div>
-              <button type="submit" className="btn-primary" style={{ alignSelf: 'flex-start' }}>
+              <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
                 <span className="material-symbols-outlined" aria-hidden="true">send</span>
                 {t('contact.send')}
               </button>

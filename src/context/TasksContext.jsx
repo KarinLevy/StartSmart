@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { useLocale } from '../i18n/LocaleContext';
 import * as tasksService from '../services/tasksService';
 
 const TasksContext = createContext(null);
 
 export function TasksProvider({ children }) {
   const { user } = useAuth();
+  const { t } = useLocale();
   const [tasks,   setTasks]   = useState([]);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
@@ -19,11 +21,11 @@ export function TasksProvider({ children }) {
       const data = await tasksService.listTasks();
       setTasks(data);
     } catch (err) {
-      setError(err.message ?? 'Failed to load tasks.');
+      setError(err.message ?? t('tasks.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => { refresh(); }, [refresh]);
 

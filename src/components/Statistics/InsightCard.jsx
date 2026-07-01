@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration } from '../../utils/dateFormat';
 import './Statistics.css';
 
 const InsightCard = ({ tasks = [] }) => {
@@ -50,7 +51,7 @@ const InsightCard = ({ tasks = [] }) => {
               <p className="insight-metric-label">{t('insightCard.avgGap')}</p>
               <div className="insight-metric-value-container">
                 <span className="insight-metric-value" style={{ fontSize: '1.5rem' }}>
-                  {avgGap > 0 ? `+${avgGap}m` : `${avgGap}m`}
+                  {avgGap > 0 ? `+${formatDuration(avgGap, t)}` : avgGap < 0 ? `-${formatDuration(Math.abs(avgGap), t)}` : formatDuration(0, t)}
                 </span>
                 <span className="insight-metric-badge">
                   {avgGap > 0 ? t('insightCard.over') : avgGap < 0 ? t('insightCard.under') : t('insightCard.onTarget')}

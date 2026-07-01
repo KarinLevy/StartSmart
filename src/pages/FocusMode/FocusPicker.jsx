@@ -4,9 +4,8 @@ import Navbar from '../../components/Navbar/Navbar';
 import Footer from '../../components/Footer/Footer';
 import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
+import { formatDuration } from '../../utils/dateFormat';
 import './FocusMode.css';
-
-const fmtMin = (m) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 > 0 ? ` ${m % 60}m` : ''}` : `${m}m`);
 
 const FocusPicker = () => {
   const navigate = useNavigate();
@@ -45,7 +44,7 @@ const FocusPicker = () => {
                     type="button"
                     className="fp-task-row"
                     onClick={() => navigate(`/focus-mode/${task.id}`)}
-                    aria-label={`Start focus session for ${task.title}`}
+                    aria-label={t('focusMode.startSession', { title: task.title })}
                   >
                     <div className="fp-task-info">
                       <div className="fp-task-name">{task.title}</div>
@@ -55,17 +54,17 @@ const FocusPicker = () => {
                     </div>
                     <div className="fp-task-meta">
                       {task.priorityHigh && (
-                        <span className="fp-task-priority" aria-label="High priority">
+                        <span className="fp-task-priority" aria-label={t('focus.highPriority')}>
                           <span className="material-symbols-outlined" aria-hidden="true">flag</span>
                         </span>
                       )}
-                      <span className="fp-task-duration">
-                        {fmtMin(task.estimatedMinutes)}
+                      <span className="fp-task-duration" dir="ltr">
+                        {formatDuration(task.estimatedMinutes, t)}
                       </span>
-                      <span className="fp-task-status fp-task-status--${task.status}">
-                        {task.status === 'in_progress' ? 'In Progress' : 'Pending'}
+                      <span className={`fp-task-status fp-task-status--${task.status}`}>
+                        {task.status === 'in_progress' ? t('focusMode.inProgress') : t('focusMode.pending')}
                       </span>
-                      <span className="material-symbols-outlined fp-task-arrow" aria-hidden="true">arrow_forward</span>
+                      <span className="material-symbols-outlined fp-task-arrow flip-rtl" aria-hidden="true">arrow_forward</span>
                     </div>
                   </button>
                 </li>

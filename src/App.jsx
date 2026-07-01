@@ -6,6 +6,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { NotificationsProvider } from './context/NotificationsContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { LocaleProvider } from './i18n/LocaleContext';
+import { RegionalProvider } from './context/RegionalContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -44,6 +45,7 @@ function App() {
   return (
     <ThemeProvider>
     <LocaleProvider>
+    <RegionalProvider>
     <AuthProvider>
     <NotificationsProvider>
     <TasksProvider>
@@ -87,6 +89,7 @@ function App() {
     </TasksProvider>
     </NotificationsProvider>
     </AuthProvider>
+    </RegionalProvider>
     </LocaleProvider>
     </ThemeProvider>
   );

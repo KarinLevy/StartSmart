@@ -123,7 +123,7 @@
   letter-spacing: 0.06em;
   color: var(--color-outline);
   white-space: nowrap;
-  margin-right: 0.1rem;
+  margin-inline-end: 0.1rem;
 }
 .sc-filter-group {
   display: flex;
@@ -156,6 +156,13 @@
   border-color: var(--color-secondary);
   color: #fff;
 }
+.sc-tag-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 .sc-filter-priority-btn {
   color: var(--color-error, #b91c1c);
   border-color: rgba(185,28,28,0.35);
@@ -181,7 +188,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 0.25rem 0.6rem;
   border: none;
   background: none;
@@ -218,15 +225,15 @@
   gap: 0.1rem;
   padding: 0.45rem 0.75rem;
   border-radius: var(--rounded-md);
-  border-left: 3px solid var(--color-outline-variant);
+  border-inline-start: 3px solid var(--color-outline-variant);
   background: var(--color-surface-container-low);
   text-decoration: none;
   transition: transform 0.12s, box-shadow 0.15s;
 }
 .sc-task:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.sc-task.sc-progress { border-left-color: var(--color-secondary);   background: rgba(107,56,212,0.06); }
-.sc-task.sc-done     { border-left-color: #16a34a;                   background: rgba(22,163,74,0.06);  }
-.sc-task.sc-pending  { border-left-color: var(--color-primary); }
+.sc-task.sc-progress { border-inline-start-color: var(--color-secondary);   background: rgba(107,56,212,0.06); }
+.sc-task.sc-done     { border-inline-start-color: #16a34a;                   background: rgba(22,163,74,0.06);  }
+.sc-task.sc-pending  { border-inline-start-color: var(--color-primary); }
 
 .sc-task-time  { font-size: var(--font-size-label-xs); font-weight: 700; color: var(--color-outline); }
 .sc-task-title { font-size: var(--font-size-label-sm); font-weight: 600; color: var(--color-on-surface); line-height: 1.3; }
@@ -461,7 +468,7 @@
   flex-direction: column;
   overflow: hidden;
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   font-family: inherit;
   padding: 0;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
@@ -485,6 +492,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.4rem;
   padding: 0.55rem 0.75rem;
   border-bottom: 1px solid var(--color-outline-variant);
   background: var(--color-surface-container-low);
@@ -501,6 +509,14 @@
   font-weight: 700;
   color: var(--color-on-surface);
 }
+
+/* RTL: group date+name together at the inline-start (visual right),
+   date first (rightmost) then name immediately to its left */
+[dir="rtl"] .sc-day-head {
+  justify-content: flex-start;
+}
+[dir="rtl"] .sc-day-date { order: 1; }
+[dir="rtl"] .sc-day-name { order: 2; }
 .sc-day-date.today-dot {
   width: 1.75rem;
   height: 1.75rem;
@@ -553,20 +569,27 @@
   gap: 0.05rem;
   padding: 0.3rem 0.5rem;
   border-radius: var(--rounded-sm, 4px);
-  border-left: 2px solid var(--color-outline-variant);
+  border-inline-start: 2px solid var(--color-outline-variant);
   background: var(--color-surface-container-low);
 }
-.sc-week-task.sc-progress { border-left-color: var(--color-secondary); background: rgba(107,56,212,0.06); }
-.sc-week-task.sc-done     { border-left-color: #16a34a; background: rgba(22,163,74,0.06); }
-.sc-week-task.sc-pending  { border-left-color: var(--color-primary); }
+.sc-week-task.sc-progress { border-inline-start-color: var(--color-secondary); background: rgba(107,56,212,0.06); }
+.sc-week-task.sc-done     { border-inline-start-color: #16a34a; background: rgba(22,163,74,0.06); }
+.sc-week-task.sc-pending  { border-inline-start-color: var(--color-primary); }
 
 /* ── Monthly View ────────────────────────────────────── */
 .sc-month { display: flex; flex-direction: column; gap: 0.75rem; }
 
-.sc-month-dow-row {
+.sc-month-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  /* minmax(0,1fr) prevents any column from shrinking below 0 due to content,
+     guaranteeing all 7 columns are exactly equal width */
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-xl);
+  overflow: hidden;
 }
+
+/* Day-name headers are now the first 7 children of sc-month-grid */
 .sc-month-dow {
   text-align: center;
   font-size: var(--font-size-label-xs);
@@ -574,20 +597,15 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-outline);
-  padding: 0.4rem 0;
-}
-
-.sc-month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  border: 1px solid var(--color-outline-variant);
-  border-radius: var(--rounded-xl);
-  overflow: hidden;
+  padding: 0.5rem 0.25rem;
+  background: var(--color-surface-container-low);
+  border-bottom: 1px solid var(--color-outline-variant);
+  /* No inline-end border on headers — columns are visually separated by the cells below */
 }
 
 .sc-month-cell {
   min-height: 6.5rem;
-  border-right: 1px solid var(--color-outline-variant);
+  border-inline-end: 1px solid var(--color-outline-variant);
   border-bottom: 1px solid var(--color-outline-variant);
   padding: 0.4rem;
   background: var(--color-surface-container-lowest);
@@ -596,9 +614,9 @@
   gap: 0.2rem;
   /* button reset */
   border-top: none;
-  border-left: none;
+  border-inline-start: none;
   font-family: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: background 0.12s;
 }
@@ -609,7 +627,7 @@
   outline: 2px solid var(--color-secondary);
   outline-offset: -2px;
 }
-.sc-month-cell:nth-child(7n)    { border-right: none; }
+.sc-month-cell:nth-child(7n)    { border-inline-end: none; }
 .sc-month-cell:nth-last-child(-n+7) { border-bottom: none; }
 
 .sc-month-cell.sc-month-blank {
@@ -649,14 +667,15 @@
 .sc-month-task {
   font-size: 0.68rem;
   font-weight: 600;
-  padding: 0.15rem 0.4rem 0.15rem 0.5rem;
+  padding: 0.15rem 0.4rem;
+  padding-inline-start: 0.5rem;
   border-radius: 3px;
-  border-left: 2px solid var(--color-outline-variant);
+  border-inline-start: 2px solid var(--color-outline-variant);
   color: var(--color-on-surface);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: break-word;
   display: block;
+  line-height: 1.35;
 }
 .sc-month-task.sc-done     { color: var(--color-success-on); }
 .sc-month-task.sc-progress { color: var(--color-secondary); }
@@ -681,4 +700,209 @@
   .sc-hour-row      { grid-template-columns: 4rem 1fr; }
   .sc-tasks-layer   { left: 4rem; }
   .sc-now-line      { left: 4rem; }
+}
+
+/* ── RTL overrides ───────────────────────────────────── */
+
+/* The daily timeline grid reverses in RTL (label column moves to the right).
+   sc-tasks-layer and sc-now-line are absolutely positioned with physical left;
+   flip them to use right instead so they stay in the content area. */
+[dir="rtl"] .sc-tasks-layer {
+  left: 0;
+  right: 5rem;
+}
+[dir="rtl"] .sc-now-line {
+  left: 0;
+  right: 5rem;
+  background: linear-gradient(to left, var(--sc-now-color) 0%, rgba(var(--sc-now-rgb), 0.35) 100%);
+}
+[dir="rtl"] .sc-now-line::before {
+  left: auto;
+  right: -4px;
+}
+
+/* Hour label: in LTR sits on the left and right-aligns text toward the line.
+   In RTL the label column is on the right; left-align text toward the line. */
+[dir="rtl"] .sc-hour-label {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 0.75rem;
+  align-items: flex-start;
+}
+
+/* Responsive RTL */
+@media (max-width: 640px) {
+  [dir="rtl"] .sc-tasks-layer { right: 4rem; left: 0; }
+  [dir="rtl"] .sc-now-line    { right: 4rem; left: 0; }
+}
+
+/* Filter bar: "clear" button should push to the inline-end (left in RTL) */
+[dir="rtl"] .sc-toolbar { flex-direction: row-reverse; justify-content: flex-end; }
+
+/* Week/month task text stays start-aligned (right in RTL) naturally via text-align: start */
+
+/* ── Schedule Task button (Daily unslotted) ──────────── */
+.sc-task-unslotted-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.sc-task-link-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.sc-schedule-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--rounded-full);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-size: var(--font-size-label-xs);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sc-schedule-btn:hover {
+  background: var(--color-primary-container);
+  border-color: var(--color-primary);
+}
+.sc-schedule-btn .material-symbols-outlined { font-size: 1rem; }
+
+/* ── Schedule icon button (Weekly / Monthly compact) ─── */
+.sc-week-schedule-btn,
+.sc-month-schedule-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-outline);
+  cursor: pointer;
+  border-radius: var(--rounded-sm);
+  transition: color 0.15s;
+  line-height: 1;
+}
+.sc-week-schedule-btn:hover,
+.sc-month-schedule-btn:hover { color: var(--color-primary); }
+.sc-week-schedule-btn .material-symbols-outlined,
+.sc-month-schedule-btn .material-symbols-outlined { font-size: 0.9rem; }
+
+/* ── Schedule Task Modal ─────────────────────────────── */
+.sc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.sc-modal {
+  background: var(--color-surface);
+  border-radius: var(--rounded-xl);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sc-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-title-sm);
+  font-weight: 700;
+  color: var(--color-on-surface);
+  margin: 0;
+}
+.sc-modal-title .material-symbols-outlined { font-size: 1.2rem; color: var(--color-primary); }
+
+.sc-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--color-outline);
+  cursor: pointer;
+  border-radius: var(--rounded-sm);
+  transition: color 0.15s;
+}
+.sc-modal-close:hover { color: var(--color-on-surface); }
+.sc-modal-close .material-symbols-outlined { font-size: 1.25rem; }
+
+.sc-modal-task-name {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface-container-low);
+  border-radius: var(--rounded-md);
+  border-inline-start: 3px solid var(--color-primary);
+}
+
+.sc-modal-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sc-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sc-modal-field-label {
+  font-size: var(--font-size-label-sm);
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+}
+
+.sc-modal-input {
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: var(--rounded-md);
+  background: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+  font-size: var(--font-size-body-sm);
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.sc-modal-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.sc-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
 }
