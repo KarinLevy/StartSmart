@@ -1,0 +1,100 @@
+.gcal-email {
+  font-size: var(--font-size-label-md);
+  color: var(--color-on-surface-variant);
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.gcal-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.gcal-error {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: var(--spacing-card-gap, 1rem);
+  padding: 0.75rem 1rem;
+  background: var(--color-error-container, #fde8e8);
+  border-radius: var(--rounded-md, 0.5rem);
+  color: var(--color-on-error-container, #7f1d1d);
+  font-size: var(--font-size-label-md, 0.875rem);
+}
+
+.gcal-error .material-symbols-outlined {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.gcal-events {
+  margin-top: var(--spacing-card-gap, 1rem);
+  padding-top: var(--spacing-card-gap, 1rem);
+  border-top: 1px solid var(--color-surface-container);
+}
+
+.gcal-events-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--font-size-label-md, 0.875rem);
+  font-weight: 600;
+  color: var(--color-on-surface-variant);
+  margin: 0 0 0.75rem;
+}
+
+.gcal-events-heading .material-symbols-outlined {
+  font-size: 18px;
+  color: var(--color-secondary);
+}
+
+.gcal-event-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.gcal-event-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-surface-container);
+}
+
+.gcal-event-list .gcal-event-item:last-child {
+  border-bottom: none;
+}
+
+.gcal-event-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-secondary);
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.gcal-event-name {
+  font-size: var(--font-size-body-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--color-on-surface);
+  margin: 0 0 0.125rem;
+}
+
+.gcal-event-time {
+  font-size: var(--font-size-label-sm, 0.8125rem);
+  color: var(--color-on-surface-variant);
+  margin: 0;
+}
+
+[dir="rtl"] .gcal-event-list {
+  padding-right: 0;
+}

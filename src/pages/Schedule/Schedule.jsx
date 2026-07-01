@@ -5,6 +5,7 @@ import { useTasks } from '../../context/TasksContext';
 import { useLocale } from '../../i18n/LocaleContext';
 import { formatDuration } from '../../utils/dateFormat';
 import { getTagDisplayColor, TAG_PRESETS } from '../../utils/tagUtils';
+import GoogleCalendarCard from '../../components/Schedule/GoogleCalendarCard';
 import './Schedule.css';
 
 const DEFAULT_ACCENT = '#6b38d4'; // StartSmart purple
@@ -697,6 +698,9 @@ const Schedule = () => {
           {t('schedule.today')}
         </button>
       </div>
+
+      {/* Google Calendar quick-access card */}
+      <GoogleCalendarCard />
 
       {/* Filter bar */}
       <div className="sc-filter-bar surface-card">

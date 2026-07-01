@@ -80,10 +80,31 @@ export function AuthProvider({ children }) {
     return { data, error };
   }, []);
 
+  /**
+   * Starts the Google Calendar OAuth flow.
+   * @param {string} redirectPath  The app path to return to after Google approves
+   *   (e.g. '/settings' or '/schedule'). A ?gcal=connected param is appended
+   *   so the receiving component knows to capture the provider_token.
+   *
+   * This is entirely separate from signInWithGoogle (login).
+   * It requests calendar.readonly scope on top of the user's existing session.
+   */
+  const connectGoogleCalendar = useCallback(async (redirectPath = '/settings') => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        scopes: 'email profile https://www.googleapis.com/auth/calendar.readonly',
+        redirectTo: `${window.location.origin}${redirectPath}?gcal=connected`,
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
+    });
+    return { data, error };
+  }, []);
+
   const user = session?.user ?? null;
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut, resetPassword, signInWithGoogle }}>
+    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut, resetPassword, signInWithGoogle, connectGoogleCalendar }}>
       {children}
     </AuthContext.Provider>
   );

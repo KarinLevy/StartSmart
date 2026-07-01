@@ -12,6 +12,7 @@ import { useRegional } from '../../context/RegionalContext';
 import { formatDate, formatTime } from '../../utils/dateFormat';
 import { updateNotificationsEnabled } from '../../services/userService';
 import { loadUserSettings, saveUserSettings } from '../../services/userSettingsService';
+import GoogleCalendarSection from '../../components/Settings/GoogleCalendarSection';
 import './Settings.css';
 
 // localStorage key kept only as instant-read cache (primary source is now Supabase)
@@ -378,6 +379,9 @@ const Settings = () => {
           }
         />
       </Section>
+
+      {/* ── Google Calendar ── */}
+      <GoogleCalendarSection />
 
       {/* ── Help & Support ── */}
       <Section icon="help" title={t('settings.help')}>

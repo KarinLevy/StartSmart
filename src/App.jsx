@@ -7,6 +7,7 @@ import { NotificationsProvider } from './context/NotificationsContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { LocaleProvider } from './i18n/LocaleContext';
 import { RegionalProvider } from './context/RegionalContext';
+import { CalendarProvider } from './context/CalendarContext';
 import LandingPage from './pages/LandingPage/landing';
 import Register from './pages/Register/Register';
 import Login from './pages/Login/Login';
@@ -51,6 +52,7 @@ function App() {
     <TasksProvider>
     <ProfileProvider>
     <Router>
+    <CalendarProvider>
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
@@ -84,6 +86,7 @@ function App() {
         <Route path="/notifications"      element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
         <Route path="/insights"           element={<ProtectedRoute><Insights /></ProtectedRoute>} />
       </Routes>
+    </CalendarProvider>
     </Router>
     </ProfileProvider>
     </TasksProvider>
