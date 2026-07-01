@@ -528,8 +528,8 @@ const TaskHistory = () => {
       {done.length > 0 && (
         <p className="th-result-count" aria-live="polite">
           {filtered.length === done.length
-            ? `${done.length} task${done.length !== 1 ? 's' : ''}`
-            : `${filtered.length} of ${done.length} tasks`}
+            ? t('history.results', { n: done.length })
+            : t('history.resultsFiltered', { n: filtered.length, total: done.length })}
         </p>
       )}
 

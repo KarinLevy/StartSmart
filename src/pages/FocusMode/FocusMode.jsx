@@ -407,7 +407,7 @@ const FocusMode = () => {
             </span>
             <span className="fm-remaining" aria-live="off" dir="ltr">
               {isOver
-                ? t('focus.elapsed').replace('{time}', fmtSecs(remaining))
+                ? t('focus.elapsed').replace('{time}', fmtSecs(overSecs))
                 : t('focus.left').replace('{time}', fmtSecs(remaining))}
             </span>
           </div>
