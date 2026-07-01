@@ -163,18 +163,17 @@ React was chosen for its component model and ecosystem, which made it practical 
 
 ## Architecture
 
-```
-
+```text
 src/
-├── components/         # Shared UI components (Navbar, Footer, PageShell, TaskCards, Statistics, Google Calendar UI)
-├── context/            # React context providers (Auth, Tasks, Theme, Locale, Regional, Notifications, Profile, Calendar)
-├── i18n/               # Locale files (en, he, ar, fr, de, ru) + LocaleContext
+├── components/         # Reusable UI components (Navbar, Footer, Task Cards, Statistics, Google Calendar UI)
+├── context/            # React context providers (Auth, Tasks, Theme, Regional, Notifications, Profile, Calendar)
+├── i18n/               # Localization files (en, he, ar, fr, de, ru)
 ├── lib/                # Supabase client configuration
-├── pages/              # One directory per route/page
-│   ├── Auth/           # Shared authentication CSS
+├── pages/              # Route-based application pages
+│   ├── Auth/
 │   ├── Dashboard/
-│   ├── FocusMode/      # FocusPicker + active focus session timer
-│   ├── FooterPages/    # About, FAQ, Contact, HelpCenter, Privacy, Terms, Cookies, Accessibility
+│   ├── FocusMode/
+│   ├── FooterPages/
 │   ├── ForgotPassword/
 │   ├── ResetPassword/
 │   ├── Insights/
@@ -184,19 +183,19 @@ src/
 │   ├── Premium/
 │   ├── Profile/
 │   ├── Register/
-│   ├── Schedule/       # Daily, weekly, monthly schedule + Google Calendar event display
-│   ├── Settings/       # Preferences, language/theme settings, Google Calendar connection management
+│   ├── Schedule/
+│   ├── Settings/
 │   ├── Statistics/
 │   ├── TaskDetails/
 │   └── TaskHistory/
-├── services/           # Data/API services (tasks, time logs, notifications, settings, user, Google Calendar)
-├── styles/             # Global CSS and design tokens
-└── utils/              # Tag colours, achievements, date/time formatting, analytics helpers
+├── services/           # Business logic and external services (Supabase, Google Calendar)
+├── styles/             # Global styles and design tokens
+└── utils/              # Helper functions, analytics, formatting and achievements
 ```
 
-**State management:** React Context (no Redux). Auth state lives in `AuthContext`, tasks in `TasksContext` (real-time Supabase subscriptions), theme in `ThemeContext`, locale in `LocaleContext`, and Google Calendar state in `CalendarContext`.
+**State management:** React Context (no Redux). Authentication is managed in `AuthContext`, tasks in `TasksContext` (real-time Supabase subscriptions), theme in `ThemeContext`, localization in `RegionalContext`, notifications in `NotificationsContext`, user profile in `ProfileContext`, and Google Calendar integration in `CalendarContext`.
 
-**Routing:** React Router DOM v7 with `BrowserRouter`. Protected routes redirect unauthenticated users to `/login`. The `vercel.json` SPA rewrite ensures direct URL navigation does not return 404.
+**Routing:** React Router DOM v7 with `BrowserRouter`. Protected routes redirect unauthenticated users to `/login`. The `vercel.json` SPA rewrite ensures direct URL navigation works correctly in production.
 
 ---
 
