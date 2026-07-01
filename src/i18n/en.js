@@ -121,6 +121,12 @@ const en = {
   'login.err.wrongPassword':   'Incorrect password. Please try again.',
   'login.err.invalid':         'Invalid email or password.',
   'login.err.network':         'We could not log you in right now. Please try again.',
+  'login.err.invalidCreds':    'Invalid email or password.',
+  'auth.continueWithGoogle':   'Continue with Google',
+  'auth.orDivider':            'or',
+  'auth.googleOAuthError':     'Google sign-in failed. Please try again.',
+  'auth.googleCancelled':      'Google sign-in was cancelled.',
+  'auth.googleEmailConflict':  'An account with this email already exists. Try logging in with your password instead.',
 
   'register.title':              'Create your account',
   'register.subtitle':           'Start building better time habits today.',

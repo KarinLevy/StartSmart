@@ -112,6 +112,12 @@ const de = {
   'login.err.wrongPassword':   'Falsches Passwort. Bitte versuchen Sie es erneut.',
   'login.err.invalid':         'Ungültige E-Mail oder Passwort.',
   'login.err.network':         'Wir konnten Sie gerade nicht anmelden. Bitte versuchen Sie es erneut.',
+  'login.err.invalidCreds':    'Ungültige E-Mail oder Passwort.',
+  'auth.continueWithGoogle':   'Mit Google fortfahren',
+  'auth.orDivider':            'oder',
+  'auth.googleOAuthError':     'Google-Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+  'auth.googleCancelled':      'Google-Anmeldung wurde abgebrochen.',
+  'auth.googleEmailConflict':  'Ein Konto mit dieser E-Mail-Adresse existiert bereits. Versuchen Sie, sich mit Ihrem Passwort anzumelden.',
 
   'register.title':              'Konto erstellen',
   'register.subtitle':           'Beginnen Sie noch heute, bessere Zeitgewohnheiten aufzubauen.',

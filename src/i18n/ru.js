@@ -108,6 +108,12 @@ const ru = {
   'login.err.wrongPassword': 'Неверный пароль. Попробуй снова.',
   'login.err.invalid':       'Неверный email или пароль.',
   'login.err.network':       'Не удалось подключиться. Попробуй снова.',
+  'login.err.invalidCreds':  'Неверный email или пароль.',
+  'auth.continueWithGoogle':  'Продолжить с Google',
+  'auth.orDivider':           'или',
+  'auth.googleOAuthError':    'Вход через Google не удался. Попробуй снова.',
+  'auth.googleCancelled':     'Вход через Google отменён.',
+  'auth.googleEmailConflict': 'Аккаунт с таким email уже существует. Войди с помощью пароля.',
 
   'register.title':        'Создай аккаунт',
   'register.subtitle':     'Начни строить лучшие привычки тайм-менеджмента сегодня.',

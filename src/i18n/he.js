@@ -108,6 +108,12 @@ const he = {
   'login.err.wrongPassword': 'סיסמה שגויה. נסה שוב.',
   'login.err.invalid':       'אימייל או סיסמה לא תקינים.',
   'login.err.network':       'לא הצלחנו להתחבר כרגע. נסה שוב.',
+  'login.err.invalidCreds':  'אימייל או סיסמה שגויים.',
+  'auth.continueWithGoogle':  'המשך עם Google',
+  'auth.orDivider':           'או',
+  'auth.googleOAuthError':    'הכניסה עם Google נכשלה. נסה שוב.',
+  'auth.googleCancelled':     'הכניסה עם Google בוטלה.',
+  'auth.googleEmailConflict': 'כבר קיים חשבון עם אימייל זה. נסה להתחבר עם סיסמה.',
 
   'register.title':        'צור את חשבונך',
   'register.subtitle':     'התחל לבנות הרגלי זמן טובים יותר היום.',

@@ -112,6 +112,12 @@ const fr = {
   'login.err.wrongPassword':   'Mot de passe incorrect. Veuillez réessayer.',
   'login.err.invalid':         'E-mail ou mot de passe invalide.',
   'login.err.network':         'Impossible de vous connecter pour le moment. Veuillez réessayer.',
+  'login.err.invalidCreds':    'E-mail ou mot de passe invalide.',
+  'auth.continueWithGoogle':   'Continuer avec Google',
+  'auth.orDivider':            'ou',
+  'auth.googleOAuthError':     'La connexion Google a échoué. Veuillez réessayer.',
+  'auth.googleCancelled':      'La connexion Google a été annulée.',
+  'auth.googleEmailConflict':  'Un compte avec cet e-mail existe déjà. Essayez de vous connecter avec votre mot de passe.',
 
   'register.title':              'Créez votre compte',
   'register.subtitle':           'Commencez à développer de meilleures habitudes de gestion du temps dès aujourd\'hui.',

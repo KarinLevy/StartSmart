@@ -379,6 +379,39 @@
   margin: 0.25rem 0 0;
   font-style: italic;
 }
+/* Google OAuth button */
+.auth-google-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  background: var(--color-surface-container-lowest);
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: var(--rounded-md);
+  color: var(--color-on-surface);
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.auth-google-btn:hover:not(:disabled) {
+  background: var(--color-surface-container-low);
+  border-color: var(--color-outline);
+  box-shadow: var(--shadow-md);
+}
+.auth-google-btn:focus-visible {
+  outline: 3px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+.auth-google-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

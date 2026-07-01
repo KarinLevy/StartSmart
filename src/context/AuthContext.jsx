@@ -70,10 +70,20 @@ export function AuthProvider({ children }) {
     return { data, error };
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+    return { data, error };
+  }, []);
+
   const user = session?.user ?? null;
 
   return (
-    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ session, user, loading, signUp, signIn, signOut, resetPassword, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

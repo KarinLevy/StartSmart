@@ -108,6 +108,12 @@ const ar = {
   'login.err.wrongPassword': 'كلمة مرور خاطئة. حاول مرة أخرى.',
   'login.err.invalid':       'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
   'login.err.network':       'تعذر الاتصال الآن. حاول مرة أخرى.',
+  'login.err.invalidCreds':  'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+  'auth.continueWithGoogle':  'المتابعة مع Google',
+  'auth.orDivider':           'أو',
+  'auth.googleOAuthError':    'فشل تسجيل الدخول بـ Google. يُرجى المحاولة مجدداً.',
+  'auth.googleCancelled':     'تم إلغاء تسجيل الدخول بـ Google.',
+  'auth.googleEmailConflict': 'يوجد حساب بهذا البريد الإلكتروني. جرّب تسجيل الدخول بكلمة المرور.',
 
   'register.title':        'إنشاء حسابك',
   'register.subtitle':     'ابدأ في بناء عادات إدارة وقت أفضل اليوم.',
