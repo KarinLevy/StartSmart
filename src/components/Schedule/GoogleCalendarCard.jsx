@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCalendar } from '../../context/CalendarContext';
 import { useLocale } from '../../i18n/LocaleContext';
@@ -35,32 +35,12 @@ function formatEventTime(event) {
 }
 
 export default function GoogleCalendarCard() {
-  const { session, connectGoogleCalendar } = useAuth();
-  const { calStatus, googleEmail, events, captureAndSync, syncEvents, disconnectCalendar } = useCalendar();
+  const { connectGoogleCalendar } = useAuth();
+  const { calStatus, googleEmail, events, syncEvents } = useCalendar();
   const { t } = useLocale();
-  const location = useLocation();
-  const navigate  = useNavigate();
 
-  const [errorMsg,    setErrorMsg]    = useState('');
-  const [connecting,  setConnecting]  = useState(false);
-
-  // Handle the ?gcal=connected OAuth callback when it lands on /schedule
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('gcal') !== 'connected') return;
-
-    navigate('/schedule', { replace: true });
-
-    const providerToken = session?.provider_token;
-    if (!providerToken) {
-      setErrorMsg(t('gcal.errNoToken'));
-      return;
-    }
-
-    captureAndSync(providerToken, session?.user?.email ?? '').then(({ error }) => {
-      if (error) setErrorMsg(t(error === 'expired' ? 'gcal.errExpired' : 'gcal.errSync'));
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const [errorMsg,   setErrorMsg]   = useState('');
+  const [connecting, setConnecting] = useState(false);
 
   const handleConnect = async () => {
     setConnecting(true);
@@ -70,7 +50,8 @@ export default function GoogleCalendarCard() {
       setErrorMsg(t('gcal.errConnect'));
       setConnecting(false);
     }
-    // On success the browser redirects; no cleanup needed here
+    // On success the browser redirects to Google; CalendarContext's
+    // onAuthStateChange listener captures provider_token when it returns.
   };
 
   const handleSyncNow = async () => {

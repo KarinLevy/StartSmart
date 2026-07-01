@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCalendar } from '../../context/CalendarContext';
 import { useLocale } from '../../i18n/LocaleContext';
@@ -27,32 +26,11 @@ function formatEventTime(event) {
 }
 
 export default function GoogleCalendarSection() {
-  const { session, connectGoogleCalendar } = useAuth();
-  const { calStatus, googleEmail, events, captureAndSync, syncEvents, disconnectCalendar } = useCalendar();
+  const { connectGoogleCalendar } = useAuth();
+  const { calStatus, googleEmail, events, syncEvents, disconnectCalendar } = useCalendar();
   const { t } = useLocale();
-  const location = useLocation();
-  const navigate  = useNavigate();
 
   const [errorMsg, setErrorMsg] = useState('');
-
-  // Handle the ?gcal=connected OAuth callback when it lands on /settings
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('gcal') !== 'connected') return;
-
-    // Clean URL immediately
-    navigate('/settings', { replace: true });
-
-    const providerToken = session?.provider_token;
-    if (!providerToken) {
-      setErrorMsg(t('gcal.errNoToken'));
-      return;
-    }
-
-    captureAndSync(providerToken, session?.user?.email ?? '').then(({ error }) => {
-      if (error) setErrorMsg(t(error === 'expired' ? 'gcal.errExpired' : 'gcal.errSync'));
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConnect = async () => {
     setErrorMsg('');

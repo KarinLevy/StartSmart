@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import { fetchUpcomingEvents } from '../services/calendarService';
 
 const CalendarContext = createContext(null);
@@ -11,9 +12,9 @@ export function CalendarProvider({ children }) {
   const [events,      setEvents]      = useState(null);
 
   /**
-   * Call this immediately after the OAuth callback returns.
-   * Stores the token in state and fetches events in one step
-   * to avoid the async state-update race when calling both separately.
+   * Call this immediately after capturing a valid provider_token.
+   * Stores the token in state and fetches events in one step to avoid
+   * the async state-update race when calling both separately.
    */
   const captureAndSync = useCallback(async (token, email) => {
     setCalToken(token);
@@ -66,6 +67,32 @@ export function CalendarProvider({ children }) {
     setEvents(null);
     setCalStatus('idle');
   }, []);
+
+  /**
+   * Listen for the SIGNED_IN event that Supabase fires after the Calendar
+   * OAuth completes. This is the only reliable place to read provider_token —
+   * the session object passed to onAuthStateChange has the fresh tokens,
+   * whereas React component state is still stale at useEffect time.
+   *
+   * The sessionStorage flag ('gcal_pending') is set by connectGoogleCalendar()
+   * before the OAuth redirect, distinguishing this SIGNED_IN from normal login.
+   */
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event !== 'SIGNED_IN') return;
+
+      const pending = sessionStorage.getItem('gcal_pending');
+      if (!pending) return;
+
+      const providerToken = newSession?.provider_token;
+      if (!providerToken) return;   // no calendar token — OAuth may have been for login only
+
+      sessionStorage.removeItem('gcal_pending');
+      captureAndSync(providerToken, newSession?.user?.email ?? '');
+    });
+
+    return () => subscription.unsubscribe();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <CalendarContext.Provider value={{

@@ -83,21 +83,29 @@ export function AuthProvider({ children }) {
   /**
    * Starts the Google Calendar OAuth flow.
    * @param {string} redirectPath  The app path to return to after Google approves
-   *   (e.g. '/settings' or '/schedule'). A ?gcal=connected param is appended
-   *   so the receiving component knows to capture the provider_token.
+   *   (e.g. '/settings' or '/schedule').
    *
    * This is entirely separate from signInWithGoogle (login).
    * It requests calendar.readonly scope on top of the user's existing session.
    */
   const connectGoogleCalendar = useCallback(async (redirectPath = '/settings') => {
+    // Set a flag BEFORE the redirect so CalendarContext's onAuthStateChange
+    // listener can distinguish this SIGNED_IN event from a normal Google login.
+    // sessionStorage survives the OAuth round-trip within the same tab.
+    // Note: redirectTo must NOT include query params — Supabase strips them before
+    // redirecting back, so the flag is the only reliable cross-redirect signal.
+    sessionStorage.setItem('gcal_pending', redirectPath);
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         scopes: 'email profile https://www.googleapis.com/auth/calendar.readonly',
-        redirectTo: `${window.location.origin}${redirectPath}?gcal=connected`,
+        redirectTo: `${window.location.origin}${redirectPath}`,
         queryParams: { access_type: 'offline', prompt: 'consent' },
       },
     });
+
+    if (error) sessionStorage.removeItem('gcal_pending');
     return { data, error };
   }, []);
 
